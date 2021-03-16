@@ -1,0 +1,41 @@
+-read .mc file load data into data segment
+
+memory class
+
+-data segment - implement in dictionary
+ -key - byte address
+ -value- string 
+ -little endian  
+ -functions - access byte, access word,read byte, read word
+
+-text segment
+ -instructions are word aligned
+ -
+ 
+-stack
+
+memory interface class 
+- MAR MDR member field
+- write read memory member functs
+
+register file class 
+-
+
+Program counter, instruction register
+
+
+fetch 
+memory class interaction
+
+decode
+- input - machine code
+- output -  
+- data in file 
+- csv/json
+- key opcode
+  - funct3
+  - funct7
+
+
+
+ 

@@ -57,11 +57,8 @@ class Memory:
         for i in range(2):
             address_in_hex = "0"*8+hex(address_in_dec+i)[2:]
             address_in_hex = address_in_hex[-8:]
-            self.store_byte(address_in_hex,data[6-2*i:8-2*i])
-            
-            
-    
-
+            self.store_byte(address_in_hex,data[2-2*i:4-2*i])
+                        
 #mem = Memory()
 #mem.store_byte("00000000","0A")
 #print(mem.load_word("00000000"))

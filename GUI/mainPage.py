@@ -33,7 +33,7 @@ class UiComponents():
         button.clicked.connect(lambda: self.openFile(link))
         return button
 
-    def yourFeed(self):
+    def Editor(self):
         self.groupBox = QGroupBox("Editor")
         self.gridLayout = QGridLayout()
         self.scroller = QScrollArea()
@@ -68,7 +68,7 @@ class mainScreen(QWidget, UiComponents):
         self.setWindowIcon(QtGui.QIcon(self.iconName))
         self.setGeometry(self.left, self.top, self.width, self.height)
         logo_label = self.mainLabel(top=100, left=100, width=200, height=50)
-        self.yourFeed()
+        self.Editor()
         feed = self.scroller
         
         self.memoryDisplay()

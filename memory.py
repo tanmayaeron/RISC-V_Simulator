@@ -1,7 +1,9 @@
+from collections import defaultdict
+
 class Memory:
 
     def __init__(self):
-        self.__memory = {}     #only relevant data stored
+        self.__memory = defaultdict(lambda:"00")    #only relevant data stored
 
     def load_byte(self, address):
         if address in self.__memory.keys():

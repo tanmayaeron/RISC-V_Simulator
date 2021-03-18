@@ -2,12 +2,10 @@ from sys import stdin,stdout
 import sys
 from collections import defaultdict
 from memory import Memory
-file=open('test.mc','r')
-# sys.stdout=open('output.txt','w')
+file=open('test/test1.mc','r')
 memory=Memory()
 input=1
 for i in file:
-    
     if i=="$\n":
         input=0
         continue

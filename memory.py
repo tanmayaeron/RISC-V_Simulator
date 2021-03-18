@@ -10,7 +10,7 @@ class Memory:
         
     
     def load_byte(self, address):
-        if address in self.__memory.keys():
+        if address in self._memory.keys():
             return self._memory[address]
         else:
             return "00"

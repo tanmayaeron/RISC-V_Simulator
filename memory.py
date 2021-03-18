@@ -1,7 +1,6 @@
 from collections import defaultdict
 
 class Memory:
-
     def __init__(self):
         self.__memory = defaultdict(lambda:"00")    #only relevant data stored
 
@@ -28,7 +27,10 @@ class Memory:
         for i in range(4):
             address_in_hex = "0"*8+hex(address_in_dec+i)[2:]
             address_in_hex = address_in_hex[-8:]
-            self.store_word(address_in_hex,data[6-2*i:8-2*i])
+            self.store_byte(address_in_hex,data[6-2*i:8-2*i])
+            
+            
+    
 
 #mem = Memory()
 #mem.store_byte("00000000","0A")

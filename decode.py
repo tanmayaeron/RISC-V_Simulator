@@ -77,7 +77,7 @@ def decode(code):
                 fields['funct3']=list(df['funct3'])[0]
                 fields['rs1']=machine_code[-20:-15]
                 fields['rs2']=machine_code[-25:-20]
-                fields['immediate']=machine_code[0]+machine_code[-8]+machine_code[1:7]+machine_code[-12:-8]
+                fields['immediate']=machine_code[0]+machine_code[-8]+machine_code[1:7]+machine_code[-12:-8]      #0 not added in the end
 
 
         elif format=='U':

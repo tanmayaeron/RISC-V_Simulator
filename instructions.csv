@@ -1,0 +1,30 @@
+id,neumonic,name,format,opcode,funct3,funct7
+0,add,ADD,R,0b0110011,0b000,0b0000000
+1,sub,SUB,R,0b0110011,0b000,0b0100000
+2,xor,XOR,R,0b0110011,0b100,0b0000000
+3,or,OR,R,0b0110011,0b110,0b0000000
+4,and,AND,R,0b0110011,0b111,0b0000000
+5,sll,Shift Left Logical,R,0b0110011,0b001,0b0000000
+6,srl,Shift Right Logical,R,0b0110011,0b101,0b0000000
+7,sra,Shift Right Arithmetic,R,0b0110011,0b101,0b0100000
+8,slt,Set Less than,R,0b0110011,0b010,0b0000000
+9,addi,ADD Immediate,I,0b0010011,0b000,
+10,ori,OR Immediate,I,0b0010011,0b110,
+11,andi,AND Immediate,I,0b0010011,0b111,
+12,lb,Load Byte,I,0b0000011,0b000,
+13,lh,Load Halfword,I,0b0000011,0b001,
+14,lw,Load Word,I,0b0000011,0b010,
+15,sb,Store Byte,S,0b0100011,0b000,
+16,sh,Store Halfword,S,0b0100011,0b001,
+17,sw,Store Word,S,0b0100011,0b010,
+18,beq,Branch if equal,SB,0b1100011,0b000,
+19,bne,Branch if not equal,SB,0b1100011,0b001,
+20,blt,Branch if less than,SB,0b1100011,0b100,
+21,bge,Branch if greater than equal to,SB,0b1100011,0b101,
+22,jal,Jump and Link,UJ,0b1101111,,
+23,jalr,Jump and Link Register,I,0b1100111,0b000,
+24,lui,Load Upper Immediate,U,0b0110111,,
+25,auipc,Add Upper Immediate to PC,U,0b0010111,,
+26,mul,Multiplication,R,0b0110011,0b000,0b0000001
+27,div,Division,R,0b0110011,0b100,0b0000001
+28,rem,Remainder,R,0b0110011,0b110,0b0000001

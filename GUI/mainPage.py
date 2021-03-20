@@ -6,6 +6,7 @@ import sys
 import qtawesome as iconPack
 import qdarkstyle
 from register_file import RegisterFile
+
 class UiComponents(RegisterFile):
     def __init__(self):
         super().__init__()
@@ -18,9 +19,13 @@ class UiComponents(RegisterFile):
         button.setText(name)
         button.setFixedHeight(30)
         button.setFixedWidth(50)
-        
         return button
-
+    
+    def updateRegisterView(self):
+        for i in range(32):
+            currValue = self.get_register(i)
+            self.registerArray[i].setText("0x"+currValue)
+             
 
     def mainLabel(self, top, left, height, width):
         save_button = self.buttonTile("Save")
@@ -42,7 +47,6 @@ class UiComponents(RegisterFile):
         self.editorScroll = QScrollArea()
         self.editorlayout = QVBoxLayout()
         self.editorScreen = QPlainTextEdit()
-        
         self.editorScreen.setFont(self.fixedfont)
         self.path = 'test/test1.mc'
         self.editorlayout.addWidget(self.editorScreen)
@@ -71,35 +75,43 @@ class UiComponents(RegisterFile):
         self.scroll = QScrollArea()
         self.scroll.setFrameShape = None
         self.displayWidget = QGroupBox()
+        self.memoryArray = []
         vbox = QGridLayout()
         for i in range(10):
+            self.memoryArray.append([])
             label = QLabel("Ox"+'0'*7+str(i+1))
             label.setFont(self.fixedfont)
+            self.memoryArray[-1].append(label)
+            vbox.addWidget(self.memoryArray[-1][-1], i, 0)
             
-            vbox.addWidget(label, i, 0)
             for j in range(4):
                 temp = QLabel()
                 temp.setText("a")
-                
                 temp.setFont(self.fixedfont)
                 temp.setFixedHeight(40)
                 temp.setFixedWidth(40)
                 temp.setStyleSheet("border :1px solid white;")
                 temp.setAlignment(QtCore.Qt.AlignCenter) 
-                vbox.addWidget(temp, i, j+1)
+                self.memoryArray[-1].append(temp)
+                
+                vbox.addWidget(self.memoryArray[-1][-1], i, j+1)
                    
         self.displayWidget.setLayout(vbox)
         self.scroll.setWidget(self.displayWidget)
         self.scroll.setWidgetResizable(True)
 
 
-    def tabbedView(self):
+    def tabbedView1(self):
         self.tabs = QTabWidget() 
         self.tab1 = self.scroll1
         self.tab2 = self.scroll
         self.tabs.addTab(self.tab1, "Registers") 
         self.tabs.addTab(self.tab2, "Memory") 
         
+    # def tabbedView2(self):
+    #     self.tabsMain = QTabWidget()
+    #     self.tabMain1 = self.editorScroll
+    #     self.
     
     
     def registerDisplay(self):
@@ -107,25 +119,25 @@ class UiComponents(RegisterFile):
         self.scroll1.setFrameShape = None
         self.displayWidget = QGroupBox()
         vbox = QGridLayout()
+        self.registerArray = []
         for i in range(32):
             label = QLabel("x"+str(i))
-            
             vbox.addWidget(label, i, 0)
             label2 = QLabel("("+ self.get_alt_name(i)+")")
             label2.setFont(self.fixedfont)
             vbox.addWidget(label2, i, 1)
-            temp = QLabel()
-            currValue = self.get_register(i)
-            temp.setText("0x"+currValue)
-            
-            temp.setFont(self.fixedfont)
             label.setFont(self.fixedfont)
-            temp.setFixedHeight(40)
-            temp.setFixedWidth(160)
-            temp.setStyleSheet("border :1px solid white;")
-            temp.setAlignment(QtCore.Qt.AlignCenter) 
-            vbox.addWidget(temp, i, 2)
-                   
+            
+            temp = QLabel()
+            self.registerArray.append(temp)
+            self.registerArray[i].setFont(self.fixedfont)
+            self.registerArray[i].setFixedHeight(40)
+            self.registerArray[i].setFixedWidth(160)
+            self.registerArray[i].setStyleSheet("border :1px solid white;")
+            self.registerArray[i].setAlignment(QtCore.Qt.AlignCenter)
+            vbox.addWidget(self.registerArray[i], i, 2)
+            
+        self.updateRegisterView()
         self.displayWidget.setLayout(vbox)
         self.scroll1.setWidget(self.displayWidget)
         self.scroll1.setWidgetResizable(True)
@@ -133,9 +145,6 @@ class UiComponents(RegisterFile):
 class mainScreen(QWidget, UiComponents):
     def __init__(self):
         super().__init__()
-        # self.setStyle("Fusion")
-        # self.setPalette(DarkPalette())
-        # self.setStyleSheet("QToolTip { color: #ffffff; background-color: grey; border: 1px solid white; }")
         self.title = "RISC-V Simulator"
         self.subTitle = "Made by SAATH"
         self.top = 200
@@ -145,21 +154,18 @@ class mainScreen(QWidget, UiComponents):
         self.iconName = "GUI/Images/logo.png"
         
         self.initWindow()
+        
 
     def initWindow(self):
         self.setWindowTitle(self.title)
         self.setWindowIcon(QtGui.QIcon(self.iconName))
-        
-  
         self.setGeometry(self.left, self.top, self.width, self.height)
         logo_label = self.mainLabel(top=100, left=100, width=200, height=50)
-        
         self.editor()
         feed = self.editorScroll
-        
         self.memoryDisplay()
         self.registerDisplay()
-        self.tabbedView()
+        self.tabbedView1()
         memoryDisplay = self.tabs
         hbox = QHBoxLayout()
         hbox.addWidget(feed,10)

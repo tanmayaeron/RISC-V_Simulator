@@ -4,6 +4,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import sys
 import qtawesome as iconPack
+import qdarkstyle
 class UiComponents():
     def __init__(self):
         super().__init__()
@@ -12,10 +13,8 @@ class UiComponents():
     def buttonTile(self):
         button = QPushButton()
         button.setText("save")
-        button.setFixedHeight(50)
+        button.setFixedHeight(30)
         button.setFixedWidth(50)
-        button.setStyleSheet("border-bottom :10px solid;"
-                             "border-bottom-color : blue;")
         button.clicked.connect(lambda: self.fileSave())
         return button
 
@@ -33,10 +32,7 @@ class UiComponents():
         main_label_hBox.setContentsMargins(10, 10, 10, 10)
         return main_label_hBox
 
-    
 
-
-        
     def editor(self):
         self.editorlayout = QVBoxLayout()
         self.editorScreen = QPlainTextEdit()
@@ -66,11 +62,20 @@ class UiComponents():
 
     def memoryDisplay(self):
         self.displayWidget = QGroupBox("Memory Lookup")
-        vbox = QVBoxLayout()
+        vbox = QGridLayout()
         for i in range(10):
-            label = QLabel("Ox"+str(i+1))
-            label.setAlignment(Qt.AlignCenter)
-            vbox.addWidget(label)
+            label = QLabel("Ox"+'0'*7+str(i+1))
+            vbox.addWidget(label, i, 0)
+            for j in range(4):
+                temp = QLabel()
+                temp.setText("a")
+                
+                temp.setFixedHeight(40)
+                temp.setFixedWidth(40)
+                temp.setStyleSheet("border :1px solid white;")
+                temp.setAlignment(QtCore.Qt.AlignCenter) 
+                vbox.addWidget(temp, i, j+1)
+                   
         self.displayWidget.setLayout(vbox)
         self.displayWidget.setContentsMargins(10,10,10,10)
 
@@ -78,10 +83,12 @@ class UiComponents():
 class mainScreen(QWidget, UiComponents):
     def __init__(self):
         super().__init__()
-        
+        # self.setStyle("Fusion")
+        # self.setPalette(DarkPalette())
+        # self.setStyleSheet("QToolTip { color: #ffffff; background-color: grey; border: 1px solid white; }")
         self.title = "RISC-V Simulator"
-        self.subTitle = "Made by TAASH"
-        self.top = 100
+        self.subTitle = "Made by SAATH"
+        self.top = 200
         self.left = 100
         self.width = 1400
         self.height = 900
@@ -104,7 +111,7 @@ class mainScreen(QWidget, UiComponents):
         memoryDisplay = self.displayWidget
         hbox = QHBoxLayout()
         hbox.addWidget(feed,10)
-        hbox.addWidget(memoryDisplay, 5)
+        hbox.addWidget(memoryDisplay, 4)
         hbox.setContentsMargins(10,10,10,10)
         vbox = QVBoxLayout()
         vbox.addLayout(logo_label)
@@ -115,5 +122,7 @@ class mainScreen(QWidget, UiComponents):
         self.show()
 
 App = QApplication(sys.argv)
+
+App.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
 window = mainScreen()
 sys.exit(App.exec_())

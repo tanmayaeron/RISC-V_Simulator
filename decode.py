@@ -242,8 +242,7 @@ def UJ_format(fields):
 
 def alu_caller():
     machine_code = "0x02C0056F"
-    if machine_code.startswith('0x'):
-        machine_code = machine_code[2:]
+
     fields = decode(machine_code)
 
     format = fields['format']

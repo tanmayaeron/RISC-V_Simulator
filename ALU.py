@@ -9,7 +9,7 @@ from bitstring import Bits
 class ALU:
 
     """
-    We are passing obj of RegisterFile type as obj
+    PC needs to be dealt with separately
     RM, RY, RZ are temporary registers
     all functions deal and pass integers
     """

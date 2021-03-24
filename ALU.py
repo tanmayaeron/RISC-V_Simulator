@@ -22,6 +22,7 @@ class ALU:
         self.RM = 0
         self.RY = 0
         self.RZ = 0
+        self.PC_temp = 0
         self.muxB = 0 #set by decode
 
     def add(self):
@@ -91,8 +92,24 @@ class ALU:
             self.PC = self.PC - 4 + self.imm
 
     def auipc(self):
+        #imm is assumed to be shifted by 12
         self.RZ = self.PC - 4 + self.imm
     
     def lui(self):
         #imm is assumed to be shifted by 12
         self.add()
+    
+    def jal(self):
+        self.PC_temp = self.PC
+        self.PC = self.PC - 4 + self.imm
+    
+    def jalr(self):
+        self.PC_temp = self.PC
+        self.PC = self.RA + self.imm
+
+    def lbhw(self):
+        self.add(self)
+    
+    def sbhw(self):
+        self.RM = self.RB
+        self.add(self)

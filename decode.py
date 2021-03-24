@@ -182,7 +182,13 @@ def I_format(fields):
 
 
 def S_format(fields):
-    pass
+    # not checked
+    # to be checked later
+    #######################################
+    instruction = fields['neumonic']
+    rs1 = int(fields['rs1'], 2)
+    rs2 = int(fields['rs2'], 2)
+    imm = twos_complement(fields['immediate'])
 
 
 def SB_format(fields):

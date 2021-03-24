@@ -5,6 +5,7 @@ from bitstring import Bits
 obj = RegisterFile()
 obj2 = ALU()
 obj2.add()
+#increment PC += 4 by default
 
 class ALU:
 

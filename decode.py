@@ -125,8 +125,28 @@ def R_format(fields):
     obj.muxB = 0
     if instruction == "add":
         obj.add()
+    elif instruction == "and":
+        obj._and()
+    elif instruction == "or":
+        obj._or()
+    elif instruction == "sll":
+        obj.sll()
+    elif instruction == "slt":
+        obj.slt()
+    elif instruction == "sra":
+        obj.sra()
+    elif instruction == "srl":
+        obj.srl()
     elif instruction == "sub":
         obj.sub()
+    elif instruction == "xor":
+        obj.xor()
+    elif instruction == "mul":
+        obj.mul()
+    elif instruction == "div":
+        obj.div()
+    elif instruction == "rem":
+        obj.rem()
 
 
 def I_format(fields):
@@ -147,7 +167,7 @@ def I_format(fields):
         print(obj.RZ)
     elif instruction == "andi":
         # mux value is 1
-        obj._or()
+        obj._andi()
         print(obj.RZ)
     elif instruction == "lb":
         # mux value is 1

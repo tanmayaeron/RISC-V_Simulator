@@ -2,9 +2,7 @@ class RegisterFile:
 
     """
     data:
-    self._registers : list storing content of 32 register in hex
-                 each as a string of size 8(without 0x)
-
+    self._registers : list of 32 integers representing 32 registers
     methods:
     initialise_registers : initialise registers to default value
                            can be used to reset register file
@@ -15,14 +13,13 @@ class RegisterFile:
     def __init__(self):
         self._registers = []
         self.initialise_registers()
+        self.PC = 0
         self._alt_name = ["zero", "ra", "sp", "gp", "tp", "t0", "t1", "t2", "s0/fp", "s1", "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"]
 
     def initialise_registers(self):
-        self._registers = ["0" * 8] * 32
-        self._registers[2] = "7ffffff0"
-        self._registers[3] = "1" + "0" * 7
-        
-    
+        self._registers = [0]*32
+        self._registers[2] = 0x7FFFFFF0 #sp
+        self._registers[3] = 0x10000000 #gp
 
     def print_registers(self):
         print(self._registers)
@@ -33,13 +30,16 @@ class RegisterFile:
     def get_alt_name(self, index):
         return self._alt_name[index]
     
-
+    def handle_overflow(self, data):
+        # number 0xffffffff we will store it as
+        data &= 0xffffffff
+        if(data >= (1 << 31)):
+            return data - (1 << 32)
+        return data
+    
     def set_register(self,index,data):
-        if index==0 and data!="0"*8:
-            return 0   #x0 register can't be changed
-        else:
-            self._registers[index]=data
-            return 1
+        if index != 0:
+            self._registers[index] = handle_overflow(data)
 
 if __name__ == '__main__':
     rf = RegisterFile()

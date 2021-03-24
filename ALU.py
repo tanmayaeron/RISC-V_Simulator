@@ -94,4 +94,5 @@ class ALU:
         self.RZ = self.PC - 4 + self.imm
     
     def lui(self):
-        pass
+        #imm is assumed to be shifted by 12
+        self.add()

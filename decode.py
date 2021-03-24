@@ -240,8 +240,7 @@ def UJ_format(fields):
         print(obj.PC)
 
 
-def alu_caller():
-    machine_code = "0x02C0056F"
+def alu_caller(machine_code):
 
     fields = decode(machine_code)
 
@@ -264,4 +263,4 @@ def alu_caller():
         UJ_format(fields)
 
 
-alu_caller()
+alu_caller("0x02C0056F")

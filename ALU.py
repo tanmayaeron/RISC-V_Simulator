@@ -107,8 +107,8 @@ class ALU:
         self.PC = self.RA + self.imm
 
     def lbhw(self):
-        self.add(self)
+        self.add()
 
     def sbhw(self):
         self.RM = self.RB
-        self.add(self)
+        self.add()

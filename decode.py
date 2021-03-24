@@ -1,5 +1,8 @@
 import pandas as pd
-
+from ALU import ALU
+from register import RegisterFile
+from bitstring import BitArray
+from bitstring import Bits
 df_main = pd.read_csv('instructions.csv')
 
 
@@ -38,6 +41,7 @@ def decode(code):
                 fields['rs1'] = machine_code[-20:-15]
                 fields['rs2'] = machine_code[-25:-20]
                 fields['rd'] = machine_code[-12:-7]
+                fields['format'] = 'R'
 
         elif format == 'I':
             funct3 = '0b'+machine_code[-15:-12]
@@ -51,6 +55,7 @@ def decode(code):
                 fields['rs1'] = machine_code[-20:-15]
                 fields['rd'] = machine_code[-12:-7]
                 fields['immediate'] = machine_code[0:12]
+                fields['format'] = 'I'
 
         elif format == 'S':
             funct3 = '0b'+machine_code[-15:-12]
@@ -64,6 +69,7 @@ def decode(code):
                 fields['rs1'] = machine_code[-20:-15]
                 fields['rs2'] = machine_code[-25:-20]
                 fields['immediate'] = machine_code[0:7]+machine_code[-12:-7]
+                fields["format"] = 'S'
 
         elif format == 'SB':
             funct3 = '0b'+machine_code[-15:-12]
@@ -79,12 +85,14 @@ def decode(code):
                 fields['immediate'] = machine_code[0]+machine_code[-8] + \
                     machine_code[1:7]+machine_code[-12:-
                                                    8]  # 0 not added in the end
+                fields["format"] = 'SB'
 
         elif format == 'U':
             fields['neumonic'] = list(df['neumonic'])[0]
             fields['opcode'] = opcode
             fields['immediate'] = machine_code[0:20]
             fields['rd'] = machine_code[-12:-7]
+            fields["format"] = 'U'
 
         elif format == 'UJ':
             fields['neumonic'] = list(df['neumonic'])[0]
@@ -93,8 +101,99 @@ def decode(code):
                 machine_code[-21] + \
                 machine_code[1:11]  # not shifted 12 bits see later
             fields['rd'] = machine_code[-12:-7]
+            fields["format"] = 'UJ'
         return fields
 
 
-print(decode('001585B3'))  # add x11,x11,x1
-print(decode('00158593'))  # addi x11 x11 1
+obj = ALU()
+registers = RegisterFile()
+
+
+def twos_complement(a):
+
+    return Bits(bin=a).int
+
+
+def R_format(fields):
+
+    instruction = fields['neumonic']
+    rs1 = int(fields['rs1'], 2)
+    rs2 = int(fields['rs2'], 2)
+    rd = int(fields['rd'], 2)
+    obj.RA = registers.get_register(rs1)
+    obj.RB = registers.get_register(rs2)
+    obj.muxB = 0
+    if instruction == "add":
+        obj.add()
+    elif instruction == "sub":
+        obj.sub()
+
+
+def I_format(fields):
+    instruction = fields['neumonic']
+    rs1 = int(fields['rs1'], 2)
+    imm = twos_complement(fields['immediate'])
+    rd = int(fields['rd'], 2)
+    obj.RA = registers.get_register(rs1)
+    obj.imm = imm
+    obj.muxB = 1
+    if instruction == "addi":
+        # mux value is 1
+        obj.add()
+        print(obj.RZ)
+    elif instruction == "ori":
+        # mux value is 1
+        obj._or()
+        print(obj.RZ)
+    elif instruction == "andi":
+        # mux value is 1
+        obj._or()
+        print(obj.RZ)
+    elif instruction == "lb":
+        # mux value is 1
+        obj.lbhw()
+        print(obj.RZ)
+    elif instruction == "jalr":
+        # mux value is 1
+        obj.jalr()
+        print(obj.RZ)
+
+
+def S_format(fields):
+    pass
+
+
+def SB_format(fields):
+    pass
+
+
+def U_format(fields):
+    pass
+
+
+def UJ_format(fields):
+    pass
+
+
+def alu_caller():
+    machine_code = "43E58593"
+    fields = decode(machine_code)
+
+    format = fields['format']
+    if format == 0:
+        return
+    if format == 'R':
+        R_format(fields)
+    elif format == 'I':
+        I_format(fields)
+    elif format == "S":
+        S_format(fields)
+    elif format == "SB":
+        SB_format(fields)
+    elif format == "U":
+        U_format(fields)
+    else:
+        UJ_format(fields)
+
+
+alu_caller()

@@ -153,6 +153,7 @@ def I_format(fields):
     instruction = fields['neumonic']
     rs1 = int(fields['rs1'], 2)
     imm = twos_complement(fields['immediate'])
+
     rd = int(fields['rd'], 2)
     obj.RA = registers.get_register(rs1)
     obj.imm = imm
@@ -175,8 +176,9 @@ def I_format(fields):
         print(obj.RZ)
     elif instruction == "jalr":
         # mux value is 1
+        # works fine
         obj.jalr()
-        print(obj.RZ)
+        print(obj.PC)
 
 
 def S_format(fields):
@@ -184,11 +186,40 @@ def S_format(fields):
 
 
 def SB_format(fields):
-    pass
+    instruction = fields['neumonic']
+    rs1 = int(fields['rs1'], 2)
+    rs2 = int(fields['rs2'], 2)
+    imm = twos_complement(fields['immediate'])
+    imm *= 2  # to left shift as imm[0] is 0
+    obj.RA = registers.get_register(rs1)
+    obj.RB = registers.get_register(rs2)
+    obj.imm = imm
+    print(obj.RA, obj.RB, obj.imm, obj.PC)
+    if instruction == "beq":
+        obj.beq()
+        print(obj.PC)
+    elif instruction == "bne":
+        obj.bne()
+        print(obj.PC)
+    elif instruction == "bge":
+        obj.bge()
+        print(obj.PC)
+    elif instruction == "blt":
+        obj.blt()
+        print(obj.PC)
 
 
 def U_format(fields):
-    pass
+    instruction = fields['neumonic']
+    rd = int(fields['rd'], 2)
+    imm = twos_complement(fields['immediate'])
+    imm = imm*2**12  # left shifting 12 bits
+    obj.imm = imm
+    if instruction == "lui":
+        obj.lui()
+    elif instruction == "auipc":
+        obj.auipc()
+        print(obj.RZ)
 
 
 def UJ_format(fields):
@@ -196,11 +227,15 @@ def UJ_format(fields):
 
 
 def alu_caller():
-    machine_code = "43E58593"
+    machine_code = "0xFFFFF597"
+    if machine_code.startswith('0x'):
+        machine_code = machine_code[2:]
     fields = decode(machine_code)
 
     format = fields['format']
+    print(fields)
     if format == 0:
+        print("not found")
         return
     if format == 'R':
         R_format(fields)

@@ -223,11 +223,19 @@ def U_format(fields):
 
 
 def UJ_format(fields):
-    pass
+    instruction = fields['neumonic']
+    rd = int(fields['rd'], 2)
+    imm = twos_complement(fields['immediate'])
+    imm *= 2  # to left shift as imm[0] is 0
+    obj.imm = imm
+    if instruction == "jal":
+        obj.jal()
+        print(obj.PC_temp)
+        print(obj.PC)
 
 
 def alu_caller():
-    machine_code = "0xFFFFF597"
+    machine_code = "0x02C0056F"
     if machine_code.startswith('0x'):
         machine_code = machine_code[2:]
     fields = decode(machine_code)

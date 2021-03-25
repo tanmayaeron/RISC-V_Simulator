@@ -5,7 +5,8 @@ from PyQt5.QtWidgets import *
 import sys
 import qtawesome as iconPack
 import qdarkstyle
-from register_file import RegisterFile
+import time
+from register import RegisterFile
 
 class UiComponents(RegisterFile):
     def __init__(self):
@@ -24,7 +25,7 @@ class UiComponents(RegisterFile):
     def updateRegisterView(self):
         for i in range(32):
             currValue = self.get_register(i)
-            self.registerArray[i].setText("0x"+currValue)
+            self.registerArray[i].setText("0x"+str(currValue))
              
 
     def mainLabel(self, top, left, height, width):
@@ -50,12 +51,17 @@ class UiComponents(RegisterFile):
         self.editorScreen.setFont(self.fixedfont)
         self.path = 'test/test1.mc'
         self.editorlayout.addWidget(self.editorScreen)
-        self.container = QGroupBox("Editor")
+        self.container = QGroupBox()
         self.container.setLayout(self.editorlayout)
         self.fileOpen()
         self.editorScreen.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.editorScroll.setWidget(self.container)
         self.editorScroll.setWidgetResizable(True)
+        
+        
+    def team(self):
+        self.members = ["Aneeket", "Tanmay", "Shikhar", "Het", "Aditya"]
+        pass
         
     def fileOpen(self):
         path = self.path
@@ -108,10 +114,10 @@ class UiComponents(RegisterFile):
         self.tabs.addTab(self.tab1, "Registers") 
         self.tabs.addTab(self.tab2, "Memory") 
         
-    # def tabbedView2(self):
-    #     self.tabsMain = QTabWidget()
-    #     self.tabMain1 = self.editorScroll
-    #     self.
+    def tabbedView2(self):
+        self.tabsMain = QTabWidget()
+        self.tabMain1 = self.editorScroll
+        self.tabsMain.addTab(self.tabMain1, "Editor")
     
     
     def registerDisplay(self):
@@ -152,21 +158,27 @@ class mainScreen(QWidget, UiComponents):
         self.width = 1400
         self.height = 900
         self.iconName = "GUI/Images/logo.png"
+    
+        self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
+        QTimer.singleShot(3000, self.initWindow)
+        self.splash.show()
         
-        self.initWindow()
         
 
     def initWindow(self):
+        self.splash.close()
         self.setWindowTitle(self.title)
         self.setWindowIcon(QtGui.QIcon(self.iconName))
         self.setGeometry(self.left, self.top, self.width, self.height)
         logo_label = self.mainLabel(top=100, left=100, width=200, height=50)
         self.editor()
-        feed = self.editorScroll
+        
         self.memoryDisplay()
         self.registerDisplay()
         self.tabbedView1()
+        self.tabbedView2()
         memoryDisplay = self.tabs
+        feed = self.tabsMain
         hbox = QHBoxLayout()
         hbox.addWidget(feed,10)
         hbox.addWidget(memoryDisplay, 4)

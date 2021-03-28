@@ -5,10 +5,10 @@ from PyQt5.QtWidgets import *
 import sys
 import qtawesome as iconPack
 import qdarkstyle
-import time
 from register import RegisterFile
+from memory import Memory
 
-class UiComponents(RegisterFile):
+class UiComponents(RegisterFile, Memory):
     def __init__(self):
         super().__init__()
         self.fixedfont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
@@ -26,6 +26,13 @@ class UiComponents(RegisterFile):
         for i in range(32):
             currValue = self.get_register(i)
             self.registerArray[i].setText("0x"+str(currValue))
+            
+    def updateMemoryView(self, address):
+        l = self.getMemoryDisplay(address)
+        for i in range(10):
+            for j in range(4):
+                print(l[i*4 + j])
+                self.memoryArray[i][j].setText(l[i*4 + j])
              
 
     def mainLabel(self, top, left, height, width):
@@ -102,6 +109,7 @@ class UiComponents(RegisterFile):
                 
                 vbox.addWidget(self.memoryArray[-1][-1], i, j+1)
                    
+        self.updateMemoryView("00000000")
         self.displayWidget.setLayout(vbox)
         self.scroll.setWidget(self.displayWidget)
         self.scroll.setWidgetResizable(True)
@@ -188,7 +196,7 @@ class mainScreen(QWidget, UiComponents):
         vbox.addLayout(hbox)
         vbox.setContentsMargins(10,10,10,10)
         self.setLayout(vbox)
-        
+
         self.show()
 
 App = QApplication(sys.argv)

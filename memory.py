@@ -11,11 +11,33 @@ class Memory:
     """
 
     def __init__(self):
-        self._memory = defaultdict(lambda: "00")  # only relevant data stored
+        self._memory = defaultdict(lambda: "00") # only relevant data stored
 
     def hexToDec(self, address):
+        
         address_in_dec = int(address, 16)
         return address_in_dec
+    
+    def getMemoryDisplay(self, address):
+        l = []
+        """
+        
+        :param address: byte address str of length 8(without 0x)
+        :return: 10 words in contiguous location, in hex, str of length 8(without 0x)
+        """
+        address_in_dec = self.hexToDec(address)
+        data = ""
+        for i in reversed(range(40)):
+            address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
+            address_in_hex = address_in_hex[-8:]
+            if address in self._memory.keys():
+                data =  self._memory[address]
+            else:
+                data = "00"
+            l.append(data)
+        return l
+        
+
 
     def load_byte(self, address):
         """

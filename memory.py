@@ -11,10 +11,9 @@ class Memory:
     """
 
     def __init__(self):
-        self._memory = defaultdict(lambda: "00") # only relevant data stored
+        self.__memory = defaultdict(lambda: "00") # only relevant data stored
 
     def hexToDec(self, address):
-        
         address_in_dec = int(address, 16)
         return address_in_dec
     
@@ -30,10 +29,7 @@ class Memory:
         for i in reversed(range(40)):
             address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
             address_in_hex = address_in_hex[-8:]
-            if address in self._memory.keys():
-                data =  self._memory[address]
-            else:
-                data = "00"
+            data = self.load_byte(address_in_hex)
             l.append(data)
         return l
         
@@ -45,8 +41,8 @@ class Memory:
         :param address:byte address str of length 8(without 0x)
         :return:1byte data stored at address in hex, str of length 2(without 0x)
         """
-        if address in self._memory.keys():
-            return self._memory[address]
+        if address in self.__memory.keys():
+            return self.__memory[address]
         else:
             return "00"
 
@@ -86,7 +82,7 @@ class Memory:
     """
 
     def store_byte(self, address, data):
-        self._memory[address] = data
+        self.__memory[address] = data
 
     def store_word(self, address, data):
         address_in_dec = self.hexToDec(address)

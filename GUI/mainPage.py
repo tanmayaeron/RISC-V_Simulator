@@ -12,7 +12,7 @@ class UiComponents(RegisterFile, Memory):
     def __init__(self):
         super().__init__()
         self.fixedfont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
-        self.fixedfont.setPointSize(14)
+        self.fixedfont.setPointSize(13)
         
         
     def buttonTile(self, name):

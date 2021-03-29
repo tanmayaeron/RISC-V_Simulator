@@ -18,7 +18,7 @@ class ALU:
 
     def _hexToDec(self, operand):
         
-        if (operand[2] == "F"):
+        if (operand[0] == "F"):
             operand = int(operand, 16)
             operand-= 1<<32
             return operand
@@ -28,7 +28,7 @@ class ALU:
         if(operand >= 0):
             return '{:08x}'.format(operand)
         else:
-            operand = 1<<31 - abs(operand)
+            operand = 1<<32 - abs(operand)
             return '{:08x}'.format(operand)
     
     def operate(self, operand1, operand2, control):

@@ -18,7 +18,7 @@ class ALU:
 
     def _hexToDec(self, operand):
         
-        if (operand[0] == "F"):
+        if (operand[0] == "f"):
             operand = int(operand, 16)
             operand-= 1<<32
             return operand
@@ -28,15 +28,17 @@ class ALU:
         if(operand >= 0):
             return '{:08x}'.format(operand)
         else:
-            operand = 1<<32 - abs(operand)
+            operand = (1<<32) - (abs(operand))
             return '{:08x}'.format(operand)
     
     def operate(self, operand1, operand2, control):
         self._input1 = self._hexToDec(operand1)
         self._input2 = self._hexToDec(operand2)
         if(control < self._numOfSupportedOperations):
+            print(self._input1, self._input2)
             self._control = control
             self._lookup[self._control]()
+            print(self._output)
             self._output = self._decToHex(self._output)
             return self._output
         else:
@@ -78,6 +80,7 @@ class ALU:
         self._output = self._input1 >> self._input2
 
     def _sra(self):
+        # self._input1 &= 0xffffffff
         self._output = self._input1 >> self._input2
 
     def _eq(self):
@@ -105,6 +108,6 @@ class ALU:
             self._output = 0
 
 alu = ALU()
-a = "00000023"
-b = "00000014"
-print(alu.operate(a, b, 0))
+a = "ffffffff"
+b = "00000001"
+print(alu.operate(a, b, 10))

@@ -17,22 +17,28 @@ class ALU:
         self._output = 0
 
     def _hexToDec(self, operand):
-        decValue = int(operand, 16)
-        return decValue
+        operand = hex(int(operand, 16) + 0x200)
+        return -(operand & 0x80000000) | (operand & 0x7fffffff)﻿
+    
     def _decToHex(self, operand):
-        hexValue = '{:08x}'.format(operand)
-        return hexValue
+        if(operand >= 0):
+            return '{:08x}'.format(operand)
+        else:
+            operand = 1<<31 - abs(operand)
+            return '{:08x}'.format(operand)
     
     def operate(self, operand1, operand2, control):
         self._input1 = self._hexToDec(operand1)
         self._input2 = self._hexToDec(operand2)
         if(control < self._numOfSupportedOperations):
             self._control = control
+            self._lookup[self._control]()
+            self._output = self._decToHex(self._output)
+            return self._output
         else:
             print("unsupported operation")
-        self._lookup[self._control]()
-        self._output = self._decToHex(self._output)
-        return self._output
+            return 404
+        
     
     
         
@@ -97,4 +103,4 @@ class ALU:
 alu = ALU()
 a = "00000023"
 b = "00000014"
-print(alu.operate(a, b, 0))
+print(alu.operate(a, b, 0) + 0x01)

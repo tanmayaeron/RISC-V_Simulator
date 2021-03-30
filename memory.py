@@ -56,14 +56,21 @@ class Memory:
             address_in_hex = address_in_hex[-8:]
             data = data + self.load_byte(address_in_hex)
         return data
-
-    """
     
-    store functions
-    :param address: byte address str of length 8(without 0x)
-           data: data to be stored at address, str of appropriate size(without 0x)
-    """
+    def load_word(self, address):
+        """
+        :param address: byte address str of length 8(without 0x)
+        :return: word data stored at address, in hex, str of length 4(without 0x)
+        """
+        address_in_dec = self.hexToDec(address)
+        data = ""
+        for i in reversed(range(4)):
+            address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
+            address_in_hex = address_in_hex[-8:]
+            data = data + self.load_byte(address_in_hex)
+        return data
 
+    
     def make_length(self, data, length):
         data = "0"*length+data
         return data[-length:]

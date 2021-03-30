@@ -35,10 +35,8 @@ class ALU:
         self._input1 = self._hexToDec(operand1)
         self._input2 = self._hexToDec(operand2)
         if(control < self._numOfSupportedOperations):
-            print(self._input1, self._input2)
             self._control = control
             self._lookup[self._control]()
-            print(self._output)
             self._output = self._decToHex(self._output)
             return self._output
         else:
@@ -80,7 +78,6 @@ class ALU:
         self._output = self._input1 >> self._input2
 
     def _sra(self):
-        # self._input1 &= 0xffffffff
         self._output = self._input1 >> self._input2
 
     def _eq(self):

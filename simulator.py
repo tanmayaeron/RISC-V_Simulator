@@ -30,7 +30,7 @@ class Execute:
 
         self.PC += 4
         self.cycle += 1
-        self.IR = "02F605B3"  # we have to reload next instruction here
+        self.IR = "00B62323"  # we have to reload next instruction here
         self.obj.PC = self.PC  # temporary copying self.pc to obj.pc to be removed in future
         self.alu_caller(self.IR)
         self.PC = self.obj.PC  # copying back the changes to obj.pc in pc to be removed in future
@@ -215,7 +215,20 @@ class Execute:
         instruction = fields['neumonic']
         rs1 = int(fields['rs1'], 2)
         rs2 = int(fields['rs2'], 2)
+        self.obj.RA = self.registers.get_register(rs1)
+        self.obj.RB = self.registers.get_register(rs2)
         imm = self.twos_complement(fields['immediate'])
+        self.obj.imm = self.int_to_hex(imm)
+        self.obj.muxB = 1
+        if instruction == "sb":
+            self.obj.sbhw()
+        elif instruction == "sh":
+            self.obj.sbhw()
+        elif instruction == "sw":
+            self.obj.sbhw()
+
+        print("location is:", self.obj.RZ)
+        print("the value is : ", self.obj.RM)
 
     def SB_format(self, fields):
         instruction = fields['neumonic']
@@ -227,6 +240,7 @@ class Execute:
         self.obj.RB = self.registers.get_register(rs2)
         self.obj.imm = self.int_to_hex(imm)
         print(self.obj.RA, self.obj.RB, self.obj.imm, self.obj.PC)
+        self.obj.muxB = 0
         if instruction == "beq":
             self.obj.beq()
             print(self.obj.PC)
@@ -246,6 +260,7 @@ class Execute:
         imm = self.twos_complement(fields['immediate'])
         imm = imm*2**12  # left shifting 12 bits
         self.obj.imm = self.int_to_hex(imm)
+        self.obj.muxB = 0
         if instruction == "lui":
             self.obj.lui()
         elif instruction == "auipc":
@@ -258,6 +273,7 @@ class Execute:
         imm = self.twos_complement(fields['immediate'])
         imm *= 2  # to left shift as imm[0] is 0
         self.obj.imm = self.int_to_hex(imm)
+        self.obj.muxB = 0
         if instruction == "jal":
             self.obj.jal()
             print(self.obj.PC_temp)

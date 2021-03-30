@@ -26,10 +26,10 @@ class ALU:
     
     def _decToHex(self, operand):
         if(operand >= 0):
-            return '{:08x}'.format(operand)
+            return '{:08x}'.format(operand)[-8:]
         else:
             operand = (1<<32) - (abs(operand))
-            return '{:08x}'.format(operand)
+            return '{:08x}'.format(operand)[-8:]
     
     def operate(self, operand1, operand2, control):
         self._input1 = self._hexToDec(operand1)

@@ -18,7 +18,7 @@ class ALU:
 
     def _hexToDec(self, operand):
         
-        if (operand[0] == "f"):
+        if (int(operand[0],16)>7):
             operand = int(operand, 16)
             operand-= 1<<32
             return operand
@@ -105,6 +105,6 @@ class ALU:
             self._output = 0
 
 alu = ALU()
-a = "ffffffff"
-b = "00000001"
+a = "80000000"
+b = "00000002"
 print(alu.operate(a, b, 10))

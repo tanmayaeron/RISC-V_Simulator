@@ -148,6 +148,7 @@ class Execute:
         self.obj.RA = self.registers.get_register(rs1)
         self.obj.RB = self.registers.get_register(rs2)
         self.obj.muxB = 0
+        self.obj.muxY = 0
         if instruction == "add":
             self.obj.add()
         elif instruction == "and":
@@ -185,7 +186,7 @@ class Execute:
         self.obj.imm = imm
         self.obj.imm = self.int_to_hex(imm)
         self.obj.muxB = 1
-
+        self.obj.muxY = 0
         if instruction == "addi":
             # mux value is 1
             self.obj.add()
@@ -198,11 +199,13 @@ class Execute:
             # mux value is 1
             self.obj._andi()
             print(self.obj.RZ)
-        elif instruction == "lb":
+        elif instruction in ["lb", "lw", "lh"]:
+            self.obj.muxY = 1
             # mux value is 1
             self.obj.lbhw()
             print(self.obj.RZ)
         elif instruction == "jalr":
+            self.obj.muxY = 2
             # mux value is 1
             # works fine
             self.obj.jalr()
@@ -220,6 +223,7 @@ class Execute:
         imm = self.twos_complement(fields['immediate'])
         self.obj.imm = self.int_to_hex(imm)
         self.obj.muxB = 1
+        self.obj.muxY = 1  # dont care
         if instruction == "sb":
             self.obj.sbhw()
         elif instruction == "sh":
@@ -241,6 +245,7 @@ class Execute:
         self.obj.imm = self.int_to_hex(imm)
         print(self.obj.RA, self.obj.RB, self.obj.imm, self.obj.PC)
         self.obj.muxB = 0
+        self.obj.muxY = 2
         if instruction == "beq":
             self.obj.beq()
             print(self.obj.PC)
@@ -261,9 +266,11 @@ class Execute:
         imm = imm*2**12  # left shifting 12 bits
         self.obj.imm = self.int_to_hex(imm)
         self.obj.muxB = 0
+        self.obj.muxY = 0
         if instruction == "lui":
             self.obj.lui()
         elif instruction == "auipc":
+            self.obj.muxY = 2
             self.obj.auipc()
             print(self.obj.RZ)
 
@@ -274,6 +281,7 @@ class Execute:
         imm *= 2  # to left shift as imm[0] is 0
         self.obj.imm = self.int_to_hex(imm)
         self.obj.muxB = 0
+        self.obj.muxY = 2
         if instruction == "jal":
             self.obj.jal()
             print(self.obj.PC_temp)
@@ -289,16 +297,22 @@ class Execute:
             print("not found")
             return
         if format == 'R':
+            self.obj.muxY = 0
             self.R_format(fields)
         elif format == 'I':
+            self.obj.muxY = 0  # mix and is updated ahead
             self.I_format(fields)
         elif format == "S":
+            self.obj.muxY = 0
             self.S_format(fields)
         elif format == "SB":
+            self.obj.muxY = 2  # pc+=imm
             self.SB_format(fields)
         elif format == "U":
+            self.obj.muxY = 0  # doubt
             self.U_format(fields)
         else:
+            self.obj.muxY = 2
             self.UJ_format(fields)
 
 

@@ -1,7 +1,7 @@
 class RegisterFile:
 
     """
-    data:
+    data: hexadecimal string representing 32 bit number
     self._registers : list of 32 integers representing 32 registers
     methods:
     initialise_registers : initialise registers to default value
@@ -31,17 +31,9 @@ class RegisterFile:
     def get_alt_name(self, index):
         return self._alt_name[index]
 
-    def handle_overflow(self, data):
-        # number 0xffffffff we will store it as -1 here
-        # number 0x00000001 is stored as 1 only
-        data &= 0xffffffff
-        if(data >= (1 << 31)):
-            return data - (1 << 32)
-        return data
-
     def set_register(self, index, data):
         if index != 0:
-            self._registers[index] = self.handle_overflow(data)
+            self._registers[index] = data[-8:]
 
 
 if __name__ == '__main__':

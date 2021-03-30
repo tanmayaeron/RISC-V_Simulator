@@ -1,6 +1,6 @@
 
 import pandas as pd
-from ALU import ALU
+from ALU_re import alu_interface
 from register import RegisterFile
 from bitstring import BitArray
 from bitstring import Bits
@@ -15,15 +15,24 @@ class Execute:
         self.cycle = 0
         self.IR = 0
         self.registers = RegisterFile()
-        self.obj = ALU()
+        self.obj = alu_interface()
+
+    def int_to_hex(self, a):
+        b = 0x100000000
+        if a >= 0:
+            a = '{:08x}'.format(a)[-8:]
+        else:
+            a += b
+            a = hex(a)
+        return a
 
     def fetch(self):
 
         self.PC += 4
         self.cycle += 1
-        self.IR = 0x010005EF  # we have to reload next instruction here
+        self.IR = "02F605B3"  # we have to reload next instruction here
         self.obj.PC = self.PC  # temporary copying self.pc to obj.pc to be removed in future
-        self.alu_caller(hex(self.IR))
+        self.alu_caller(self.IR)
         self.PC = self.obj.PC  # copying back the changes to obj.pc in pc to be removed in future
 
     def decode(self, code):
@@ -167,12 +176,16 @@ class Execute:
     def I_format(self, fields):
         instruction = fields['neumonic']
         rs1 = int(fields['rs1'], 2)
+
         imm = self.twos_complement(fields['immediate'])
 
         rd = int(fields['rd'], 2)
         self.obj.RA = self.registers.get_register(rs1)
+
         self.obj.imm = imm
+        self.obj.imm = self.int_to_hex(imm)
         self.obj.muxB = 1
+
         if instruction == "addi":
             # mux value is 1
             self.obj.add()
@@ -212,7 +225,7 @@ class Execute:
         imm *= 2  # to left shift as imm[0] is 0
         self.obj.RA = self.registers.get_register(rs1)
         self.obj.RB = self.registers.get_register(rs2)
-        self.obj.imm = imm
+        self.obj.imm = self.int_to_hex(imm)
         print(self.obj.RA, self.obj.RB, self.obj.imm, self.obj.PC)
         if instruction == "beq":
             self.obj.beq()
@@ -232,7 +245,7 @@ class Execute:
         rd = int(fields['rd'], 2)
         imm = self.twos_complement(fields['immediate'])
         imm = imm*2**12  # left shifting 12 bits
-        self.obj.imm = imm
+        self.obj.imm = self.int_to_hex(imm)
         if instruction == "lui":
             self.obj.lui()
         elif instruction == "auipc":
@@ -244,7 +257,7 @@ class Execute:
         rd = int(fields['rd'], 2)
         imm = self.twos_complement(fields['immediate'])
         imm *= 2  # to left shift as imm[0] is 0
-        self.obj.imm = imm
+        self.obj.imm = self.int_to_hex(imm)
         if instruction == "jal":
             self.obj.jal()
             print(self.obj.PC_temp)

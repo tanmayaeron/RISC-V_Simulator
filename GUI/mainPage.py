@@ -3,7 +3,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import sys
-import qtawesome as iconPack
 import qdarkstyle
 from register import RegisterFile
 from memory import Memory

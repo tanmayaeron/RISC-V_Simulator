@@ -74,11 +74,15 @@ class ALU:
         self._output = self._input1 << self._input2
         
     def _srl(self):
-        self._input1 &= 0xffffffff
         self._output = self._input1 >> self._input2
 
     def _sra(self):
-        self._output = self._input1 >> self._input2
+        all_set = 0
+        if(self._input1 >= (1 << 31)):
+            all_set = (1 << 32) - 1
+            rm_set = (1 << (32 - self._input2)) - 1
+            all_set = all_set ^ rm_set
+        self._output = (self._input1 >> self._input2) ^ (all_set)
 
     def _eq(self):
         if(self._input1 == self._input2):

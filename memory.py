@@ -45,7 +45,7 @@ class Memory:
         :param address:byte address str of length 8(without 0x)
         :return:1byte data stored at address, in hex, str of length 2(without 0x)
         """
-
+        address = make_length(address,8)
         return self.__memory[address]
 
     def load_halfword(self, address):
@@ -83,10 +83,12 @@ class Memory:
 
 
     def store_byte(self, address, data):
+        address = make_length(address,8)
         data = make_length(data, 2)
         self.__memory[address] = data
 
     def store_word(self, address, data):
+        address = make_length(address,8)
         data = make_length(data, 8)
         address_in_dec = self.hexToDec(address)
         for i in range(4):
@@ -95,20 +97,13 @@ class Memory:
             self.store_byte(address_in_hex, data[6 - 2 * i:8 - 2 * i])
 
     def store_halfword(self, address, data):
+        address = make_length(address,8)
         data = make_length(data, 4)
         address_in_dec = self.hexToDec(address)
         for i in range(2):
             address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
             address_in_hex = address_in_hex[-8:]
             self.store_byte(address_in_hex, data[2 - 2 * i:4 - 2 * i])
-
-if __name__=='__main__':
-    mem = Memory()
-    mem.store_word("10000000", "AAA")
-
-    print("dictionary is :", end="")
-    mem.print_memory()
-
 
 class PMI:
     def __init__(self):
@@ -130,6 +125,9 @@ class PMI:
         address = make_length(address,8)
         self.__MAR = address
 
+    def print_memory(self):
+        self.__memory.print_memory()
+
     def getData(self,size):
 
         """
@@ -146,4 +144,11 @@ class PMI:
     
     def storeData(self,size):
         getArray = [self.__memory.store_byte, self.__memory.store_halfword, self.__memory.store_word]
-        data = getArray[size](self.__MAR,self.__MDR)
+        getArray[size](self.__MAR,self.__MDR)
+
+if __name__=='__main__':
+    interface = PMI()
+    interface.setMAR("1000000f")
+    interface.setMDR("DEADBEAF")
+    interface.storeData(2)
+    print(interface.print_memory())

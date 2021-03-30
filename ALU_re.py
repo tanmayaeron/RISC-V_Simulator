@@ -18,7 +18,7 @@ class ALU:
 
     def _hexToDec(self, operand):
         
-        if (operand[0] == "f"):
+        if (operand[0].lower() == "f"):
             operand = int(operand, 16)
             operand-= 1<<32
             return operand

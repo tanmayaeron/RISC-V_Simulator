@@ -1,3 +1,4 @@
+
 class ALU:
 
     """
@@ -12,15 +13,16 @@ class ALU:
         self._input1 = 0
         self._input2 = 0
         self._numOfSupportedOperations = 15
-        self._lookup = [self._add, self._sub, self._mul, self._div, self._rem, self._xor, self._and, self._or, self._sll, self._srl, self._sra, self._eq, self._ne, self._ge, self._lt]
+        self._lookup = [self._add, self._sub, self._mul, self._div, self._rem, self._xor, self._and,
+                        self._or, self._sll, self._srl, self._sra, self._eq, self._ne, self._ge, self._lt]
         self._control = 0
         self._output = 0
 
     def _hexToDec(self, operand):
 
-        if (int(operand[0],16)>7):
+        if (int(operand[0], 16) > 7):
             operand = int(operand, 16)
-            operand-= 1<<32
+            operand -= 1 << 32
             return operand
         return int(operand, 16)
 
@@ -28,7 +30,7 @@ class ALU:
         if(operand >= 0):
             return '{:08x}'.format(operand)[-8:]
         else:
-            operand = (1<<32) - (abs(operand))
+            operand = (1 << 32) - (abs(operand))
             return '{:08x}'.format(operand)[-8:]
 
     def operate(self, operand1, operand2, control):
@@ -42,9 +44,6 @@ class ALU:
         else:
             print("unsupported operation")
             return 404
-
-
-
 
     def _add(self):
         self._output = self._input1 + self._input2
@@ -104,7 +103,116 @@ class ALU:
         else:
             self._output = 0
 
-alu = ALU()
-a = "80000000"
-b = "00000002"
-print(alu.operate(a, b, 10))
+
+class alu_interface:
+
+    """
+    PC needs to be dealt with separately
+    RM, RY, RZ are temporary registers
+    all functions deal and pass integers
+    """
+
+    def __init__(self):
+        self.RA = "0"*8
+        self.RB = "0"*8
+        self.imm = "0"*8
+        self.RM = "0"*8
+        self.RY = "0"*8
+        self.RZ = "0"*8
+        self.PC_temp = "0"*8
+        self.muxB = 0
+        self.alu = ALU()
+
+    def add(self):
+        if(self.muxB == 0):
+            self.RZ = self.alu.operate(self.RA, self.RB, 0)
+        else:
+            self.RZ = self.alu.operate(self.RA, self.imm, 0)
+        print(self.RZ)
+
+    def sub(self):
+        self.RZ = self.alu.operate(self.RA, self.RB, 1)
+        print(self.RZ)
+
+    def mul(self):
+        self.RZ = self.alu.operate(self.RA, self.RB, 2)
+
+    def div(self):
+        self.RZ = self.alu.operate(self.RA, self.RB, 3)
+
+    def rem(self):
+        self.RZ = self.alu.operate(self.RA, self.RB, 4)
+
+    def xor(self):
+        self.RZ = self.alu.operate(self.RA, self.RB, 5)
+
+    def _and(self):
+        if(self.muxB == 0):
+            self.RZ = self.alu.operate(self.RA, self.RB, 6)
+        else:
+            self.RZ = self.alu.operate(self.RA, self.imm, 6)
+        print(self.RZ)
+
+    def _or(self):
+        self.RZ = self.alu.operate(self.RA, self.RB, 7)
+
+    def sll(self):
+        self.RZ = self.alu.operate(self.RA, self.RB, 8)
+
+    def srl(self):
+        self.RZ = self.alu.operate(self.RA, self.RB, 9)
+
+    def sra(self):
+        self.RZ = self.alu.operate(self.RA, self.RB, 10)
+
+    def beq(self):
+
+        # execute increments PC by 4
+        if(self.alu.operate(self.RA, self.RB, 11)):
+            self.PC = self.PC - 4 + self.imm
+
+    def bne(self):
+        if(self.alu.operate(self.RA, self.RB, 12)):
+            self.PC = self.PC - 4 + self.imm
+
+    def bge(self):
+        if(self.RA >= self.RB):
+            self.PC = self.PC - 4 + self.imm
+
+    def blt(self):
+        if(self.RA < self.RB):
+            self.PC = self.PC - 4 + self.imm
+
+    def slt(self):
+        if(self.RA < self.RB):
+            self.RZ = 1
+        else:
+            self.RZ = 0
+
+    def auipc(self):
+        # imm is assumed to be shifted by 12
+        self.RZ = self.PC - 4 + self.imm
+
+    def lui(self):
+        # imm is assumed to be shifted by 12
+        self.add()
+
+    def jal(self):
+        self.PC_temp = self.PC
+        self.PC = self.PC - 4 + self.imm
+
+    def jalr(self):
+        self.PC_temp = self.PC
+        self.PC = self.RA + self.imm
+
+    def lbhw(self):
+        self.add()
+
+    def sbhw(self):
+        self.RM = self.RB
+        self.add()
+
+
+if __name__ == "__main__":
+    alu_interface = alu_interface()
+    alu_interface.sub()

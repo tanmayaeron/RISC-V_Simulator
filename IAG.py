@@ -23,7 +23,7 @@ class IAG(HelperFunctions):
     def getPC_Temp(self):
         return self._PC_Temp
         
-    def muxPC(self,PC_select, RA): 
+    def muxPC(self,PC_select, RA='0'*8):
         if PC_select == 1 :
             self.output_muxPC =  RA
         else:
@@ -31,13 +31,13 @@ class IAG(HelperFunctions):
             
     def muxINC(self,INC_select):
         if INC_select==0 :
-            return self.__constantoffset
+            self.inputB_adder = self.__constantoffset
         else:
-            return self._imm
+            self.inputB_adder = self._imm
 
     def adder(self):
         operandA = int(self._PC,16)
-        operandB = int(inputB_adder,16)
+        operandB = int(self.inputB_adder, 16)
         output = operandA+operandB
         self.output_adder = '{:08x}'.format(output)[-8:]
         
@@ -47,5 +47,6 @@ class IAG(HelperFunctions):
 
     def updatePC_temp(self):
         PC = int(self._PC,16)
-        PC+=4
+        PC = PC + 4
         self._PC_temp = '{:08x}'.format(PC)[-8:]
+

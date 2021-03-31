@@ -85,13 +85,13 @@ def identify(code):
                 fields['rs2'] = machine_code[-25:-20]
                 fields['immediate'] = machine_code[0]+machine_code[-8] + \
                     machine_code[1:7]+machine_code[-12:-
-                                                   8]  # 0 not added in the end
+                                                   8]+'0'  # 0 not added in the end
                 fields["format"] = 'SB'
 
         elif format == 'U':
             fields['neumonic'] = list(df['neumonic'])[0]
             fields['opcode'] = opcode
-            fields['immediate'] = machine_code[0:20]
+            fields['immediate'] = machine_code[0:20]+'0'*12
             fields['rd'] = machine_code[-12:-7]
             fields["format"] = 'U'
 
@@ -100,7 +100,7 @@ def identify(code):
             fields['opcode'] = opcode
             fields['immediate'] = machine_code[0]+machine_code[-20:-12] + \
                 machine_code[-21] + \
-                machine_code[1:11]  # not shifted 12 bits see later
+                machine_code[1:11]+'0'  # not shifted 12 bits see later
             fields['rd'] = machine_code[-12:-7]
             fields["format"] = 'UJ'
         return fields

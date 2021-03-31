@@ -1,10 +1,8 @@
-
 import pandas as pd
 from ALU_re import alu_interface
 from register import RegisterFile
 from bitstring import BitArray
 from bitstring import Bits
-# we will use register objects here
 
 df_main = pd.read_csv('instructions.csv')
 
@@ -24,33 +22,29 @@ class Execute:
         else:
             a += b
             a = hex(a)
+            a = a[2:]
         return a
 
     def fetch(self):
 
-        self.PC += 4
+        self.PC += 4 #will be changed
         self.cycle += 1
-        self.IR = "00B62323"  # we have to reload next instruction here
+        self.IR = "00108093"  # we have to reload next instruction here
         self.obj.PC = self.PC  # temporary copying self.pc to obj.pc to be removed in future
         self.alu_caller(self.IR)
         self.PC = self.obj.PC  # copying back the changes to obj.pc in pc to be removed in future
 
     def decode(self, code):
-        # code must be of the form "0x00D60593"
         """
-
         :param code:32 bit machine code in hex(without 0x32)
         :return: dictionary of all data
         """
-
         fields = {}
-
-        # print(df)
         machine_code = '0' * 32 + bin(int(code, 16))[2:]
         machine_code = machine_code[-32:]
         opcode = '0b'+machine_code[-7:]
         df = df_main[df_main.opcode == opcode]
-        # print(df)
+
         if len(df['id']) == 0:
             return 0
         else:
@@ -60,7 +54,7 @@ class Execute:
                 funct3 = '0b'+machine_code[-15:-12]
                 funct7 = '0b'+machine_code[:7]
                 df = df[(df.funct3 == funct3) & (df.funct7 == funct7)]
-                # print(df)
+                
                 if len(df['id']) == 0:
                     return 0
                 else:
@@ -136,7 +130,6 @@ class Execute:
             return fields
 
     def twos_complement(self, a):
-
         return Bits(bin=a).int
 
     def R_format(self, fields):
@@ -147,8 +140,9 @@ class Execute:
         rd = int(fields['rd'], 2)
         self.obj.RA = self.registers.get_register(rs1)
         self.obj.RB = self.registers.get_register(rs2)
-        self.obj.muxB = 0
-        self.obj.muxY = 0
+        
+        self.obj.muxB = 0 # muxB and muxY = 0
+        self.obj.muxY = 0 
         if instruction == "add":
             self.obj.add()
         elif instruction == "and":
@@ -177,44 +171,35 @@ class Execute:
     def I_format(self, fields):
         instruction = fields['neumonic']
         rs1 = int(fields['rs1'], 2)
-
         imm = self.twos_complement(fields['immediate'])
-
         rd = int(fields['rd'], 2)
-        self.obj.RA = self.registers.get_register(rs1)
 
         self.obj.imm = imm
-        self.obj.imm = self.int_to_hex(imm)
+        self.obj.RA = self.registers.get_register(rs1) #hex string (8 character)
+        self.obj.imm = self.int_to_hex(imm) #hex string (8 character)
+        
         self.obj.muxB = 1
         self.obj.muxY = 0
         if instruction == "addi":
-            # mux value is 1
             self.obj.add()
             print(self.obj.RZ)
         elif instruction == "ori":
-            # mux value is 1
             self.obj._or()
             print(self.obj.RZ)
         elif instruction == "andi":
-            # mux value is 1
-            self.obj._andi()
+            self.obj._and()
             print(self.obj.RZ)
         elif instruction in ["lb", "lw", "lh"]:
             self.obj.muxY = 1
-            # mux value is 1
             self.obj.lbhw()
             print(self.obj.RZ)
         elif instruction == "jalr":
             self.obj.muxY = 2
-            # mux value is 1
-            # works fine
             self.obj.jalr()
             print(self.obj.PC)
 
     def S_format(self, fields):
-        # not checked
-        # to be checked later
-        #######################################
+
         instruction = fields['neumonic']
         rs1 = int(fields['rs1'], 2)
         rs2 = int(fields['rs2'], 2)
@@ -222,13 +207,11 @@ class Execute:
         self.obj.RB = self.registers.get_register(rs2)
         imm = self.twos_complement(fields['immediate'])
         self.obj.imm = self.int_to_hex(imm)
-        self.obj.muxB = 1
+        print(self.obj.imm)
+        #self.obj.muxB = 1
         self.obj.muxY = 1  # dont care
-        if instruction == "sb":
-            self.obj.sbhw()
-        elif instruction == "sh":
-            self.obj.sbhw()
-        elif instruction == "sw":
+
+        if instruction in ["sb", "sh", "sw"]:
             self.obj.sbhw()
 
         print("location is:", self.obj.RZ)
@@ -240,10 +223,12 @@ class Execute:
         rs2 = int(fields['rs2'], 2)
         imm = self.twos_complement(fields['immediate'])
         imm *= 2  # to left shift as imm[0] is 0
+        
         self.obj.RA = self.registers.get_register(rs1)
         self.obj.RB = self.registers.get_register(rs2)
         self.obj.imm = self.int_to_hex(imm)
-        print(self.obj.RA, self.obj.RB, self.obj.imm, self.obj.PC)
+
+        #print(self.obj.RA, self.obj.RB, self.obj.imm, self.obj.PC)
         self.obj.muxB = 0
         self.obj.muxY = 2
         if instruction == "beq":
@@ -297,10 +282,8 @@ class Execute:
             print("not found")
             return
         if format == 'R':
-            self.obj.muxY = 0
             self.R_format(fields)
         elif format == 'I':
-            self.obj.muxY = 0  # mix and is updated ahead
             self.I_format(fields)
         elif format == "S":
             self.obj.muxY = 0
@@ -315,6 +298,11 @@ class Execute:
             self.obj.muxY = 2
             self.UJ_format(fields)
 
+    def memoryAccess(self):
+        pass
+
+    def writeBack(self):
+        pass
 
 execute_obj = Execute()
 execute_obj.fetch()

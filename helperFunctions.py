@@ -37,6 +37,6 @@ class HelperFunctions:
         return generatedBinaryNumber
         
     def binToHex(operand):
-        generatedHexNumber = "{0:08x}".format(int(operand,2))
+        generatedHexNumber = "{0:08x}".format(int(operand,2))               #operand not taken as twos complement 
         return generatedBinaryNumber
             

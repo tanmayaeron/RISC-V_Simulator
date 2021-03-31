@@ -1,5 +1,5 @@
-
-class ALU:
+from helperFunctions import HelperFunctions
+class ALU(HelperFunctions):
 
     """
     input1 : first input
@@ -18,28 +18,14 @@ class ALU:
         self._control = 0
         self._output = 0
 
-    def _hexToDec(self, operand):
-
-        if (int(operand[0], 16) > 7):
-            operand = int(operand, 16)
-            operand -= 1 << 32
-            return operand
-        return int(operand, 16)
-
-    def _decToHex(self, operand):
-        if(operand >= 0):
-            return '{:08x}'.format(operand)[-8:]
-        else:
-            operand = (1 << 32) - (abs(operand))
-            return '{:08x}'.format(operand)[-8:]
 
     def operate(self, operand1, operand2, control):
-        self._input1 = self._hexToDec(operand1)
-        self._input2 = self._hexToDec(operand2)
+        self._input1 = self.hexToDec(operand1)
+        self._input2 = self.hexToDec(operand2)
         if(control < self._numOfSupportedOperations):
             self._control = control
             self._lookup[self._control]()
-            self._output = self._decToHex(self._output)
+            self._output = self.decToHex(self._output)
             return self._output
         else:
             print("unsupported operation")

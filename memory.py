@@ -1,11 +1,10 @@
 from collections import defaultdict
-
-
+from helperFunctions import HelperFunctions
 def make_length(data, length):
     data = "0"*length+data
     return data[-length:]
 
-class Memory:
+class Memory(HelperFunctions):
 
     """
     represents memory in default dictionary
@@ -20,9 +19,7 @@ class Memory:
     def print_memory(self):
         print(self.__memory)
 
-    def hexToDec(self, address):
-        address_in_dec = int(address, 16)
-        return address_in_dec
+    
 
     def getMemoryDisplay(self, address):
         l = []

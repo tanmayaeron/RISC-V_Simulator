@@ -4,7 +4,7 @@ from register import RegisterFile
 from bitstring import BitArray
 from bitstring import Bits
 from decode import identify
-
+from helperFunctions import HelperFunctions
 # we will use register objects here
 
 df_main = pd.read_csv('instructions.csv')

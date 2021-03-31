@@ -1,4 +1,8 @@
 import pandas as pd
+
+import ALU_re
+import memory
+import IAG
 from ALU_re import alu_interface
 from register import RegisterFile
 from bitstring import BitArray
@@ -19,7 +23,8 @@ def int_to_hex(self, a):
         a = a[2:]
         return a
 
-def twos_complement
+def twos_complement():
+    pass
 
 
 class Processor:
@@ -28,7 +33,7 @@ class Processor:
 
     def __init__(self):
         self._PMI = memory.PMI()
-        self._ALU = ALU.ALU()
+        self._ALU = ALU_re.ALU()
         self._IAG = IAG.IAG()
         self._IR = '0'*8
         self._registerFile = RegisterFile()
@@ -105,7 +110,7 @@ class Processor:
             self._rd = 0
             
         try:
-            immediate = twos_complement(inf_code['immediate'])
+            immediate = twos_complement(info_code['immediate'])
             self._imm = {'.08x'}.format(immediate)[-8:]
         except:
             pass
@@ -115,7 +120,7 @@ class Processor:
         currMuxB = self._muxB[self._currOperationId]
         operand1 = self._RA
         operand2 = self.muxB(currMuxB)
-        self._RZ = ALU.operate(operand1, operand2, currALU_select)
+        self._RZ = self._ALU.operate(operand1, operand2, currALU_select)
         
     def memoryAccess(self):
         currMemoryEnable =self._memoryEnable[self._currOperationId]
@@ -141,5 +146,4 @@ class Processor:
         self._registerFile.set_register(self._rd,self._RY)
 
 if __name__=='__main__':
-    execute_obj = Execute()
-    execute_obj.fetch()
+    pass

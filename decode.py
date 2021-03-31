@@ -103,9 +103,11 @@ def identify(code):
                 machine_code[1:11]+'0'  # not shifted 12 bits see later
             fields['rd'] = machine_code[-12:-7]
             fields["format"] = 'UJ'
+
+        fields['id'] = list(df['id'])[0]
         return fields
 
-
+"""
 obj = ALU()
 registers = RegisterFile()
 
@@ -265,3 +267,4 @@ def alu_caller(machine_code):
 
 
 alu_caller("0x02C0056F")
+"""

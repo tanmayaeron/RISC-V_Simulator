@@ -40,7 +40,7 @@ class Processor:
     def muxMA(self, MA_select):
         if(MA_select==0):
             return self._RZ
-        else: 
+        else:
             return self._IAG.getPC()
 
     def demuxMDR(self,MDR_select):
@@ -75,7 +75,7 @@ class Processor:
 
     def decode(self):
         info_code = identify(self._IR)
-        try:                  
+        try:
             pass
         except:
             pass
@@ -83,7 +83,7 @@ class Processor:
             pass
         except:
             pass
-    
+
     def execute(self):
         pass
 
@@ -96,7 +96,6 @@ class Processor:
 
     """
     def twos_complement(self, a):
-
         return Bits(bin=a).int
 
     def R_format(self, fields):
@@ -107,7 +106,9 @@ class Processor:
         rd = int(fields['rd'], 2)
         self.obj.RA = self.registers.get_register(rs1)
         self.obj.RB = self.registers.get_register(rs2)
-        self.obj.muxB = 0
+
+        self.obj.muxB = 0 # muxB and muxY = 0
+        self.obj.muxY = 0
         if instruction == "add":
             self.obj.add()
         elif instruction == "and":
@@ -136,46 +137,51 @@ class Processor:
     def I_format(self, fields):
         instruction = fields['neumonic']
         rs1 = int(fields['rs1'], 2)
-
         imm = self.twos_complement(fields['immediate'])
-
         rd = int(fields['rd'], 2)
-        self.obj.RA = self.registers.get_register(rs1)
 
         self.obj.imm = imm
-        self.obj.imm = self.int_to_hex(imm)
-        self.obj.muxB = 1
+        self.obj.RA = self.registers.get_register(rs1) #hex string (8 character)
+        self.obj.imm = self.int_to_hex(imm) #hex string (8 character)
 
+        self.obj.muxB = 1
+        self.obj.muxY = 0
         if instruction == "addi":
-            # mux value is 1
             self.obj.add()
             print(self.obj.RZ)
         elif instruction == "ori":
-            # mux value is 1
             self.obj._or()
             print(self.obj.RZ)
         elif instruction == "andi":
-            # mux value is 1
-            self.obj._andi()
+            self.obj._and()
             print(self.obj.RZ)
-        elif instruction == "lb":
-            # mux value is 1
+        elif instruction in ["lb", "lw", "lh"]:
+            self.obj.muxY = 1
             self.obj.lbhw()
             print(self.obj.RZ)
         elif instruction == "jalr":
-            # mux value is 1
-            # works fine
+            self.obj.muxY = 2
             self.obj.jalr()
             print(self.obj.PC)
 
     def S_format(self, fields):
-        # not checked
-        # to be checked later
-        #######################################
+
         instruction = fields['neumonic']
         rs1 = int(fields['rs1'], 2)
         rs2 = int(fields['rs2'], 2)
+        self.obj.RA = self.registers.get_register(rs1)
+        self.obj.RB = self.registers.get_register(rs2)
         imm = self.twos_complement(fields['immediate'])
+        self.obj.imm = self.int_to_hex(imm)
+        print(self.obj.imm)
+        #self.obj.muxB = 1
+        self.obj.muxY = 1  # dont care
+
+        if instruction in ["sb", "sh", "sw"]:
+            self.obj.sbhw()
+
+        print("location is:", self.obj.RZ)
+        print("the value is : ", self.obj.RM)
 
     def SB_format(self, fields):
         instruction = fields['neumonic']
@@ -183,10 +189,14 @@ class Processor:
         rs2 = int(fields['rs2'], 2)
         imm = self.twos_complement(fields['immediate'])
         imm *= 2  # to left shift as imm[0] is 0
+
         self.obj.RA = self.registers.get_register(rs1)
         self.obj.RB = self.registers.get_register(rs2)
         self.obj.imm = self.int_to_hex(imm)
-        print(self.obj.RA, self.obj.RB, self.obj.imm, self.obj.PC)
+
+        #print(self.obj.RA, self.obj.RB, self.obj.imm, self.obj.PC)
+        self.obj.muxB = 0
+        self.obj.muxY = 2
         if instruction == "beq":
             self.obj.beq()
             print(self.obj.PC)
@@ -206,9 +216,12 @@ class Processor:
         imm = self.twos_complement(fields['immediate'])
         imm = imm*2**12  # left shifting 12 bits
         self.obj.imm = self.int_to_hex(imm)
+        self.obj.muxB = 0
+        self.obj.muxY = 0
         if instruction == "lui":
             self.obj.lui()
         elif instruction == "auipc":
+            self.obj.muxY = 2
             self.obj.auipc()
             print(self.obj.RZ)
 
@@ -218,6 +231,8 @@ class Processor:
         imm = self.twos_complement(fields['immediate'])
         imm *= 2  # to left shift as imm[0] is 0
         self.obj.imm = self.int_to_hex(imm)
+        self.obj.muxB = 0
+        self.obj.muxY = 2
         if instruction == "jal":
             self.obj.jal()
             print(self.obj.PC_temp)
@@ -237,15 +252,24 @@ class Processor:
         elif format == 'I':
             self.I_format(fields)
         elif format == "S":
+            self.obj.muxY = 0
             self.S_format(fields)
         elif format == "SB":
+            self.obj.muxY = 2  # pc+=imm
             self.SB_format(fields)
         elif format == "U":
+            self.obj.muxY = 0  # doubt
             self.U_format(fields)
         else:
+            self.obj.muxY = 2
             self.UJ_format(fields)
     """
 
+    def memoryAccess(self):
+        pass
+
+    def writeBack(self):
+        pass
 
 if __name__=='__main__':
     execute_obj = Execute()

@@ -122,13 +122,13 @@ class alu_interface:
         self.PC_temp = "0"*8
         self.muxB = 0
         self.alu = ALU()
+        self.muxY = 0
 
     def add(self):
         if(self.muxB == 0):
             self.RZ = self.alu.operate(self.RA, self.RB, 0)
         else:
             self.RZ = self.alu.operate(self.RA, self.imm, 0)
-        print(self.RZ)
 
     def sub(self):
         self.RZ = self.alu.operate(self.RA, self.RB, 1)

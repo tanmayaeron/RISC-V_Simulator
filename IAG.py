@@ -24,7 +24,7 @@ class IAG(HelperFunctions):
         return self._PC_Temp
         
     def muxPC(self,PC_select, RA): 
-        if PC_select == 0 :
+        if PC_select == 1 :
             self.output_muxPC =  RA
         else:
             self.output_muxPC = self.output_adder

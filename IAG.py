@@ -3,8 +3,8 @@ def extendimmediate(immediate,isSignExtended = True):
     """
     if isSignExtended is True, immediate is sign extended
     else immediate is padded with "0"
-    """"
-    
+    """
+
     if isSignExtended == True and immediate[0]=='1':
         immediate = "1"*32+immediate
         immediate = immediate[-32:]
@@ -34,7 +34,6 @@ class IAG:
         self._PC_Temp = "0"*8
         self.__constantoffset = "0"*7+"4"                        #is also kept as 32 bit binary to keep uniformity
         self._imm = "0"*8                                       #isSignExtended extended to 32bits, stored as binary
-        self._RA = "0"*8
         self.output_adder = "0"*8
         self.inputB_adder = "0"*8
         self.output_muxPC = "0"*8
@@ -46,9 +45,9 @@ class IAG:
     def getPC_Temp(self):
         return self._PC_Temp
         
-    def muxPC(self,PC_select): 
+    def muxPC(self,PC_select, RA): 
         if PC_select == 0 :
-            self.output_muxPC =  self._RA
+            self.output_muxPC =  RA
         else:
             self.output_muxPC = self.output_adder
             
@@ -69,9 +68,6 @@ class IAG:
             self._PC = self.output_muxPC
 
     def updatePC_temp(self):
-        pass
-
-
-    
-    
-        
+        PC = int(self._PC,16)
+        PC+=4
+        self._PC_temp = '{:08x}'.format(PC)[-8:]

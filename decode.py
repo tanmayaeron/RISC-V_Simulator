@@ -3,13 +3,14 @@ from ALU import ALU
 from register import RegisterFile
 from bitstring import BitArray
 from bitstring import Bits
+
 df_main = pd.read_csv('instructions.csv')
 
 
-def decode(code):
+def identify(code):
     """
 
-    :param code:32 bit machine code in hex(without 0x32)
+    :param code:32 bit machine code in hex(without 0x)
     :return: dictionary of all data
     """
 
@@ -242,7 +243,7 @@ def UJ_format(fields):
 
 def alu_caller(machine_code):
 
-    fields = decode(machine_code)
+    fields = identify(machine_code)
 
     format = fields['format']
     print(fields)

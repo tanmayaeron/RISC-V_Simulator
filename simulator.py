@@ -1,140 +1,100 @@
-
 import pandas as pd
 from ALU_re import alu_interface
 from register import RegisterFile
 from bitstring import BitArray
 from bitstring import Bits
+from decode import identify
+
 # we will use register objects here
 
 df_main = pd.read_csv('instructions.csv')
 
-
-class Execute:
-    def __init__(self):
-        self.PC = 0
-        self.cycle = 0
-        self.IR = 0
-        self.registers = RegisterFile()
-        self.obj = alu_interface()
-
-    def int_to_hex(self, a):
-        b = 0x100000000
-        if a >= 0:
-            a = '{:08x}'.format(a)[-8:]
-        else:
-            a += b
-            a = hex(a)
+def int_to_hex(self, a):
+    b = 0x100000000
+    if a >= 0:
+        a = '{:08x}'.format(a)[-8:]
+    else:
+        a += b
+        a = hex(a)
+        a = a[2:]
         return a
 
-    def fetch(self):
 
-        self.PC += 4
-        self.cycle += 1
-        self.IR = "02F605B3"  # we have to reload next instruction here
-        self.obj.PC = self.PC  # temporary copying self.pc to obj.pc to be removed in future
-        self.alu_caller(self.IR)
-        self.PC = self.obj.PC  # copying back the changes to obj.pc in pc to be removed in future
+class Processor:
 
-    def decode(self, code):
-        # code must be of the form "0x00D60593"
-        """
+    cycle = 0
 
-        :param code:32 bit machine code in hex(without 0x32)
-        :return: dictionary of all data
-        """
+    def __init__(self):
+        self._PMI = memory.PMI()
+        self._ALU = ALU.ALU()
+        self._IAG = IAG.IAG()
+        self._IR = '0'*8
+        self._registerFile = RegisterFile()
+        self._RA = '0'*8
+        self._RB = '0'*8
+        self._RZ = '0'*8
+        self._RM = '0'*8
+        self._RY = '0'*8
+        self._imm = '0'*8
 
-        fields = {}
+    def muxMA(self, MA_select):
+        if(MA_select==0):
+            return self._RZ
+        else: 
+            return self._IAG.getPC()
 
-        # print(df)
-        machine_code = '0' * 32 + bin(int(code, 16))[2:]
-        machine_code = machine_code[-32:]
-        opcode = '0b'+machine_code[-7:]
-        df = df_main[df_main.opcode == opcode]
-        # print(df)
-        if len(df['id']) == 0:
-            return 0
+    def demuxMDR(self,MDR_select):
+        if(MDR_select==0):
+            self._RY = self._PMI.getMDR()
         else:
-            format = list(df['format'])[0]
+            self._IR = self._PMI.getMDR()
 
-            if format == 'R':
-                funct3 = '0b'+machine_code[-15:-12]
-                funct7 = '0b'+machine_code[:7]
-                df = df[(df.funct3 == funct3) & (df.funct7 == funct7)]
-                # print(df)
-                if len(df['id']) == 0:
-                    return 0
-                else:
-                    fields['neumonic'] = list(df['neumonic'])[0]
-                    fields['opcode'] = list(df['opcode'])[0]
-                    fields['funct3'] = list(df['funct3'])[0]
-                    fields['funct7'] = list(df['funct7'])[0]
-                    fields['rs1'] = machine_code[-20:-15]
-                    fields['rs2'] = machine_code[-25:-20]
-                    fields['rd'] = machine_code[-12:-7]
-                    fields['format'] = 'R'
+    def muxB(self,B_select):
+        if(B_select == 0):
+            return self._RB
+        else:
+            return self._imm
 
-            elif format == 'I':
-                funct3 = '0b'+machine_code[-15:-12]
-                df = df[df.funct3 == funct3]
-                if len(df['id']) == 0:
-                    return 0
-                else:
-                    fields['neumonic'] = list(df['neumonic'])[0]
-                    fields['opcode'] = list(df['opcode'])[0]
-                    fields['funct3'] = list(df['funct3'])[0]
-                    fields['rs1'] = machine_code[-20:-15]
-                    fields['rd'] = machine_code[-12:-7]
-                    fields['immediate'] = machine_code[0:12]
-                    fields['format'] = 'I'
+    def muxY(self,Y_select):
+        if(Y_select==0):
+            return self._RZ
+        elif(Y_select==1):
+            return self._PMI.getMDR()
+        else:
+            return self._IAG.getPC_Temp()
 
-            elif format == 'S':
-                funct3 = '0b'+machine_code[-15:-12]
-                df = df[df.funct3 == funct3]
-                if len(df['id']) == 0:
-                    return 0
-                else:
-                    fields['neumonic'] = list(df['neumonic'])[0]
-                    fields['opcode'] = list(df['opcode'])[0]
-                    fields['funct3'] = list(df['funct3'])[0]
-                    fields['rs1'] = machine_code[-20:-15]
-                    fields['rs2'] = machine_code[-25:-20]
-                    fields['immediate'] = machine_code[0:7] + \
-                        machine_code[-12:-7]
-                    fields["format"] = 'S'
+    def fetch(self):
+        #MAR gets value of PC
+        outputmuxMA = self.muxMA(1)
+        self._IAG.updatePC_temp()                       #PC_Temp gets PC+4
+        self._PMI.setMAR(outputmuxMA)
+        #MDR gets value stored at MDR
+        self._PMI.getData(2)
+        #IR gets value of MDR
+        self.demuxMDR(1)
 
-            elif format == 'SB':
-                funct3 = '0b'+machine_code[-15:-12]
-                df = df[df.funct3 == funct3]
-                if len(df['id']) == 0:
-                    return 0
-                else:
-                    fields['neumonic'] = list(df['neumonic'])[0]
-                    fields['opcode'] = list(df['opcode'])[0]
-                    fields['funct3'] = list(df['funct3'])[0]
-                    fields['rs1'] = machine_code[-20:-15]
-                    fields['rs2'] = machine_code[-25:-20]
-                    fields['immediate'] = machine_code[0]+machine_code[-8] + \
-                        machine_code[1:7]+machine_code[-12:-
-                                                       8]  # 0 not added in the end
-                    fields["format"] = 'SB'
+    def decode(self):
+        info_code = identify(self._IR)
+        try:                  
+            pass
+        except:
+            pass
+        try:
+            pass
+        except:
+            pass
+    
+    def execute(self):
+        pass
 
-            elif format == 'U':
-                fields['neumonic'] = list(df['neumonic'])[0]
-                fields['opcode'] = opcode
-                fields['immediate'] = machine_code[0:20]
-                fields['rd'] = machine_code[-12:-7]
-                fields["format"] = 'U'
+    def memoryAccess(self):
+        pass
 
-            elif format == 'UJ':
-                fields['neumonic'] = list(df['neumonic'])[0]
-                fields['opcode'] = opcode
-                fields['immediate'] = machine_code[0]+machine_code[-20:-12] + \
-                    machine_code[-21] + \
-                    machine_code[1:11]  # not shifted 12 bits see later
-                fields['rd'] = machine_code[-12:-7]
-                fields["format"] = 'UJ'
-            return fields
+    def registerUpdate(self):
+        pass
 
+
+    """
     def twos_complement(self, a):
 
         return Bits(bin=a).int
@@ -284,7 +244,9 @@ class Execute:
             self.U_format(fields)
         else:
             self.UJ_format(fields)
+    """
 
 
-execute_obj = Execute()
-execute_obj.fetch()
+if __name__=='__main__':
+    execute_obj = Execute()
+    execute_obj.fetch()

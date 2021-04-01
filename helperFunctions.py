@@ -30,6 +30,7 @@ class HelperFunctions:
         else:
             immediate = "0"*32+immediate
             immediate = immediate[-32:]
+        return immediate
 
 
     def hexToBin(operand):

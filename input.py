@@ -15,6 +15,12 @@ class ReadFile:
                 file.write("0x"+i+" ")
                 file.write("0x"+dict[i]+"\n")
 
+    def print_registers_in_a_file(self, registers, filename):
+        # write 'a' instead of 'w' to appending text here
+        file = open(filename, 'w')
+        for index, i in enumerate(registers):
+            file.write("x"+str(index)+" "+i+"\n")
+
     def read_mc(self, filepath, obj):
         file = open(filepath, 'r')
         for lines in file:

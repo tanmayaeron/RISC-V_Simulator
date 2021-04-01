@@ -1,5 +1,3 @@
-
-
 def hexToDec(operand):
 
     if (int(operand[0], 16) > 7):
@@ -38,4 +36,3 @@ def hexToBin(operand):
 def binToHex(operand):
     generatedHexNumber = "{0:08x}".format(int(operand,2))               #operand not taken as twos complement
     return generatedHexNumber
-

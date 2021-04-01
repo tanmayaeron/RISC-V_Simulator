@@ -52,8 +52,3 @@ class IAG:
         PC+=4
         self._PC_Temp = '{:08x}'.format(PC)[-8:]
 
-    def AUIPC(self, imm): #this function is jugaad
-        PC = int(self._PC,16)
-        PC += self.hexToDec(imm)
-        print("AUIPC", '{:08x}'.format(PC)[-8:])
-        return '{:08x}'.format(PC)[-8:]

@@ -7,7 +7,7 @@ from register import RegisterFile
 from decode import identify
 from helperFunctions import *
 from input import ReadFile
-
+from pprint import pprint
 df_control = pd.read_csv('controls.csv')
 df_control = df_control.dropna(axis=0, how='any')
 
@@ -88,19 +88,25 @@ class Processor:
         self._fileReader.read_mc(filepath, self._PMI)
 
     def fetch(self):
+        print("Fetch stage:")
+        print("The value of PC is :", self._IAG.getPC())
+
         outputmuxMA = self.muxMA(1)  # MAR gets value of PC
         self._IAG.updatePC_temp()  # PC_Temp gets PC+4
         self._PMI.setMAR(outputmuxMA)
         self._PMI.getData(2)  # MDR gets value stored at address in MAR
         self.demuxMDR(1)  # IR gets value of MDR
+        print("The instruction in IR is :", self._IR)
 
     def decode(self):
+        print("Decode stage:")
         info_code = identify(self._IR)
         print("code :", info_code)
         self._currOperationId = info_code['id']
         try:
             registernumber = int(info_code['rs1'], 2)
             self._RA = self._registerFile.get_register(registernumber)
+            print("RA is :", self._RA)
         except:
             pass
 
@@ -108,54 +114,54 @@ class Processor:
             registernumber = int(info_code['rs2'], 2)
             self._RB = self._registerFile.get_register(registernumber)
             self._RM = self._RB
+            print("RB is :", self._RB)
         except:
             pass
 
         try:
             rd = int(info_code['rd'], 2)
             self._rd = rd
+            print("rd is :", self._rd)
         except:
             pass
 
         try:
             immediate = extendImmediate(info_code['immediate'])
             self._imm = binToHex(immediate)
+            print("imm is :", self._imm)
         except:
             pass
 
     def execute(self):
+        print("Execute stage:")
         currALU_select = self._ALU_select[self._currOperationId]
         currMuxB = self._muxB[self._currOperationId]
         currMuxA = self._muxA[self._currOperationId]
         currINCSelect = self.INC_select[self._currOperationId]
         currSSelect = self.S_select[self._currOperationId]
-        print("ALUs, MUXb", currALU_select, currMuxB)
 
         operand1 = self.muxA(currMuxA)
         operand2 = self.muxB(currMuxB)
+        print("operand1 is", operand1, "operand2 is:", operand2)
         self._RZ = self._ALU.operate(operand1, operand2, currALU_select)
-
-        print("PCs, INCs", self.PC_select[self._currOperationId],
-              self.INC_select[self._currOperationId])
-        print("PC, PC_temp :", self._IAG.getPC(), self._IAG.getPC_Temp())
-
+        print("RZ is :", self._RZ)
         self._IAG.muxPC(self.PC_select[self._currOperationId], self._RA)
         self._IAG.updatePC(1)
         self._IAG.muxINC(currINCSelect, currSSelect, self._imm, self._RZ)
         self._IAG.adder()
         self._IAG.muxPC(0, self._RA)
         self._IAG.updatePC(1)
-        print("PC, PC_temp :", self._IAG.getPC(), self._IAG.getPC_Temp())
 
     def memoryAccess(self):
+        print("Memory Access stage:")
         currMemoryEnable = self._memoryEnable[self._currOperationId]
         currSizeEnable = self.SizeEnable[self._currOperationId]
-        #print(self._PMI.getMDR(), self._PMI.getMAR())
+
         self._PMI.accessMemory(
             currMemoryEnable, currSizeEnable, self._RZ, self._RM)
-        print(self._PMI.getMDR(), self._PMI.getMAR())
 
     def registerUpdate(self):
+        print("Register Update Stage:")
         self._RY = self.muxY(self._muxY[self._currOperationId])
         currWriteEnable = self._writeEnable[self._currOperationId]
         self._registerFile.set_register(self._rd, self._RY, currWriteEnable)

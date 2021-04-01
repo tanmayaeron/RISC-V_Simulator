@@ -1,6 +1,3 @@
-from collections import defaultdict
-
-
 class ReadFile:
 
     def __init__(self):
@@ -29,6 +26,5 @@ class ReadFile:
                 obj.setMAR(requiredMemoryLocation[2:])
                 obj.setMDR(instruction[2:])
                 obj.storeData(2)
-
             except:
                 pass

@@ -5,8 +5,6 @@ import memory
 import IAG
 from ALU_re import ALU
 from register import RegisterFile
-from bitstring import BitArray
-from bitstring import Bits
 from decode import identify
 from helperFunctions import HelperFunctions
 from input import ReadFile
@@ -50,7 +48,7 @@ class Processor:
         self._memoryEnable = [int(x) for x in list(df2_main['ME'].dropna())]
         self.INC_select = [int(x) for x in list(df2_main['muxINC'].dropna())]
         self.PC_select = [int(x) for x in list(df2_main['muxPC'].dropna())]
-        self.WriteEnable = [int(x) for x in list(df2_main['WE'].dropna())]
+        self._writeEnable = [int(x) for x in list(df2_main['WE'].dropna())]
         self.SizeEnable = [int(x) for x in list(df2_main['SE'].dropna())]
         self._currOperationId = 0
 
@@ -99,7 +97,6 @@ class Processor:
 
     def decode(self):
         info_code = identify(self._IR)
-        # self._neumonic = info_code['neumonic']
         print("code :", info_code)
         self._currOperationId = info_code['id']
         try:
@@ -160,33 +157,14 @@ class Processor:
 
         
     def memoryAccess(self):
-        currMemoryEnable =self._memoryEnable[self._currOperationId]
-        #print("mem ",currMemoryEnable)
-        size = 0
-        if self._neumonic[1]=='b':
-            size = 0
-        elif self._neumonic[1]=='h':
-            size = 1
-        elif self._neumonic[1]=='w':
-            size = 2
-
-        if(currMemoryEnable == 1):                             #load
-            self._PMI.setMAR(self._RZ)
-            self._PMI.getData(size)
-
-        elif(currMemoryEnable == 2):                           #store
-            self._PMI.setMAR(self._RZ)
-            self._PMI.setMDR(self._RM)
-            self._PMI.storeData(size)
+        currMemoryEnable =self._memoryEnable[self._currOperationId]      
+        currSizeEnable = self._sizeEnable[self._currOperationId]
+        self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
         
     def registerUpdate(self):
-        #lui, done
-        #beq, done
-        #t
         self._RY = self.muxY(self._muxY[self._currOperationId])
-        #print(self._muxY[self._currOperationId])
-        if self.WriteEnable[self._currOperationId]:
-            self._registerFile.set_register(self._rd,self._RY)
+        currWriteEnable = self._writeEnable[self._currOperationId]:
+        self._registerFile.set_register(self._rd,self._RY, currWriteEnable)
         print("RD: RY:", self._rd, self._RY)
 
 if __name__=='__main__':

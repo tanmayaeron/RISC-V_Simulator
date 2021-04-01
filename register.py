@@ -31,8 +31,8 @@ class RegisterFile:
     def get_alt_name(self, index):
         return self._alt_name[index]
 
-    def set_register(self, index, data):
-        if index != 0:
+    def set_register(self, index, data, writeEnable):
+        if index != 0 and writeEnable == 1:
             self._registers[index] = data[-8:]
 
 

@@ -149,7 +149,9 @@ class Processor:
     def memoryAccess(self):
         currMemoryEnable =self._memoryEnable[self._currOperationId]      
         currSizeEnable = self.SizeEnable[self._currOperationId]
-        self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
+        #print(self._PMI.getMDR(), self._PMI.getMAR())
+        self._PMI.accessMemory(currMemoryEnable, currSizeEnable, self._RZ, self._RM)
+        print(self._PMI.getMDR(), self._PMI.getMAR())
         
     def registerUpdate(self):
         self._RY = self.muxY(self._muxY[self._currOperationId])
@@ -164,14 +166,20 @@ class Processor:
 if __name__=='__main__':
     run = Processor()
     run.load_mc()
-    for i in range(3):
+    kk = 0
+    while True:
+        kk += 1
         run.fetch()
         print(run._IR)
+        if kk == 100:
+            break
+        if run._IR == '0'*8:
+            break
         run.decode()
         print(run._currOperationId)
         run.execute()
         run.memoryAccess()
         run.registerUpdate()
         run._registerFile.print_registers()
-        run._PMI.print_memory()
-        run.printData()
+    run._PMI.print_memory()
+    run.printData()

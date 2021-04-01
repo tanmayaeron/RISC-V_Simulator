@@ -48,6 +48,7 @@ class Processor:
         self._memoryEnable = [int(x) for x in list(df2_main['ME'].dropna())]
         self.INC_select = [int(x) for x in list(df2_main['muxINC'].dropna())]
         self.PC_select = [int(x) for x in list(df2_main['muxPC'].dropna())]
+        self.S_select = [int(x) for x in list(df2_main['muxS'].dropna())]
         self._writeEnable = [int(x) for x in list(df2_main['WE'].dropna())]
         self.SizeEnable = [int(x) for x in list(df2_main['SE'].dropna())]
         self._currOperationId = 0
@@ -119,8 +120,8 @@ class Processor:
             pass
             
         try:
-            immediate = twos_complement(info_code['immediate'])  #to be made in helperFunctions
-            self._imm = '{:08x}'.format(immediate)[-8:]  # to ber made in helper function
+            immediate = extendImmediate(info_code['immediate'])  #to be made in helperFunctions
+            self._imm = binToHex(immediate)  # to ber made in helper function
         except:
             pass
 
@@ -128,7 +129,8 @@ class Processor:
         currALU_select = self._ALU_select[self._currOperationId]
         currMuxB = self._muxB[self._currOperationId]
         currMuxA = self._muxA[self._currOperationId]
-        
+        currINCSelect = self._muxINC[self._currOperationId]
+        currSSelect = self.S_select[self._currOperationId]
         print("ALUs, MUXb",currALU_select, currMuxB)
         
         operand1 = self.muxA(currMuxA)
@@ -142,14 +144,8 @@ class Processor:
         self._IAG.updatePC(1)
         print("neumonic, ALU_res",self._neumonic, self._RZ)
         
-        #isko dekhna padega
         
-        if self._neumonic in ['beq', 'bne', 'blt', 'bge'] and self._RZ == "0"*7+'1':
-            self._IAG.muxINC(1, self._imm)
-        else:
-            self._IAG.muxINC(self.INC_select[self._currOperationId], self._imm)
-            
-            
+        self._IAG.muxINC(currINCSelect, currSSelect, self._imm, self._RZ)
         self._IAG.adder()
         self._IAG.muxPC(0, self._RA)
         self._IAG.updatePC(1)

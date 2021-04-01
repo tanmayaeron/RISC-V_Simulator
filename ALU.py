@@ -1,5 +1,5 @@
-from helperFunctions import HelperFunctions
-class ALU(HelperFunctions):
+from helperFunctions import *
+class ALU:
 
     """
     input1 : first input
@@ -12,25 +12,28 @@ class ALU(HelperFunctions):
     def __init__(self):
         self._input1 = 0
         self._input2 = 0
-        self._numOfSupportedOperations = 15
+        self._numOfSupportedOperations = 17
         self._lookup = [self._add, self._sub, self._mul, self._div, self._rem, self._xor, self._and,
-                        self._or, self._sll, self._srl, self._sra, self._eq, self._ne, self._ge, self._lt]
+                        self._or, self._sll, self._srl, self._sra, self._eq, self._ne, self._ge, self._lt, self._selectA, self._selectB]
         self._control = 0
         self._output = 0
 
 
     def operate(self, operand1, operand2, control):
-        self._input1 = self.hexToDec(operand1)
-        self._input2 = self.hexToDec(operand2)
+        self._input1 = hexToDec(operand1)
+        self._input2 = hexToDec(operand2)
         if(control < self._numOfSupportedOperations):
             self._control = control
             self._lookup[self._control]()
-            self._output = self.decToHex(self._output)
+            self._output = decToHex(self._output)
             return self._output
         else:
             print("unsupported operation")
             return 404
-
+        
+        
+    
+    
     def _add(self):
         self._output = self._input1 + self._input2
 
@@ -88,3 +91,17 @@ class ALU(HelperFunctions):
             self._output = 1
         else:
             self._output = 0
+            
+            
+    def _selectA(self):
+        self._output = self._input1
+
+    def _selectB(self):
+        self._output = self._input2
+
+
+a = ALU()
+x = "00000003"
+y = "f0000000"
+z = a.operate(x, y, 16)
+print(z)

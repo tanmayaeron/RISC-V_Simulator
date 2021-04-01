@@ -28,7 +28,10 @@ class IAG(HelperFunctions):
         else:
             self.output_muxPC = self.output_adder
             
-    def muxINC(self,INC_select, imm):
+    def muxINC(self, INC_select, S_select, imm, RZ):
+        if(S_select == 1):
+            INC_select = int(RZ[-1], 16)%2
+            
         if INC_select==0 :
             self.inputB_adder = self.__constantoffset
         else:

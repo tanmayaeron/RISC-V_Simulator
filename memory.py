@@ -21,9 +21,12 @@ class Memory(HelperFunctions):
 
     def print_memory(self):
         print(self.__memory)
-
+        
     def getMemory(self):
         return self.__memory
+    
+    def clearMemory(self):
+        self.__memory.clear()
 
     def getMemoryDisplay(self, address):
         l = []
@@ -130,6 +133,9 @@ class PMI:
 
     def getMemory(self):
         return self.__memory.getMemory()
+    
+    def clearMemory(self):
+        self.__memory.clearMemory()
 
     def getData(self, size):
         """
@@ -149,14 +155,13 @@ class PMI:
                     self.__memory.store_halfword, self.__memory.store_word]
         getArray[size](self.__MAR, self.__MDR)
 
-    def accessMemory(self, currMemoryEnable, size):
+    def accessMemory(self,currMemoryEnable,size):
         if currMemoryEnable == 0:
             pass
         elif currMemoryEnable == 1:
             self.getData(size)
         elif currMemoryEnable == 2:
             self.storeData(size)
-
 
 if __name__ == '__main__':
     interface = PMI()

@@ -3,15 +3,11 @@ import os
 import ALU_re
 import memory
 import IAG
-from ALU_re import ALU
+from ALU import ALU
 from register import RegisterFile
 from decode import identify
 from helperFunctions import HelperFunctions
 from input import ReadFile
-# we will use register objects here
-
-def twos_complement(a):
-    return Bits(bin=a).int
 
 
 df_main = pd.read_csv('instructions.csv')
@@ -22,13 +18,18 @@ class Processor:
     cycle = 0
 
     def __init__(self):
-        
         self._PMI = memory.PMI()
-        self._ALU = ALU_re.ALU()
+        self._ALU = ALU.ALU()
         self._IAG = IAG.IAG()
         self._fileReader = ReadFile()
         self._registerFile = RegisterFile()
+        self.initialiseTempRegisters()
+        self.initialiseControls()
+        self._currFileName = 'test1.mc'
+        self._currFolderPath = os.getcwd()
+        self._currOperationId = 0
         
+    def initialiseTempRegisters(self):
         self._IR = '0'*8
         self._RA = '0'*8
         self._RB = '0'*8
@@ -38,9 +39,7 @@ class Processor:
         self._RY = '0'*8
         self._imm = '0'*8
         
-        self._currFileName = 'test1.mc'
-        self._currFolderPath = os.getcwd()
-        
+    def initialiseControls(self):
         self._ALU_select = [int(x) for x in list(df2_main['ALU_select'].dropna())]
         self._muxB = [int(x) for x in list(df2_main['muxB'].dropna())]
         self._muxA = [int(x) for x in list(df2_main['muxA'].dropna())]
@@ -51,7 +50,7 @@ class Processor:
         self.S_select = [int(x) for x in list(df2_main['muxS'].dropna())]
         self._writeEnable = [int(x) for x in list(df2_main['WE'].dropna())]
         self.SizeEnable = [int(x) for x in list(df2_main['SE'].dropna())]
-        self._currOperationId = 0
+        
 
     def muxMA(self, MA_select):
         if(MA_select==0):

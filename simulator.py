@@ -166,6 +166,10 @@ class Processor:
         currWriteEnable = self._writeEnable[self._currOperationId]:
         self._registerFile.set_register(self._rd,self._RY, currWriteEnable)
         print("RD: RY:", self._rd, self._RY)
+    def printData(self):
+        filename = 'output.txt'
+        obj = self._PMI
+        self._fileReader.write_file(obj, filename)
 
 if __name__=='__main__':
     ll = [int(x) for x in list(df2_main['muxB'].dropna())]
@@ -181,3 +185,4 @@ if __name__=='__main__':
     run.registerUpdate()
     run._registerFile.print_registers()
     run._PMI.print_memory()
+    run.printData()

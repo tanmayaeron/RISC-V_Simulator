@@ -24,11 +24,14 @@ class Processor:
     cycle = 0
 
     def __init__(self):
+        
         self._PMI = memory.PMI()
         self._ALU = ALU_re.ALU()
         self._IAG = IAG.IAG()
-        self._IR = '0'*8
+        self._fileReader = ReadFile()
         self._registerFile = RegisterFile()
+        
+        self._IR = '0'*8
         self._RA = '0'*8
         self._RB = '0'*8
         self._rd = 0
@@ -36,16 +39,19 @@ class Processor:
         self._RM = '0'*8
         self._RY = '0'*8
         self._imm = '0'*8
-        self._fileReader = ReadFile()
+        
         self._currFileName = 'test1.mc'
         self._currFolderPath = os.getcwd()
+        
         self._ALU_select = [int(x) for x in list(df2_main['ALU_select'].dropna())]
         self._muxB = [int(x) for x in list(df2_main['muxB'].dropna())]
+        self._muxA = [int(x) for x in list(df2_main['muxA'].dropna())]
         self._muxY = [int(x) for x in list(df2_main['muxY'].dropna())]
         self._memoryEnable = [int(x) for x in list(df2_main['ME'].dropna())]
         self.INC_select = [int(x) for x in list(df2_main['muxINC'].dropna())]
         self.PC_select = [int(x) for x in list(df2_main['muxPC'].dropna())]
         self.WriteEnable = [int(x) for x in list(df2_main['WE'].dropna())]
+        self.SizeEnable = [int(x) for x in list(df2_main['SE'].dropna())]
         self._currOperationId = 0
 
     def muxMA(self, MA_select):
@@ -59,6 +65,12 @@ class Processor:
             self._RY = self._PMI.getMDR()
         else:
             self._IR = self._PMI.getMDR()
+            
+    def muxA(self,A_select):
+        if(A_select == 0):
+            return self._RA
+        else:
+            return self._IAG.getPC()
 
     def muxB(self,B_select):
         if(B_select == 0):
@@ -79,18 +91,15 @@ class Processor:
         self._fileReader.read_mc(filepath, self._PMI)
 
     def fetch(self):
-        #MAR gets value of PC
-        outputmuxMA = self.muxMA(1)
+        outputmuxMA = self.muxMA(1)                     #MAR gets value of PC
         self._IAG.updatePC_temp()                       #PC_Temp gets PC+4
-        self._PMI.setMAR(outputmuxMA)
-        #MDR gets value stored at MDR
-        self._PMI.getData(2)
-        #IR gets value of MDR
-        self.demuxMDR(1)
+        self._PMI.setMAR(outputmuxMA)                   
+        self._PMI.getData(2)                           #MDR gets value stored at address in MAR
+        self.demuxMDR(1)                               #IR gets value of MDR
 
     def decode(self):
         info_code = identify(self._IR)
-        self._neumonic = info_code['neumonic']
+        # self._neumonic = info_code['neumonic']
         print("code :", info_code)
         self._currOperationId = info_code['id']
         try:
@@ -113,33 +122,37 @@ class Processor:
             pass
             
         try:
-            immediate = twos_complement(info_code['immediate'])
-            self._imm = '{:08x}'.format(immediate)[-8:]
-            #print("imm", self._imm)
+            immediate = twos_complement(info_code['immediate'])  #to be made in helperFunctions
+            self._imm = '{:08x}'.format(immediate)[-8:]  # to ber made in helper function
         except:
             pass
 
     def execute(self):
         currALU_select = self._ALU_select[self._currOperationId]
         currMuxB = self._muxB[self._currOperationId]
+        currMuxA = self._muxA[self._currOperationId]
+        
         print("ALUs, MUXb",currALU_select, currMuxB)
-        operand1 = self._RA
+        
+        operand1 = self.muxA(currMuxA)
         operand2 = self.muxB(currMuxB)
         self._RZ = self._ALU.operate(operand1, operand2, currALU_select)
 
         print("PCs, INCs", self.PC_select[self._currOperationId], self.INC_select[self._currOperationId])
-        #control determining part
-        if self._neumonic == 'auipc':
-            self._RZ = self._IAG.AUIPC(self._imm)
-
         print("PC, PC_temp :",self._IAG.getPC(), self._IAG.getPC_Temp())
+        
         self._IAG.muxPC(self.PC_select[self._currOperationId], self._RA)
         self._IAG.updatePC(1)
         print("neumonic, ALU_res",self._neumonic, self._RZ)
+        
+        #isko dekhna padega
+        
         if self._neumonic in ['beq', 'bne', 'blt', 'bge'] and self._RZ == "0"*7+'1':
             self._IAG.muxINC(1, self._imm)
         else:
             self._IAG.muxINC(self.INC_select[self._currOperationId], self._imm)
+            
+            
         self._IAG.adder()
         self._IAG.muxPC(0, self._RA)
         self._IAG.updatePC(1)
@@ -175,9 +188,6 @@ class Processor:
         if self.WriteEnable[self._currOperationId]:
             self._registerFile.set_register(self._rd,self._RY)
         print("RD: RY:", self._rd, self._RY)
-        #reset
-        self._RA = '0'*8
-        self._RB = '0'*8
 
 if __name__=='__main__':
     ll = [int(x) for x in list(df2_main['muxB'].dropna())]

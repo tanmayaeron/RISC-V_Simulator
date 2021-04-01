@@ -158,12 +158,15 @@ class PMI:
                     self.__memory.store_halfword, self.__memory.store_word]
         getArray[size](self.__MAR, self.__MDR)
 
-    def accessMemory(self,currMemoryEnable,size):
+    def accessMemory(self, currMemoryEnable, size, RZ, RM):
         if currMemoryEnable == 0:
             pass
         elif currMemoryEnable == 1:
+            self.setMAR(RZ)
             self.getData(size)
         elif currMemoryEnable == 2:
+            self.setMAR(RZ)
+            self.setMDR(RM)
             self.storeData(size)
 
 if __name__ == '__main__':

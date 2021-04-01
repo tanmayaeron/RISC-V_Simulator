@@ -166,7 +166,7 @@ class Processor:
         obj = self._PMI
         self._fileReader.write_file(obj, filename)
 
-    def print_registers_in_a_file(self):
+    def print_registers_in_a_file(self, run):
         registers = run._registerFile.get_registers()
         filename = 'registers.txt'
         self._fileReader.print_registers_in_a_file(registers, filename)
@@ -194,4 +194,5 @@ if __name__ == '__main__':
     run._PMI.print_memory()
     print("Data in output.txt printed")
     run.printData()
-    run.print_registers_in_a_file()
+    run.print_registers_in_a_file(run)
+    print(kk)

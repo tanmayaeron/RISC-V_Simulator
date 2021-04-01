@@ -19,10 +19,13 @@ class RegisterFile:
     def initialise_registers(self):
         self._registers = ["00000000"]*32
         self._registers[2] = "7FFFFFF0"  # sp
-        self._registers[3] = "10000000" # gp
+        self._registers[3] = "10000000"  # gp
 
     def print_registers(self):
         print(self._registers)
+
+    def get_registers(self):
+        return self._registers
 
     def get_register(self, index):
         return self._registers[index]

@@ -7,13 +7,12 @@ from register import RegisterFile
 from decode import identify
 from helperFunctions import *
 from input import ReadFile
+from pprint import pprint
 df_control = pd.read_csv('controls.csv')
 df_control = df_control.dropna(axis=0, how='any')
 
 
 class Processor:
-
-    cycle = 0
 
     def __init__(self):
         self._PMI = memory.PMI()
@@ -26,6 +25,7 @@ class Processor:
         self._currFileName = 'test1.mc'
         self._currFolderPath = os.getcwd()
         self._currOperationId = 0
+        self.cycle = 0
 
     def initialiseTempRegisters(self):
         self._IR = '0'*8
@@ -87,9 +87,11 @@ class Processor:
         self._fileReader.read_mc(filepath, self._PMI)
 
     def fetch(self):
+
         print("Fetch stage:")
         print("The value of PC is :", self._IAG.getPC())
-
+        self.cycle += 1
+        print("cycle is :", self.cycle)
         outputmuxMA = self.muxMA(1)  # MAR gets value of PC
         self._IAG.updatePC_temp()  # PC_Temp gets PC+4
         self._PMI.setMAR(outputmuxMA)

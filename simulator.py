@@ -1,17 +1,16 @@
 import pandas as pd
 import os
-import ALU_re
+import ALU
 import memory
 import IAG
 from ALU import ALU
 from register import RegisterFile
 from decode import identify
-from helperFunctions import HelperFunctions
+from helperFunctions import *
 from input import ReadFile
 
-
-df_main = pd.read_csv('instructions.csv')
-df2_main = pd.read_csv('controls.csv')
+df_control = pd.read_csv('controls.csv')
+df_control = df_control.dropna(axis=0,how='any')
 
 class Processor:
 
@@ -40,16 +39,16 @@ class Processor:
         self._imm = '0'*8
         
     def initialiseControls(self):
-        self._ALU_select = [int(x) for x in list(df2_main['ALU_select'].dropna())]
-        self._muxB = [int(x) for x in list(df2_main['muxB'].dropna())]
-        self._muxA = [int(x) for x in list(df2_main['muxA'].dropna())]
-        self._muxY = [int(x) for x in list(df2_main['muxY'].dropna())]
-        self._memoryEnable = [int(x) for x in list(df2_main['ME'].dropna())]
-        self.INC_select = [int(x) for x in list(df2_main['muxINC'].dropna())]
-        self.PC_select = [int(x) for x in list(df2_main['muxPC'].dropna())]
-        self.S_select = [int(x) for x in list(df2_main['muxS'].dropna())]
-        self._writeEnable = [int(x) for x in list(df2_main['WE'].dropna())]
-        self.SizeEnable = [int(x) for x in list(df2_main['SE'].dropna())]
+        self._ALU_select = list(df_control['ALU_select'].astype(int))
+        self._muxB = list(df_control['muxB'].astype(int))
+        self._muxA = list(df_control['muxA'].astype(int))
+        self._muxY = list(df_control['muxY'].astype(int))
+        self._memoryEnable = list(df_control['ME'].astype(int))
+        self.INC_select = list(df_control['muxINC'].astype(int))
+        self.PC_select = list(df_control['muxPC'].astype(int))
+        self.S_select = list(df_control['muxS'].astype(int))
+        self._writeEnable = list(df_control['WE'].astype(int))
+        self.SizeEnable = list(df_control['SE'].astype(int))
         
 
     def muxMA(self, MA_select):
@@ -158,7 +157,7 @@ class Processor:
         
     def registerUpdate(self):
         self._RY = self.muxY(self._muxY[self._currOperationId])
-        currWriteEnable = self._writeEnable[self._currOperationId]:
+        currWriteEnable = self._writeEnable[self._currOperationId]
         self._registerFile.set_register(self._rd,self._RY, currWriteEnable)
         print("RD: RY:", self._rd, self._RY)
     def printData(self):
@@ -167,7 +166,6 @@ class Processor:
         self._fileReader.write_file(obj, filename)
 
 if __name__=='__main__':
-    ll = [int(x) for x in list(df2_main['muxB'].dropna())]
     run = Processor()
     run.load_mc()
     run.fetch()

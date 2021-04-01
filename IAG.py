@@ -1,6 +1,6 @@
-from helperFunctions import HelperFunctions
+from helperFunctions import *
         
-class IAG(HelperFunctions):
+class IAG:
 
     '''
     data:
@@ -28,7 +28,10 @@ class IAG(HelperFunctions):
         else:
             self.output_muxPC = self.output_adder
             
-    def muxINC(self,INC_select, imm):
+    def muxINC(self, INC_select, S_select, imm, RZ):
+        if(S_select == 1):
+            INC_select = int(RZ[-1], 16)%2
+            
         if INC_select==0 :
             self.inputB_adder = self.__constantoffset
         else:
@@ -49,8 +52,3 @@ class IAG(HelperFunctions):
         PC+=4
         self._PC_Temp = '{:08x}'.format(PC)[-8:]
 
-    def AUIPC(self, imm): #this function is jugaad
-        PC = int(self._PC,16)
-        PC += self.hexToDec(imm)
-        print("AUIPC", '{:08x}'.format(PC)[-8:])
-        return '{:08x}'.format(PC)[-8:]

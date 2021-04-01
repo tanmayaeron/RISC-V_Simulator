@@ -1,114 +1,102 @@
-from register import RegisterFile
-from bitstring import BitArray
-from bitstring import Bits
-
-
-# increment PC += 4 by default
-
-
+from helperFunctions import *
 class ALU:
 
     """
-    PC needs to be dealt with separately
-    RM, RY, RZ are temporary registers
-    all functions deal and pass integers
+    input1 : first input
+    input2 : second input
+    control : operation select
+
+    ALU will recieve data in hexadecimal format, to call ALU one needs to call operate function with
     """
 
     def __init__(self):
-        self.RA = 0  # set by decode
-        self.RB = 0  # set by decode
-        self.imm = 0  # set by decode
-        self.RM = 0
-        self.RY = 0
-        self.RZ = 0
-        self.PC_temp = 0
-        self.muxB = 0  # set by decode
+        self._input1 = 0
+        self._input2 = 0
+        self._numOfSupportedOperations = 17
+        self._lookup = [self._add, self._sub, self._mul, self._div, self._rem, self._xor, self._and,
+                        self._or, self._sll, self._srl, self._sra, self._eq, self._ne, self._ge, self._lt, self._selectA, self._selectB]
+        self._control = 0
+        self._output = 0
 
-    def add(self):
-        if(self.muxB == 0):
-            self.RZ = self.RA + self.RB
+
+    def operate(self, operand1, operand2, control):
+        self._input1 = hexToDec(operand1)
+        self._input2 = hexToDec(operand2)
+        if(control < self._numOfSupportedOperations):
+            self._control = control
+            self._lookup[self._control]()
+            self._output = decToHex(self._output)
+            return self._output
         else:
-            self.RZ = self.RA + self.imm
+            print("unsupported operation")
+            return 404
+        
+        
+    
+    
+    def _add(self):
+        self._output = self._input1 + self._input2
 
-    def sub(self):
-        self.RZ = self.RA - self.RB
+    def _sub(self):
+        self._output = self._input1 - self._input2
 
-    def mul(self):
-        self.RZ = self.RA * self.RB
+    def _mul(self):
+        self._output = self._input1 * self._input2
 
-    def div(self):
-        self.RZ = self.RA // self.RB
+    def _div(self):
+        self._output = self._input1 // self._input2
 
-    def rem(self):
-        self.RZ = self.RA % self.RB
+    def _rem(self):
+        self._output = self._input1 % self._input2
 
-    def xor(self):
-        self.RZ = self.RA ^ self.RB
+    def _xor(self):
+        self._output = self._input1 ^ self._input2
 
     def _and(self):
-        if(self.muxB == 0):
-            self.RZ = self.RA & self.RB
-        else:
-            self.RZ = self.RA & self.imm
+        self._output = self._input1 & self._input2
 
     def _or(self):
-        if(self.muxB == 0):
-            self.RZ = self.RA | self.RB
+        self._output = self._input1 | self._input2
+
+    def _sll(self):
+        self._output = self._input1 << self._input2
+
+    def _srl(self):
+        self._input1 &= 0xffffffff
+        self._output = self._input1 >> self._input2
+
+    def _sra(self):
+        self._output = self._input1 >> self._input2
+
+    def _eq(self):
+        if(self._input1 == self._input2):
+            self._output = 1
         else:
-            self.RZ = self.RA | self.imm
+            self._output = 0
 
-    def sll(self):
-        self.RZ = self.RA << self.RB
-
-    def sra(self):
-        self.RZ = self.RA >> self.RB
-
-    def srl(self):
-        self.RA &= 0xffffffff
-        self.RZ = self.RA >> self.RB
-
-    def slt(self):
-        if(self.RA < self.RB):
-            self.RZ = 1
+    def _ne(self):
+        if(self._input1 != self._input2):
+            self._output = 1
         else:
-            self.RZ = 0
+            self._output = 0
 
-    def beq(self):
-        # execute increments PC by 4
-        if(self.RA == self.RB):
-            self.PC = self.PC - 4 + self.imm
+    def _ge(self):
+        if(self._input1 >= self._input2):
+            self._output = 1
+        else:
+            self._output = 0
 
-    def bne(self):
-        if(self.RA != self.RB):
-            self.PC = self.PC - 4 + self.imm
+    def _lt(self):
+        if(self._input1 < self._input2):
+            self._output = 1
+        else:
+            self._output = 0
+            
+            
+    def _selectA(self):
+        self._output = self._input1
 
-    def bge(self):
-        if(self.RA >= self.RB):
-            self.PC = self.PC - 4 + self.imm
+    def _selectB(self):
+        self._output = self._input2
 
-    def blt(self):
-        if(self.RA < self.RB):
-            self.PC = self.PC - 4 + self.imm
 
-    def auipc(self):
-        # imm is assumed to be shifted by 12
-        self.RZ = self.PC - 4 + self.imm
-
-    def lui(self):
-        # imm is assumed to be shifted by 12
-        self.add()
-
-    def jal(self):
-        self.PC_temp = self.PC
-        self.PC = self.PC - 4 + self.imm
-
-    def jalr(self):
-        self.PC_temp = self.PC
-        self.PC = self.RA + self.imm
-
-    def lbhw(self):
-        self.add()
-
-    def sbhw(self):
-        self.RM = self.RB
-        self.add()

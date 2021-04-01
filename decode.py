@@ -1,11 +1,6 @@
 import pandas as pd
-from ALU import ALU
-from register import RegisterFile
-from bitstring import BitArray
-from bitstring import Bits
 
 df_main = pd.read_csv('instructions.csv')
-
 
 def identify(code):
     """
@@ -15,13 +10,10 @@ def identify(code):
     """
 
     fields = {}
-
-    # print(df)
     machine_code = '0' * 32 + bin(int(code, 16))[2:]
     machine_code = machine_code[-32:]
     opcode = '0b'+machine_code[-7:]
     df = df_main[df_main.opcode == opcode]
-    # print(df)
     if len(df['id']) == 0:
         return 0
     else:
@@ -31,7 +23,6 @@ def identify(code):
             funct3 = '0b'+machine_code[-15:-12]
             funct7 = '0b'+machine_code[:7]
             df = df[(df.funct3 == funct3) & (df.funct7 == funct7)]
-            # print(df)
             if len(df['id']) == 0:
                 return 0
             else:
@@ -106,165 +97,3 @@ def identify(code):
 
         fields['id'] = list(df['id'])[0]
         return fields
-
-"""
-obj = ALU()
-registers = RegisterFile()
-
-
-def twos_complement(a):
-
-    return Bits(bin=a).int
-
-
-def R_format(fields):
-
-    instruction = fields['neumonic']
-    rs1 = int(fields['rs1'], 2)
-    rs2 = int(fields['rs2'], 2)
-    rd = int(fields['rd'], 2)
-    obj.RA = registers.get_register(rs1)
-    obj.RB = registers.get_register(rs2)
-    obj.muxB = 0
-    if instruction == "add":
-        obj.add()
-    elif instruction == "and":
-        obj._and()
-    elif instruction == "or":
-        obj._or()
-    elif instruction == "sll":
-        obj.sll()
-    elif instruction == "slt":
-        obj.slt()
-    elif instruction == "sra":
-        obj.sra()
-    elif instruction == "srl":
-        obj.srl()
-    elif instruction == "sub":
-        obj.sub()
-    elif instruction == "xor":
-        obj.xor()
-    elif instruction == "mul":
-        obj.mul()
-    elif instruction == "div":
-        obj.div()
-    elif instruction == "rem":
-        obj.rem()
-
-
-def I_format(fields):
-    instruction = fields['neumonic']
-    rs1 = int(fields['rs1'], 2)
-    imm = twos_complement(fields['immediate'])
-
-    rd = int(fields['rd'], 2)
-    obj.RA = registers.get_register(rs1)
-    obj.imm = imm
-    obj.muxB = 1
-    if instruction == "addi":
-        # mux value is 1
-        obj.add()
-        print(obj.RZ)
-    elif instruction == "ori":
-        # mux value is 1
-        obj._or()
-        print(obj.RZ)
-    elif instruction == "andi":
-        # mux value is 1
-        obj._andi()
-        print(obj.RZ)
-    elif instruction == "lb":
-        # mux value is 1
-        obj.lbhw()
-        print(obj.RZ)
-    elif instruction == "jalr":
-        # mux value is 1
-        # works fine
-        obj.jalr()
-        print(obj.PC)
-
-
-def S_format(fields):
-    # not checked
-    # to be checked later
-    #######################################
-    instruction = fields['neumonic']
-    rs1 = int(fields['rs1'], 2)
-    rs2 = int(fields['rs2'], 2)
-    imm = twos_complement(fields['immediate'])
-
-
-def SB_format(fields):
-    instruction = fields['neumonic']
-    rs1 = int(fields['rs1'], 2)
-    rs2 = int(fields['rs2'], 2)
-    imm = twos_complement(fields['immediate'])
-    imm *= 2  # to left shift as imm[0] is 0
-    obj.RA = registers.get_register(rs1)
-    obj.RB = registers.get_register(rs2)
-    obj.imm = imm
-    print(obj.RA, obj.RB, obj.imm, obj.PC)
-    if instruction == "beq":
-        obj.beq()
-        print(obj.PC)
-    elif instruction == "bne":
-        obj.bne()
-        print(obj.PC)
-    elif instruction == "bge":
-        obj.bge()
-        print(obj.PC)
-    elif instruction == "blt":
-        obj.blt()
-        print(obj.PC)
-
-
-def U_format(fields):
-    instruction = fields['neumonic']
-    rd = int(fields['rd'], 2)
-    imm = twos_complement(fields['immediate'])
-    imm = imm*2**12  # left shifting 12 bits
-    obj.imm = imm
-    if instruction == "lui":
-        obj.lui()
-    elif instruction == "auipc":
-        obj.auipc()
-        print(obj.RZ)
-
-
-def UJ_format(fields):
-    instruction = fields['neumonic']
-    rd = int(fields['rd'], 2)
-    imm = twos_complement(fields['immediate'])
-    imm *= 2  # to left shift as imm[0] is 0
-    obj.imm = imm
-    if instruction == "jal":
-        obj.jal()
-        print(obj.PC_temp)
-        print(obj.PC)
-
-
-def alu_caller(machine_code):
-
-    fields = identify(machine_code)
-
-    format = fields['format']
-    print(fields)
-    if format == 0:
-        print("not found")
-        return
-    if format == 'R':
-        R_format(fields)
-    elif format == 'I':
-        I_format(fields)
-    elif format == "S":
-        S_format(fields)
-    elif format == "SB":
-        SB_format(fields)
-    elif format == "U":
-        U_format(fields)
-    else:
-        UJ_format(fields)
-
-
-alu_caller("0x02C0056F")
-"""

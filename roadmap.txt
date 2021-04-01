@@ -35,6 +35,15 @@ decode
 - key opcode
   - funct3
   - funct7
+  
+  
+  ####### To Do 1 April 2021 #######
+  - size signal
+  - PC to muxA
+  - make twos complement in helper function
+  - immediate extension in identify ( see if it is already happening in decode) 
+  - signal for muxA
+  - mux for INC select signal 
 
 
 

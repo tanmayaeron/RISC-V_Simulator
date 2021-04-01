@@ -7,7 +7,6 @@ from register import RegisterFile
 from decode import identify
 from helperFunctions import *
 from input import ReadFile
-from pprint import pprint
 df_control = pd.read_csv('controls.csv')
 df_control = df_control.dropna(axis=0, how='any')
 

@@ -117,8 +117,8 @@ class Processor:
             pass
             
         try:
-            immediate = extendImmediate(info_code['immediate'])  #to be made in helperFunctions
-            self._imm = binToHex(immediate)  # to ber made in helper function
+            immediate = extendImmediate(info_code['immediate']) 
+            self._imm = binToHex(immediate)
         except:
             pass
 
@@ -164,13 +164,14 @@ class Processor:
 if __name__=='__main__':
     run = Processor()
     run.load_mc()
-    run.fetch()
-    print(run._IR)
-    run.decode()
-    print(run._currOperationId)
-    run.execute()
-    run.memoryAccess()
-    run.registerUpdate()
-    run._registerFile.print_registers()
-    run._PMI.print_memory()
-    run.printData()
+    for i in range(3):
+        run.fetch()
+        print(run._IR)
+        run.decode()
+        print(run._currOperationId)
+        run.execute()
+        run.memoryAccess()
+        run.registerUpdate()
+        run._registerFile.print_registers()
+        run._PMI.print_memory()
+        run.printData()

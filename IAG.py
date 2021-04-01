@@ -1,6 +1,6 @@
-from helperFunctions import HelperFunctions
+from helperFunctions import *
         
-class IAG(HelperFunctions):
+class IAG:
 
     '''
     data:

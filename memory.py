@@ -1,5 +1,5 @@
 from collections import defaultdict
-from helperFunctions import HelperFunctions
+from helperFunctions import *
 
 
 def make_length(data, length):
@@ -7,7 +7,7 @@ def make_length(data, length):
     return data[-length:]
 
 
-class Memory(HelperFunctions):
+class Memory:
 
     """
     represents memory in default dictionary
@@ -35,7 +35,7 @@ class Memory(HelperFunctions):
         :param address: byte address str of length 8(without 0x)
         :return: 10 words in contiguous location, in hex, str of length 8(without 0x)
         """
-        address_in_dec = self.hexToDec(address)
+        address_in_dec = hexToDec(address)
         data = ""
         for i in reversed(range(40)):
             address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
@@ -57,7 +57,7 @@ class Memory(HelperFunctions):
         :param address: byte address str of length 8(without 0x)
         :return: halfword data stored at address, in hex, str of length 4(without 0x)
         """
-        address_in_dec = self.hexToDec(address)
+        address_in_dec = hexToDec(address)
         data = ""
         for i in reversed(range(2)):
             address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
@@ -70,7 +70,7 @@ class Memory(HelperFunctions):
         :param address: byte address str of length 8(without 0x)
         :return: word data stored at address, in hex, str of length 4(without 0x)
         """
-        address_in_dec = self.hexToDec(address)
+        address_in_dec = hexToDec(address)
         data = ""
         for i in reversed(range(4)):
             address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
@@ -92,7 +92,7 @@ class Memory(HelperFunctions):
     def store_word(self, address, data):
         address = make_length(address, 8)
         data = make_length(data, 8)
-        address_in_dec = self.hexToDec(address)
+        address_in_dec = hexToDec(address)
         for i in range(4):
             address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
             address_in_hex = address_in_hex[-8:]
@@ -101,7 +101,7 @@ class Memory(HelperFunctions):
     def store_halfword(self, address, data):
         address = make_length(address, 8)
         data = make_length(data, 4)
-        address_in_dec = self.hexToDec(address)
+        address_in_dec = hexToDec(address)
         for i in range(2):
             address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
             address_in_hex = address_in_hex[-8:]
@@ -119,6 +119,9 @@ class PMI:
 
     def getMAR(self):
         return self.__MAR
+    
+    def getMemoryDisplay(self):
+        self.__memory.getMemoryDisplay()
 
     def setMDR(self, data):
         data = make_length(data, 8)

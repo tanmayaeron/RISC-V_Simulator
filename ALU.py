@@ -100,8 +100,3 @@ class ALU:
         self._output = self._input2
 
 
-a = ALU()
-x = "00000003"
-y = "f0000000"
-z = a.operate(x, y, 16)
-print(z)

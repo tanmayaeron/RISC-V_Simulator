@@ -3,7 +3,6 @@ import os
 import ALU
 import memory
 import IAG
-from ALU import ALU
 from register import RegisterFile
 from decode import identify
 from helperFunctions import *
@@ -127,7 +126,7 @@ class Processor:
         currALU_select = self._ALU_select[self._currOperationId]
         currMuxB = self._muxB[self._currOperationId]
         currMuxA = self._muxA[self._currOperationId]
-        currINCSelect = self._muxINC[self._currOperationId]
+        currINCSelect = self.INC_select[self._currOperationId]
         currSSelect = self.S_select[self._currOperationId]
         print("ALUs, MUXb",currALU_select, currMuxB)
         
@@ -140,9 +139,6 @@ class Processor:
         
         self._IAG.muxPC(self.PC_select[self._currOperationId], self._RA)
         self._IAG.updatePC(1)
-        print("neumonic, ALU_res",self._neumonic, self._RZ)
-        
-        
         self._IAG.muxINC(currINCSelect, currSSelect, self._imm, self._RZ)
         self._IAG.adder()
         self._IAG.muxPC(0, self._RA)
@@ -152,7 +148,7 @@ class Processor:
         
     def memoryAccess(self):
         currMemoryEnable =self._memoryEnable[self._currOperationId]      
-        currSizeEnable = self._sizeEnable[self._currOperationId]
+        currSizeEnable = self.SizeEnable[self._currOperationId]
         self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
         
     def registerUpdate(self):
@@ -172,7 +168,6 @@ if __name__=='__main__':
     print(run._IR)
     run.decode()
     print(run._currOperationId)
-    print(run._neumonic)
     run.execute()
     run.memoryAccess()
     run.registerUpdate()

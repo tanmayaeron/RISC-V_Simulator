@@ -7,7 +7,7 @@ class ReadFile:
     def __init__(self):
         pass
 
-    def write_file(obj, filename):
+    def write_file(self, obj, filename):
         file = open(filename, 'w')
         # we want to print only data segment
         dict = obj.getMemory()

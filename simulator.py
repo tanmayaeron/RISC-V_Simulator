@@ -17,7 +17,7 @@ def twos_complement(a):
 
 
 df_main = pd.read_csv('instructions.csv')
-df2_main = pd.read_csv('controls3.csv')
+df2_main = pd.read_csv('controls.csv')
 
 class Processor:
 
@@ -36,6 +36,9 @@ class Processor:
         self._RM = '0'*8
         self._RY = '0'*8
         self._imm = '0'*8
+        self._fileReader = ReadFile()
+        self._currFileName = 'test1.mc'
+        self._currFolderPath = os.getcwd()
         self._ALU_select = [int(x) for x in list(df2_main['ALU_select'].dropna())]
         self._muxB = [int(x) for x in list(df2_main['muxB'].dropna())]
         self._muxY = [int(x) for x in list(df2_main['muxY'].dropna())]
@@ -72,11 +75,8 @@ class Processor:
             return self._IAG.getPC_Temp()
     
     def load_mc(self):
-        inp = ReadFile()
-        fileName = 'test1.mc'
-        folderPath = os.getcwd()
-        filepath = os.path.join(folderPath, 'test', fileName)
-        inp.read_mc(filepath, self._PMI)
+        filepath = os.path.join(self._currFolderPath, 'test', self._currFileName)
+        self._fileReader.read_mc(filepath, self._PMI)
 
     def fetch(self):
         #MAR gets value of PC

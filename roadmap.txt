@@ -35,6 +35,11 @@ decode
 - key opcode
   - funct3
   - funct7
+  
+  
+  ####### To Do 1 April 2021 #######
+  - size signal
+  - PC to muxA
 
 
 

@@ -1,5 +1,4 @@
-  
-from memory import PMI
+
 from collections import defaultdict
 
 
@@ -13,9 +12,9 @@ class ReadFile:
         # we want to print only data segment
         dict = obj.getMemory()
         for i in dict:
-            if i[0] == '1' and len(i) == 8:  # >=10000000
-                file.write(i+" ")
-                file.write(dict[i]+"\n")
+            if i[0] != '0':  # >=10000000
+                file.write("0x"+i+" ")
+                file.write("0x"+dict[i]+"\n")
 
     def read_mc(self, filepath, obj):
         file = open(filepath, 'r')

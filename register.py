@@ -24,7 +24,7 @@ class RegisterFile:
     def print_registers(self):
         print(self._registers)
 
-    def get_registers(self):
+    def get_registerFile(self):
         return self._registers
 
     def get_register(self, index):

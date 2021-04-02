@@ -131,9 +131,6 @@ class PMI:
         address = make_length(address, 8)
         self.__MAR = address
 
-    def print_memory(self):
-        self.__memory.print_memory()
-
     def getMemory(self):
         return self.__memory.getMemory()
     
@@ -158,15 +155,12 @@ class PMI:
                     self.__memory.store_halfword, self.__memory.store_word]
         getArray[size](self.__MAR, self.__MDR)
 
-    def accessMemory(self, currMemoryEnable, size, RZ, RM):
+    def accessMemory(self, currMemoryEnable, size):
         if currMemoryEnable == 0:
             pass
         elif currMemoryEnable == 1:
-            self.setMAR(RZ)
             self.getData(size)
         elif currMemoryEnable == 2:
-            self.setMAR(RZ)
-            self.setMDR(RM)
             self.storeData(size)
 
 if __name__ == '__main__':

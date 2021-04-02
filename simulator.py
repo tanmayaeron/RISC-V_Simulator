@@ -1,5 +1,7 @@
 import pandas as pd
 import os
+import sys
+import io
 import ALU
 import memory
 import IAG
@@ -7,10 +9,11 @@ from register import RegisterFile
 from decode import identify
 from helperFunctions import *
 from input import ReadFile
+input = io.BytesIO(os.read(0, os.fstat(0).st_size)).readline
+
 df_control = pd.read_csv('controls.csv')
 df_control = df_control.dropna(axis=0, how='any')
-
-
+df_main = pd.read_csv('instructions.csv')
 class Processor:
 
     def __init__(self):
@@ -21,8 +24,9 @@ class Processor:
         self._registerFile = RegisterFile()
         self.initialiseTempRegisters()
         self.initialiseControls()
-        self._currFileName = 'test1.mc'
         self._currFolderPath = os.getcwd()
+        self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
+        sys.stdout = self._outputLogFile
         self._currOperationId = 0
         self.cycle = 0
 
@@ -53,12 +57,14 @@ class Processor:
             return self._RZ
         else:
             return self._IAG.getPC()
+        
 
-    def demuxMDR(self, MDR_select):
-        if(MDR_select == 0):
-            self._RY = self._PMI.getMDR()
-        else:
+    def setIR(self, enable):
+        if enable == 1:
             self._IR = self._PMI.getMDR()
+            
+    def getIR(self):
+        return self._IR
 
     def muxA(self, A_select):
         if(A_select == 0):
@@ -80,13 +86,11 @@ class Processor:
         else:
             return self._IAG.getPC_Temp()
 
-    def load_mc(self):
-        filepath = os.path.join(self._currFolderPath,
-                                'test', self._currFileName)
+    def load_mc(self, currFileName):
+        filepath = os.path.join(self._currFolderPath,'test', currFileName)
         self._fileReader.read_mc(filepath, self._PMI)
 
     def fetch(self):
-
         print("Fetch stage:")
         print("The value of PC is :", self._IAG.getPC())
         self.cycle += 1
@@ -94,13 +98,14 @@ class Processor:
         outputmuxMA = self.muxMA(1)  # MAR gets value of PC
         self._IAG.updatePC_temp()  # PC_Temp gets PC+4
         self._PMI.setMAR(outputmuxMA)
-        self._PMI.getData(2)  # MDR gets value stored at address in MAR
-        self.demuxMDR(1)  # IR gets value of MDR
+        # MDR gets value stored at address in MAR
+        self._PMI.accessMemory(1,2)
+        self.setIR(1)  # IR gets value of MDR
         print("The instruction in IR is :", self._IR)
 
     def decode(self):
         print("Decode stage:")
-        info_code = identify(self._IR)
+        info_code = identify(self._IR, df_main)
         print("code :", info_code)
         self._currOperationId = info_code['id']
         try:
@@ -156,9 +161,10 @@ class Processor:
         print("Memory Access stage:")
         currMemoryEnable = self._memoryEnable[self._currOperationId]
         currSizeEnable = self.SizeEnable[self._currOperationId]
-
-        self._PMI.accessMemory(
-            currMemoryEnable, currSizeEnable, self._RZ, self._RM)
+        outputmuxMA = self.muxMA(0)
+        self._PMI.setMAR(outputmuxMA)
+        self._PMI.setMDR(self._RM)
+        self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
 
     def registerUpdate(self):
         print("Register Update Stage:")
@@ -169,36 +175,11 @@ class Processor:
 
     def printData(self):
         filename = 'output.txt'
-        obj = self._PMI
-        self._fileReader.write_file(obj, filename)
+        filename = os.path.join(self._currFolderPath, "generated", 'memory.txt')
+        memorySnapshot = self._PMI.getMemory()
+        self._fileReader.printMemory(memorySnapshot, filename)
 
-    def print_registers_in_a_file(self, run):
-        registers = run._registerFile.get_registers()
-        filename = 'registers.txt'
-        self._fileReader.print_registers_in_a_file(registers, filename)
-
-
-if __name__ == '__main__':
-    run = Processor()
-    run.load_mc()
-    kk = 0
-    while True:
-        kk += 1
-        run.fetch()
-        print(run._IR)
-        if kk == 100:
-            break
-        if run._IR == '0'*8:
-            break
-        run.decode()
-        print(run._currOperationId)
-        run.execute()
-        run.memoryAccess()
-        run.registerUpdate()
-        run._registerFile.print_registers()
-
-    run._PMI.print_memory()
-    print("Data in output.txt printed")
-    run.printData()
-    run.print_registers_in_a_file(run)
-    print(kk)
+    def printRegisters(self):
+        registers = self._registerFile.get_registerFile()
+        filename = os.path.join(self._currFolderPath, "generated", 'registers.txt')
+        self._fileReader.printRegisters(registers, filename)

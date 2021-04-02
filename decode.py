@@ -1,8 +1,8 @@
 import pandas as pd
 
-df_main = pd.read_csv('instructions.csv')
+# df_main = pd.read_csv('instructions.csv')
 
-def identify(code):
+def identify(code, df_main):
     """
 
     :param code:32 bit machine code in hex(without 0x)

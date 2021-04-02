@@ -3,16 +3,16 @@ class ReadFile:
     def __init__(self):
         pass
 
-    def write_file(self, obj, filename):
+    def printMemory(self, memory, filename):
         file = open(filename, 'w')
         # we want to print only data segment
-        dict = obj.getMemory()
+        dict = memory
         for i in sorted(dict.keys()):
             if i[0] != '0':  # >=10000000
                 file.write("0x"+i+" ")
                 file.write("0x"+dict[i]+"\n")
 
-    def print_registers_in_a_file(self, registers, filename):
+    def printRegisters(self, registers, filename):
         # write 'a' instead of 'w' to appending text here
         file = open(filename, 'w')
         for index, i in enumerate(registers):
@@ -28,3 +28,4 @@ class ReadFile:
                 obj.storeData(2)
             except:
                 pass
+        

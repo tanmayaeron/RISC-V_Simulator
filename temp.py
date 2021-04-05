@@ -15,13 +15,13 @@ from frontBack import *
 class UiComponents():
     def __init__(self):
         self.fixedfont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
-        self.fixedfont.setPointSize(13)
+        self.fixedfont.setPointSize(15)
 
     def buttonTile(self, name):
         button = QPushButton()
         button.setText(name)
         button.setFixedHeight(30)
-        button.setFixedWidth(50)
+        button.setFixedWidth(100)
         return button
 
     def labelTile(self, labelName, height, width, isBorder):
@@ -38,6 +38,9 @@ class UiComponents():
     def mainLabel(self, top, left, height, width):
         self.save_button = self.buttonTile("Save")
         self.compile_button = self.buttonTile("Compile")
+        self.currentTheme = "Dark Theme"
+        self.theme_button = self.buttonTile("Change Theme")
+        self.theme_button.setContentsMargins(10,10,20,10)
         self.save_button.setContentsMargins(10, 10, 20, 10)
         self.compile_button.setContentsMargins(10, 10, 20, 10)
         main_label_image = QLabel()
@@ -48,6 +51,7 @@ class UiComponents():
         main_label_hBox.addWidget(main_label_image)
         main_label_hBox.addWidget(self.save_button)
         main_label_hBox.addWidget(self.compile_button)
+        main_label_hBox.addWidget(self.theme_button)
         main_label_hBox.setContentsMargins(10, 10, 10, 10)
         return main_label_hBox
 
@@ -75,7 +79,7 @@ class UiComponents():
         self.memoryArray = [[] for i in range(10)]
         gridbox = QGridLayout()
         for i in range(10):
-            label = self.labelTile("0x", 40, 140, 0)
+            label = self.labelTile("0x", 40, 100, 0)
             self.memoryArray[i].append(label)
             gridbox.addWidget(self.memoryArray[i][0], i, 0)
             for j in range(4):
@@ -162,6 +166,14 @@ class mainScreen(QWidget, UiComponents):
         self.link.runProgram(self.currFilePath)
         self.updateRegisterView()
 
+    def changeTheme(self):
+        if self.currentTheme == "Dark Theme":
+            self.currentTheme = "Light Theme"
+            App.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5', palette=LightPalette))
+        else:
+            self.currentTheme = "Dark Theme"
+            App.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5', palette=DarkPalette))
+
     def initWindow(self):
         self.splash.close()
         self.setWindowTitle(self.title)
@@ -172,6 +184,7 @@ class mainScreen(QWidget, UiComponents):
         self.registerDisplay()
         self.save_button.clicked.connect(lambda: self.fileSave())
         self.compile_button.clicked.connect(lambda: self.fileCompile())
+        self.theme_button.clicked.connect(lambda: self.changeTheme())
 
         self.updateMemoryView("10000000")
         self.updateRegisterView()

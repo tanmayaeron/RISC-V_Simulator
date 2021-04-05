@@ -1,4 +1,5 @@
 from simulator import Processor
+from helperFunctions import *
 
 class frontBackEndInteraction:
     def __init__(self, directoryPath):
@@ -23,7 +24,20 @@ class frontBackEndInteraction:
         return l
     
     def getMemorySnapshot(self, address):
-        l = [[]*4]*10
+        mem = self.processor.getData()
+        print(mem)
+        l=[]
+        address_in_dec = hexToDec(address)
+        for i in range(40):
+            address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
+            address_in_hex = address_in_hex[-8:]
+            if i%4==0:
+                l.append([])
+                l[-1].append("0x"+address_in_hex)
+            l[-1].append(mem[address_in_hex])
+        #print(l)
         return l
 
+    def reset(self):
+        self.processor.reset()
     

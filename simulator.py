@@ -18,11 +18,11 @@ class Processor:
         self._IAG = IAG.IAG()
         self._fileReader = ReadFile()
         self._registerFile = RegisterFile()
+        self._currFolderPath = currFolderPath
         self.df_control = pd.read_csv(os.path.join(self._currFolderPath, 'repository', "controls.csv"))
         self.df_control = self.df_control.dropna(axis=0, how='any')
         self.df_main = pd.read_csv(os.path.join(self._currFolderPath, 'repository', "instructions.csv"))
-        
-        self._currFolderPath = currFolderPath
+
         self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
         self.initialiseTempRegisters()
         self.initialiseControls()
@@ -164,10 +164,10 @@ class Processor:
         self._PMI.setMAR(outputmuxMA)
         self._PMI.setMDR(self._RM)
         self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
+        self._RY = self.muxY(self._muxY[self._currOperationId])
 
     def registerUpdate(self):
         print("Register Update Stage:")
-        self._RY = self.muxY(self._muxY[self._currOperationId])
         currWriteEnable = self._writeEnable[self._currOperationId]
         self._registerFile.set_register(self._rd, self._RY, currWriteEnable)
         print("RD: RY:", self._rd, self._RY)
@@ -191,3 +191,11 @@ class Processor:
         
     def getData(self):
         return self._PMI.getMemory()
+
+    def reset(self):
+        self._registerFile.initialise_registers()
+        self._PMI.clearMemory()
+        self._IAG.initialiseIAG()
+        self.initialiseTempRegisters()
+        self.initialiseControls()
+        self.cycle = 0

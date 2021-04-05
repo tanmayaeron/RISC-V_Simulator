@@ -8,6 +8,8 @@ class ReadFile:
         # we want to print only data segment
         dict = memory
         for i in sorted(dict.keys()):
+            if int(i,16) >= int("10007FE8",16):
+                break
             if i[0] != '0':  # >=10000000
                 file.write("0x"+i+" ")
                 file.write("0x"+dict[i]+"\n")

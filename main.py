@@ -1,5 +1,8 @@
 from simulator import Processor
-processor = Processor()
+import os
+
+pathtofolder = os.getcwd()
+processor = Processor(pathtofolder)
 processor.load_mc("bubble.mc")
 
 while True:

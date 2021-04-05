@@ -94,8 +94,6 @@ class Processor:
     def fetch(self):
         print("Fetch stage:")
         print("The value of PC is :", self._IAG.getPC())
-        self.cycle += 1
-        print("cycle is :", self.cycle)
         outputmuxMA = self.muxMA(1)  # MAR gets value of PC
         self._IAG.updatePC_temp()  # PC_Temp gets PC+4
         self._PMI.setMAR(outputmuxMA)
@@ -173,6 +171,8 @@ class Processor:
         currWriteEnable = self._writeEnable[self._currOperationId]
         self._registerFile.set_register(self._rd, self._RY, currWriteEnable)
         print("RD: RY:", self._rd, self._RY)
+        self.cycle += 1
+        print("cycle is :", self.cycle)
 
     def printData(self):
         filename = 'output.txt'

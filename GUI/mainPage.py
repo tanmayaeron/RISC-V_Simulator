@@ -4,15 +4,15 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import sys
 import qdarkstyle
-from register import RegisterFile
-from memory import Memory
-
-class UiComponents(RegisterFile, Memory):
+from qdarkstyle.dark.palette import DarkPalette  
+from qdarkstyle.light.palette import LightPalette
+import os
+from helperFunctions import *
+from frontBack import *
+class UiComponents():
     def __init__(self):
-        super().__init__()
         self.fixedfont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
-        self.fixedfont.setPointSize(13)
-        
+        self.fixedfont.setPointSize(15)
         
     def buttonTile(self, name):
         button = QPushButton()
@@ -21,41 +21,41 @@ class UiComponents(RegisterFile, Memory):
         button.setFixedWidth(50)
         return button
     
-    def updateRegisterView(self):
-        for i in range(32):
-            currValue = self.get_register(i)
-            self.registerArray[i].setText("0x"+str(currValue))
-            
-    def updateMemoryView(self, address):
-        l = self.getMemoryDisplay(address)
-        for i in range(10):
-            for j in range(4):
-                print(l[i*4 + j])
-                self.memoryArray[i][j].setText(l[i*4 + j])
-             
-
-    def mainLabel(self, top, left, height, width):
-        save_button = self.buttonTile("Save")
-        save_button.clicked.connect(lambda: self.fileSave())
-        save_button.setContentsMargins(10,10,20,10)
+    def labelTile(self, labelName, height, width, isBorder):
+        temp = QLabel()
+        temp.setText(labelName)
+        temp.setFont(self.fixedfont)
+        temp.setFixedHeight(height)
+        temp.setFixedWidth(width)
+        if(isBorder):
+            temp.setStyleSheet("border :1px solid white;")
+        temp.setAlignment(QtCore.Qt.AlignCenter) 
+        return temp
         
+    
+    def mainLabel(self, top, left, height, width):
+        self.save_button = self.buttonTile("Save")
+        self.compile_button = self.buttonTile("Compile")
+        self.save_button.setContentsMargins(10,10,20,10)
+        self.compile_button.setContentsMargins(10,10,20,10)
         main_label_image = QLabel()
         main_label_image_pixmap = QPixmap("GUI/Images/logo.png")
         main_label_image_pixmap = main_label_image_pixmap.scaled(400, 60)
         main_label_image.setPixmap(main_label_image_pixmap)
         main_label_hBox = QHBoxLayout()
         main_label_hBox.addWidget(main_label_image)
-        main_label_hBox.addWidget(save_button)
+        main_label_hBox.addWidget(self.save_button)
+        main_label_hBox.addWidget(self.compile_button)
         main_label_hBox.setContentsMargins(10, 10, 10, 10)
         return main_label_hBox
 
 
-    def editor(self):
+    def editor(self, filePath):
         self.editorScroll = QScrollArea()
         self.editorlayout = QVBoxLayout()
         self.editorScreen = QPlainTextEdit()
         self.editorScreen.setFont(self.fixedfont)
-        self.path = 'test/test1.mc'
+        self.path = filePath
         self.editorlayout.addWidget(self.editorScreen)
         self.container = QGroupBox()
         self.container.setLayout(self.editorlayout)
@@ -69,47 +69,21 @@ class UiComponents(RegisterFile, Memory):
         self.members = ["Aneeket", "Tanmay", "Shikhar", "Het", "Aditya"]
         pass
         
-    def fileOpen(self):
-        path = self.path
-        f = open(path, 'r')
-        text = f.read()
-        self.path = path
-        self.editorScreen.setPlainText(text)
-
-    def fileSave(self):
-        path = self.path
-        text = self.editorScreen.toPlainText()
-        f = open(path, 'w')
-        f.write(text)
-        self.path = path
-
     def memoryDisplay(self):
         self.scroll = QScrollArea()
-        self.scroll.setFrameShape = None
         self.displayWidget = QGroupBox()
-        self.memoryArray = []
-        vbox = QGridLayout()
+        self.memoryArray = [[] for i in range(10)]
+        gridbox = QGridLayout()
         for i in range(10):
-            self.memoryArray.append([])
-            label = QLabel("Ox"+'0'*7+str(i+1))
-            label.setFont(self.fixedfont)
-            self.memoryArray[-1].append(label)
-            vbox.addWidget(self.memoryArray[-1][-1], i, 0)
-            
+            label = self.labelTile("0x", 40, 100, 0)
+            self.memoryArray[i].append(label)
+            gridbox.addWidget(self.memoryArray[i][0], i, 0)
             for j in range(4):
-                temp = QLabel()
-                temp.setText("a")
-                temp.setFont(self.fixedfont)
-                temp.setFixedHeight(40)
-                temp.setFixedWidth(40)
-                temp.setStyleSheet("border :1px solid white;")
-                temp.setAlignment(QtCore.Qt.AlignCenter) 
-                self.memoryArray[-1].append(temp)
-                
-                vbox.addWidget(self.memoryArray[-1][-1], i, j+1)
-                   
-        self.updateMemoryView("00000000")
-        self.displayWidget.setLayout(vbox)
+                temp = self.labelTile("", 40, 40, 1)
+                self.memoryArray[i].append(temp)
+                gridbox.addWidget(self.memoryArray[i][j+1], i, j+1)
+    
+        self.displayWidget.setLayout(gridbox)
         self.scroll.setWidget(self.displayWidget)
         self.scroll.setWidgetResizable(True)
 
@@ -129,63 +103,94 @@ class UiComponents(RegisterFile, Memory):
     
     def registerDisplay(self):
         self.scroll1 = QScrollArea()
-        self.scroll1.setFrameShape = None
         self.displayWidget = QGroupBox()
-        vbox = QGridLayout()
-        self.registerArray = []
+        gridbox = QGridLayout()
+        self.registerArray = [[] for i in range(32)]
+        
         for i in range(32):
-            label = QLabel("x"+str(i))
-            vbox.addWidget(label, i, 0)
-            label2 = QLabel("("+ self.get_alt_name(i)+")")
-            label2.setFont(self.fixedfont)
-            vbox.addWidget(label2, i, 1)
-            label.setFont(self.fixedfont)
+            label1 = self.labelTile("x"+str(i), 40, 40, 0)
+            label2 = self.labelTile("()", 40, 60, 0)
+            temp = self.labelTile("", 40, 160, 1)
+            self.registerArray[i] = [label1, label2, temp]
+            gridbox.addWidget(self.registerArray[i][0], i, 0)
+            gridbox.addWidget(self.registerArray[i][1], i, 1)
+            gridbox.addWidget(self.registerArray[i][2], i, 2)
             
-            temp = QLabel()
-            self.registerArray.append(temp)
-            self.registerArray[i].setFont(self.fixedfont)
-            self.registerArray[i].setFixedHeight(40)
-            self.registerArray[i].setFixedWidth(160)
-            self.registerArray[i].setStyleSheet("border :1px solid white;")
-            self.registerArray[i].setAlignment(QtCore.Qt.AlignCenter)
-            vbox.addWidget(self.registerArray[i], i, 2)
-            
-        self.updateRegisterView()
-        self.displayWidget.setLayout(vbox)
+        self.displayWidget.setLayout(gridbox)
         self.scroll1.setWidget(self.displayWidget)
         self.scroll1.setWidgetResizable(True)
+        
+        
+
+        
 
 class mainScreen(QWidget, UiComponents):
     def __init__(self):
         super().__init__()
-        self.title = "RISC-V Simulator"
-        self.subTitle = "Made by SAATH"
-        self.top = 200
-        self.left = 100
-        self.width = 1400
-        self.height = 900
-        self.iconName = "GUI/Images/logo.png"
-    
+        self.title = "RISC-V SAATH Simulator"
+        self.directoryPath = os.getcwd()
+        # self.directoryPath = os.path.normpath(os.getcwd() + os.sep + os.pardir)
+        self.currFilePath = os.path.join(self.directoryPath, "test", "test1.mc")
+        self.link = frontBackEndInteraction(self.directoryPath)
+        self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
+        
+        
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
         QTimer.singleShot(3000, self.initWindow)
         self.splash.show()
+        
+      
+        
+    def updateRegisterView(self):
+        alt = getAltNameOfRegister()
+        val = [0]*32
+        for i in range(32):
+            self.registerArray[i][1].setText(str(alt[i]))
+            self.registerArray[i][2].setText("0x" + str(val[i]))
+            
+
+    def updateMemoryView(self, address):
+        # l = self.frontBackEndInteraction.getMemoryView()
+        l= [["a", "a", "a", "a"] for i in range(10)]
+        for i in range(10):
+            for j in range(4):
+                self.memoryArray[i][j+1].setText(l[i][j])
+                
+    def fileOpen(self):
+        f = open(self.currFilePath, 'r')
+        self.editorScreen.setPlainText(f.read())
+        
+    def fileSave(self):
+        text = self.editorScreen.toPlainText()
+        f = open(self.currFilePath, 'w')
+        f.write(text)
+    def fileCompile(self):
+        self.fileSave()
+        self.link.runProgram(self.currFilePath)
         
         
 
     def initWindow(self):
         self.splash.close()
         self.setWindowTitle(self.title)
-        self.setWindowIcon(QtGui.QIcon(self.iconName))
-        self.setGeometry(self.left, self.top, self.width, self.height)
         logo_label = self.mainLabel(top=100, left=100, width=200, height=50)
-        self.editor()
         
+        
+        self.editor(self.currFilePath)
         self.memoryDisplay()
         self.registerDisplay()
+        self.save_button.clicked.connect(lambda: self.fileSave())
+        self.compile_button.clicked.connect(lambda: self.fileCompile())
+        
+        self.updateMemoryView("10000000")
+        self.updateRegisterView()
+        
         self.tabbedView1()
         self.tabbedView2()
+        
         memoryDisplay = self.tabs
         feed = self.tabsMain
+        
         hbox = QHBoxLayout()
         hbox.addWidget(feed,10)
         hbox.addWidget(memoryDisplay, 4)
@@ -195,11 +200,9 @@ class mainScreen(QWidget, UiComponents):
         vbox.addLayout(hbox)
         vbox.setContentsMargins(10,10,10,10)
         self.setLayout(vbox)
-
-        self.show()
-
+        self.showMaximized()
+        
 App = QApplication(sys.argv)
-
-App.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+App.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5',palette=DarkPalette))
 window = mainScreen()
 sys.exit(App.exec_())

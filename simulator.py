@@ -9,23 +9,24 @@ from register import RegisterFile
 from decode import identify
 from helperFunctions import *
 from input import ReadFile
-input = io.BytesIO(os.read(0, os.fstat(0).st_size)).readline
 
-df_control = pd.read_csv('controls.csv')
-df_control = df_control.dropna(axis=0, how='any')
-df_main = pd.read_csv('instructions.csv')
 class Processor:
 
-    def __init__(self):
+    def __init__(self, currFolderPath):
         self._PMI = memory.PMI()
         self._ALU = ALU.ALU()
         self._IAG = IAG.IAG()
         self._fileReader = ReadFile()
         self._registerFile = RegisterFile()
+        self.df_control = pd.read_csv(os.path.join(self._currFolderPath, 'repository', "controls.csv"))
+        self.df_control = self.df_control.dropna(axis=0, how='any')
+        self.df_main = pd.read_csv(os.path.join(self._currFolderPath, 'repository', "instructions.csv"))
+        
+        self._currFolderPath = currFolderPath
+        self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
         self.initialiseTempRegisters()
         self.initialiseControls()
-        self._currFolderPath = os.getcwd()
-        self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
+        
         sys.stdout = self._outputLogFile
         self._currOperationId = 0
         self.cycle = 0
@@ -41,16 +42,16 @@ class Processor:
         self._imm = '0'*8
 
     def initialiseControls(self):
-        self._ALU_select = list(df_control['ALU_select'].astype(int))
-        self._muxB = list(df_control['muxB'].astype(int))
-        self._muxA = list(df_control['muxA'].astype(int))
-        self._muxY = list(df_control['muxY'].astype(int))
-        self._memoryEnable = list(df_control['ME'].astype(int))
-        self.INC_select = list(df_control['muxINC'].astype(int))
-        self.PC_select = list(df_control['muxPC'].astype(int))
-        self.S_select = list(df_control['muxS'].astype(int))
-        self._writeEnable = list(df_control['WE'].astype(int))
-        self.SizeEnable = list(df_control['SE'].astype(int))
+        self._ALU_select = list(self.df_control['ALU_select'].astype(int))
+        self._muxB = list(self.df_control['muxB'].astype(int))
+        self._muxA = list(self.df_control['muxA'].astype(int))
+        self._muxY = list(self.df_control['muxY'].astype(int))
+        self._memoryEnable = list(self.df_control['ME'].astype(int))
+        self.INC_select = list(self.df_control['muxINC'].astype(int))
+        self.PC_select = list(self.df_control['muxPC'].astype(int))
+        self.S_select = list(self.df_control['muxS'].astype(int))
+        self._writeEnable = list(self.df_control['WE'].astype(int))
+        self.SizeEnable = list(self.df_control['SE'].astype(int))
 
     def muxMA(self, MA_select):
         if(MA_select == 0):
@@ -105,7 +106,7 @@ class Processor:
 
     def decode(self):
         print("Decode stage:")
-        info_code = identify(self._IR, df_main)
+        info_code = identify(self._IR, self.df_main)
         print("code :", info_code)
         self._currOperationId = info_code['id']
         try:
@@ -183,3 +184,10 @@ class Processor:
         registers = self._registerFile.get_registerFile()
         filename = os.path.join(self._currFolderPath, "generated", 'registers.txt')
         self._fileReader.printRegisters(registers, filename)
+        
+        
+    def getRegisters(self):
+        return self._registerFile.get_registerFile()
+        
+    def getData(self):
+        return self._PMI.getMemory()

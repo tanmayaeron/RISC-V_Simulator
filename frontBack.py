@@ -27,7 +27,6 @@ class frontBackEndInteraction:
     
     def getMemorySnapshot(self, address):
         mem = self.processor.getData()
-        print(mem)
         l=[]
         address_in_dec = hexToDec(address)
         for i in range(40):
@@ -37,7 +36,6 @@ class frontBackEndInteraction:
                 l.append([])
                 l[-1].append("0x"+address_in_hex)
             l[-1].append(mem[address_in_hex])
-        #print(l)
         return l
 
     def reset(self):

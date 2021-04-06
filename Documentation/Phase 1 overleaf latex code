@@ -22,15 +22,22 @@
 \textsc{Indian Institute of Technology, Ropar} \\    [40pt] 
 \horrule{} \\[0.4cm] 
 \Huge CS204 Course Project - Phase I\\ 
-\horrule{} \\[0.5cm] 
+\horrule{} \\[0.5cm]
+\protect\vspace{2.0cm}
 \large
-\textup{SAATH (Shikhar, Aneeket, Aditya, Tanmay, Het)}\\
-\horrule{} \\[0.2cm] 
-Lecturer - Dr. T.V. Kalyan
+\textup{Team Members:}\\\vspace{1cm}
+\begin{centering}
+\begin{enumerate}
+    \item Aditya Agarwal - 2019CSB1064
+    \item Aneeket Mangal - 2019CSB1071
+    \item Fadia Het Rakeshkumar - 2019CSB1084
+    \item Shikhar Soni - 2019CSB1119
+    \item Tanmay Aeron - 2019CSB1124
+\end{enumerate}
+\end{centering}
 \date{}
 \centering
-\protect\vspace{5.0cm}
-
+\protect\vspace{4.0cm}
 \includegraphics[width=1.0\textwidth]{riscv-logo-1.png}
 }
 
@@ -45,13 +52,13 @@ Lecturer - Dr. T.V. Kalyan
 \end{centering}
 \protect\vspace{2.0cm}
 \large
-The aim of this project is to simulate the machine level execution of RISC V instructions using a high level language.\\
+The aim of this project is to simulate the machine level execution of RISC V 32-bit instructions using a high level language.\\
 
-The Project also aims to give updates to the user regarding each step of the execution of the program. It also returns the final status of the memory and registers as output for the user to analyse the working of their program thoroughly.\\
+The Project also aims to give updates to the user regarding each step of the execution of the program. It also returns the final status of the memory and registers as output for the user to analyse the working of their programs thoroughly.\\
 
 The Project currently allows the user to use 29 different instructions and can be extended to allow the use of any number of instructions by editing the .csv files as long as the instructions are supported by 32-bit RISC V ISA.\\
 
- For each instruction the program gives various updates like IR, PC, decoded instruction, temporary registers like RZ, RY etc during each cycle and prints the number of cycle.\\\\
+ For each instruction the program gives various updates like IR, PC, decoded instruction, temporary registers like RA, RB, RZ, RY, etc during each cycle and prints the number of cycle.\\\\
 The program executes each instruction using five stages in the RISC V architecture.
 
 \begin{centering}
@@ -84,18 +91,39 @@ Front-end - Python3
 \end{Huge}
 \end{centering}
 \protect\vspace{1.0cm}
-We have implemented the project using the following method:
-\newline\newline
-First it takes the input file from a \textsl{\textbf{.mc}} formatted as input.\\
-Then, it stores the \textsl{\textbf{.data}} part into the upper half of the memory and the \textsl{\textbf{.text}} part on the start of the memory.
+We have implemented the project using the following method:\\
+
+First it takes the input from a \textsl{\textbf{.mc}} file that contains the input in the required format, the content of this file can be modified using the GUI editor.\\
+Then, it stores the \textsl{\textbf{.data}} part into the data memory and the \textsl{\textbf{.text}} part on text part of the memory.
 Once that is completed, we run the program using the following method:
 \begin{enumerate}
-\item Instruction Fetch: Data is fetched and the Program Counter is incremented by 4, and the instruction is stored in the Instruction Register.
+\item Instruction Fetch: Data is fetched and temp\_PC is incremented by 4, and the instruction is loaded from the memory and stored in the Instruction Register.
 
-\item Instruction Decode: The instruction is decoded using the opcode, and the funct3 section of the machine code, and then computes the values of rs1, rs2, and rd, whichever are present.
-\item Execute: The ALU executes the instruction by computing the desired output using values stored in registers in RA, RB, imm etc., thus resulting in PC and temporary registers update. We are updating the output in the RZ register.
-\item Memory Access: Memory is read and written in this stage. This stage is used only for load and store instructions. For the remaining instructions, this sta If it is a store instruction we are storing the value of RM at the given memory location MAR. If it is a load instruction we load the MDR in the MuXY. The memory read and update is extremely slow compared to register read and update.
-\item Register Write-back: Here we are storing the value of the temporary register RZ in the rd register thus updating the register file. The register update is extremely fast compared to memory read and update.
-
+\item Instruction Decode: The instruction is decoded using the opcode, funct3 and funct7 section of the machine code. The registers RA and RB are sent the contents of the registers rs1 and rs2 and other required fields of the instruction.
+\item Execute: The ALU executes the instruction by computing the desired output using values stored in registers in RA, RB, imm, etc. We are updating the output in the RZ register.
+\item Memory Access: Memory is read and written in this stage. This stage is used only for load and store instructions. For the remaining instructions, this stage is redundant. The value of the RY register is also consequently updated.
+\item Register Write-back: Here we are storing the value of the temporary register RY in the rd register, resulting in the register file being updated. The register update is extremely fast compared to memory read and update.
 \end{enumerate}
+\newpage
+\begin{centering}
+\begin{Huge}
+\textsf{Graphical User Interface}\\
+\end{Huge}
+\vspace{1cm}
+\includegraphics[width=1.0\textwidth]{pic2.png}
+\end{centering}
+\LARGE
+\\\\
+We have made GUI in both light and dark theme. The theme can be changed using the button "Change theme" on the top right.
+We have shown memory and registers on the right part of the GUI while on the left part there is Editor.
+First of all we will write or paste the code in the Editor on the left side and then when we compile the code will be written in test1.mc file and then the code will be executed. The memory and registers will be updated simultaneously.\\
+We can jump in the memory using Jump to on the bottom right in memory bar.\\
+We can see the register file by scrolling them.\\
+Executing main.py always generates GUI window and you can code in Editor.
+We can also execute non GUI code by writing python3 main.py 2
+
+\newpage
+\begin{centering}
+\includegraphics[width=1.0\textwidth]{pic1.png}
+\end{centering}
 \end{document}

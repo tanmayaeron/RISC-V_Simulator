@@ -1,19 +1,27 @@
-from simulator import Processor
+from GUI.mainPage import *
+import sys
 import os
-
-pathtofolder = os.getcwd()
-processor = Processor(pathtofolder)
-processor.load_mc("bubble.mc")
-
-while True:
-    processor.fetch()
-    if processor.getIR() == '0'*8:
-        break
-    processor.decode()
-    processor.execute()
-    processor.memoryAccess()
-    processor.registerUpdate()
-    
-
-processor.printRegisters()
-processor.printData()
+if __name__ == '__main__':
+    n = len(sys.argv)
+    print("Compiling!!!!")
+    print("Check generated folder for details.")
+    if(n == 2 and sys.argv[1] == '2'):
+        directoryPath = os.getcwd()
+        currFilePath = os.path.join(directoryPath, "test", "main.mc")
+        link = frontBackEndInteraction(directoryPath)
+        link.runProgram(currFilePath)
+        
+    elif(n == 3 and sys.argv[1] == '2'):
+        directoryPath = os.getcwd()
+        currFilePath = os.path.join(directoryPath, "test", sys.argv[2])
+        link = frontBackEndInteraction(directoryPath)
+        link.runProgram(currFilePath)
+        
+    else:
+        App = QApplication(sys.argv)
+        App.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+        window = mainScreen(App)
+        sys.exit(App.exec_())
+        
+        
+   

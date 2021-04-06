@@ -1,0 +1,105 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{geometry}
+ \geometry{
+ a4paper,
+ total={210mm,297mm},
+ left=10mm,
+ top=30mm,
+ right=10mm
+ }
+
+\graphicspath{{./}}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+    \node[shape=circle,draw,inner sep=0.5pt] (char) {#1};}}
+
+\title{ 
+\normalfont \large 
+\textsc{Indian Institute of Technology, Ropar} \\    [40pt] 
+\horrule{} \\[0.4cm] 
+\Huge CS204 Course Project - Phase I\\ 
+\horrule{} \\[0.5cm] 
+\large
+\textup{SAATH (Shikhar, Aneeket, Aditya, Tanmay, Het)}\\
+\horrule{} \\[0.2cm] 
+Lecturer - Dr. T.V. Kalyan
+\date{}
+\centering
+\protect\vspace{5.0cm}
+
+\includegraphics[width=1.0\textwidth]{riscv-logo-1.png}
+}
+
+
+\begin{document}
+\maketitle
+\newpage
+\begin{centering}
+\begin{Huge}
+\textsf{Project Description}\\
+\end{Huge}
+\end{centering}
+\protect\vspace{1.8cm}
+\large
+The aim of this project is to simulate the machine level execution of RISC V instructions using a high level language.\\
+
+The Project also aims to give updates to the user regarding each step of the execution of the program. It also returns the final status of the memory and registers as output for the user to analyse the working of their program thoroughly.\\
+
+The Project currently allows the user to use 29 different instructions and can be extended to allow the use of any number of instructions by editing the .csv files as long as the instructions are supported by 32-bit RISC V ISA.\\
+
+ For each instruction the program gives various updates like IR, PC, decoded instruction, temporary registers like RZ, RY etc during each cycle and prints the number of cycle.\\\\
+The program executes each instruction using five stages namely \\
+\begin{enumerate}
+ \item Instruction Fetch
+  \item Instruction Decode
+  \item Execute
+  \item Memory Access
+  \item Register Write-Back
+\end{enumerate}
+\begin{centering}
+\begin{Huge}
+\vspace{1cm}
+\textsf{Technologies employed}\\
+\end{Huge}
+\end{centering}
+\protect\vspace{1.0cm}
+\begin{center}
+
+\hspace{35mm}\textbf{Back-end} \textrightarrow \hspace{2mm}\textbf{Python3}\newline\newline
+\textbf{Front-end} \textrightarrow \hspace{2mm}\textbf{Python3 PyQt5 library}\\
+\end{center}
+\newline
+\vspace{1cm}
+In the back-end, we used {\bf pandas} library to read \textsl{\textbf{.csv}} files, {\bf os} library to get and add the file path,\\ {\bf defaultdict} to make a hash map for our memory, and {\bf sys} to read and edit files.\\\\
+\begin{itemize}
+  \item 
+  \item Some more text
+  \item blah, blah.
+\end{itemize}
+In the front-end, we used {\bf PyQt5} for GUI and {\bf qdarkstyle} library for using dark theme.
+
+\newpage
+\begin{centering}
+\begin{Huge}
+\textsf{Implementation Details}\\
+\end{Huge}
+\end{centering}
+\protect\vspace{1.0cm}
+We have implemented the project using the following method:
+\newline\newline
+First it takes the input file from a \textsl{\textbf{.mc}} formatted as input.\\
+Then, it stores the \textsl{\textbf{.data}} part into the upper half of the memory and the \textsl{\textbf{.text}} part on the start of the memory.
+Once that is completed, we run the program using the following method:
+\begin{enumerate}
+\item Fetch: Data is fetched and the Program Counter is incremented by 4, and the instruction is stored in the Instruction Register
+
+\item Decode: The instruction is decoded using the opcode, and the funct3 section of the machine code, and then computes the values of rs1, rs2, and rd, whichever are present
+\item Execute: The ALU executes the instruction by computing the desired output using values stored in registers in RA, RB, imm etc., whichever  thus resulting in the PC and temporary registers update.
+\item Memory Access: We are writing and reading memory in this stage. Thus during load and store instructions this is used else in this stage nothing is done.
+\item Register Write-back: Here we are updating the register file.
+\end{enumerate}
+\end{document}

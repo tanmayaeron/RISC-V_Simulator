@@ -43,7 +43,7 @@ Lecturer - Dr. T.V. Kalyan
 \textsf{Project Description}\\
 \end{Huge}
 \end{centering}
-\protect\vspace{1.8cm}
+\protect\vspace{2.0cm}
 \large
 The aim of this project is to simulate the machine level execution of RISC V instructions using a high level language.\\
 
@@ -52,35 +52,30 @@ The Project also aims to give updates to the user regarding each step of the exe
 The Project currently allows the user to use 29 different instructions and can be extended to allow the use of any number of instructions by editing the .csv files as long as the instructions are supported by 32-bit RISC V ISA.\\
 
  For each instruction the program gives various updates like IR, PC, decoded instruction, temporary registers like RZ, RY etc during each cycle and prints the number of cycle.\\\\
-The program executes each instruction using five stages namely \\
-\begin{enumerate}
- \item Instruction Fetch
-  \item Instruction Decode
-  \item Execute
-  \item Memory Access
-  \item Register Write-Back
-\end{enumerate}
+The program executes each instruction using five stages in the RISC V architecture.
+
 \begin{centering}
 \begin{Huge}
-\vspace{1cm}
+\vspace{2.0cm}
 \textsf{Technologies employed}\\
 \end{Huge}
 \end{centering}
-\protect\vspace{1.0cm}
-\begin{center}
+\protect\vspace{2.0cm}
+\textbf{}
+Back-end - Python3
+\begin{enumerate}
+  \item {\bf pandas} for reading {\bf .csv} files.
+  \item {\bf os} for getting and adding path to certain file locations.
+  \item {\bf defaultdict} to make a hash map for out memory.
+  \item {\bf sys} for reading and editing files with ease.
+\end{enumerate}\\
+\textbf{}
 
-\hspace{35mm}\textbf{Back-end} \textrightarrow \hspace{2mm}\textbf{Python3}\newline\newline
-\textbf{Front-end} \textrightarrow \hspace{2mm}\textbf{Python3 PyQt5 library}\\
-\end{center}
-\newline
-\vspace{1cm}
-In the back-end, we used {\bf pandas} library to read \textsl{\textbf{.csv}} files, {\bf os} library to get and add the file path,\\ {\bf defaultdict} to make a hash map for our memory, and {\bf sys} to read and edit files.\\\\
-\begin{itemize}
-  \item 
-  \item Some more text
-  \item blah, blah.
-\end{itemize}
-In the front-end, we used {\bf PyQt5} for GUI and {\bf qdarkstyle} library for using dark theme.
+Front-end - Python3
+\begin{enumerate}
+  \item {\bf PyQt5} for the Graphic User Interface.
+  \item {\bf qdarkstyle} for dark theme.
+\end{enumerate}
 
 \newpage
 \begin{centering}
@@ -95,11 +90,12 @@ First it takes the input file from a \textsl{\textbf{.mc}} formatted as input.\\
 Then, it stores the \textsl{\textbf{.data}} part into the upper half of the memory and the \textsl{\textbf{.text}} part on the start of the memory.
 Once that is completed, we run the program using the following method:
 \begin{enumerate}
-\item Fetch: Data is fetched and the Program Counter is incremented by 4, and the instruction is stored in the Instruction Register
+\item Instruction Fetch: Data is fetched and the Program Counter is incremented by 4, and the instruction is stored in the Instruction Register.
 
-\item Decode: The instruction is decoded using the opcode, and the funct3 section of the machine code, and then computes the values of rs1, rs2, and rd, whichever are present
-\item Execute: The ALU executes the instruction by computing the desired output using values stored in registers in RA, RB, imm etc., whichever  thus resulting in the PC and temporary registers update.
-\item Memory Access: We are writing and reading memory in this stage. Thus during load and store instructions this is used else in this stage nothing is done.
-\item Register Write-back: Here we are updating the register file.
+\item Instruction Decode: The instruction is decoded using the opcode, and the funct3 section of the machine code, and then computes the values of rs1, rs2, and rd, whichever are present.
+\item Execute: The ALU executes the instruction by computing the desired output using values stored in registers in RA, RB, imm etc., thus resulting in PC and temporary registers update. We are updating the output in the RZ register.
+\item Memory Access: Memory is read and written in this stage. This stage is used only for load and store instructions. For the remaining instructions, this sta If it is a store instruction we are storing the value of RM at the given memory location MAR. If it is a load instruction we load the MDR in the MuXY. The memory read and update is extremely slow compared to register read and update.
+\item Register Write-back: Here we are storing the value of the temporary register RZ in the rd register thus updating the register file. The register update is extremely fast compared to memory read and update.
+
 \end{enumerate}
 \end{document}

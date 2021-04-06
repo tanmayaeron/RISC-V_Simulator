@@ -18,6 +18,8 @@ class frontBackEndInteraction:
         self.processor.printRegisters()
         self.processor.printData()
         
+        # return "Compiled"
+        
         
     def getRegisterSnapshot(self):
         l = self.processor.getRegisters()

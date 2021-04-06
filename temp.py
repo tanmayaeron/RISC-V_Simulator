@@ -10,18 +10,19 @@ from qdarkstyle.light.palette import LightPalette
 import os
 from helperFunctions import *
 from frontBack import *
-
+import time
 
 class UiComponents():
     def __init__(self):
         self.fixedfont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
-        self.fixedfont.setPointSize(15)
+        self.fixedfont.setPointSize(16)
 
-    def buttonTile(self, name):
+    def buttonTile(self, name, height, width):
         button = QPushButton()
         button.setText(name)
-        button.setFixedHeight(30)
-        button.setFixedWidth(100)
+        button.setFont(self.fixedfont)
+        button.setFixedHeight(height)
+        button.setFixedWidth(width)
         return button
 
     def labelTile(self, labelName, height, width, isBorder):
@@ -36,10 +37,10 @@ class UiComponents():
         return temp
 
     def mainLabel(self, top, left, height, width):
-        self.save_button = self.buttonTile("Save")
-        self.compile_button = self.buttonTile("Compile")
+        self.save_button = self.buttonTile("Save", 50, 100)
+        self.compile_button = self.buttonTile("Compile", 50, 100)
         self.currentTheme = "Dark Theme"
-        self.theme_button = self.buttonTile("Change Theme")
+        self.theme_button = self.buttonTile("Change\nTheme", 50, 100)
         self.theme_button.setContentsMargins(10,10,20,10)
         self.save_button.setContentsMargins(10, 10, 20, 10)
         self.compile_button.setContentsMargins(10, 10, 20, 10)
@@ -79,14 +80,35 @@ class UiComponents():
         self.memoryArray = [[] for i in range(10)]
         gridbox = QGridLayout()
         for i in range(10):
-            label = self.labelTile("0x", 40, 100, 0)
+            label = self.labelTile("0x", 40, 160, 0)
             self.memoryArray[i].append(label)
             gridbox.addWidget(self.memoryArray[i][0], i, 0)
             for j in range(4):
                 temp = self.labelTile("", 40, 40, 1)
                 self.memoryArray[i].append(temp)
                 gridbox.addWidget(self.memoryArray[i][j + 1], i, j + 1)
+                
+        self.memoryArray.append([])
+        self.tempLineEdit = QLineEdit()
+        self.tempLineEdit.setFont(self.fixedfont)
+        self.tempLineEdit.setFixedHeight(40)
+        self.tempLineEdit.setFixedWidth(200)
+        self.tempLineEdit.setStyleSheet("border :1px solid white;")
+        self.tempLineEdit.setAlignment(QtCore.Qt.AlignCenter)
+        self.tempLineEdit.setMaxLength(8)
+        self.tempLineEdit.setFixedWidth(300)
+        # self.tempLineEdit.setValidator(QRegexValidator())
+        
+        self.jump_button =  self.buttonTile("Jump to", 30, 116)
+        self.memoryArray[-1].append(self.tempLineEdit)
+        # self.memoryArray[-1].append(self.tempLineEdit)
+        self.memoryArray[-1].append(self.jump_button)
+        gridbox.addWidget(self.memoryArray[-1][0], 10, 0, 1, 16)
+        gridbox.addWidget(self.memoryArray[-1][1], 10,3, 1, 20)
 
+        gridbox.setVerticalSpacing(34)
+        gridbox.setHorizontalSpacing(30)
+        # gridbox.setAlignment(QtCore.Qt.AlignCenter)
         self.displayWidget.setLayout(gridbox)
         self.scroll.setWidget(self.displayWidget)
         self.scroll.setWidgetResizable(True)
@@ -118,6 +140,8 @@ class UiComponents():
             gridbox.addWidget(self.registerArray[i][1], i, 1)
             gridbox.addWidget(self.registerArray[i][2], i, 2)
 
+        
+        gridbox.setAlignment(QtCore.Qt.AlignCenter)
         self.displayWidget.setLayout(gridbox)
         self.scroll1.setWidget(self.displayWidget)
         self.scroll1.setWidgetResizable(True)
@@ -161,10 +185,22 @@ class mainScreen(QWidget, UiComponents):
         f.write(text)
 
     def fileCompile(self):
+        self.compile_button.setText("\U0000231B")
         self.fileSave()
         self.link.reset()
         self.link.runProgram(self.currFilePath)
+        self.compile_button.setText("\U00002705")
         self.updateRegisterView()
+        self.updateMemoryView("10000000")
+        
+    def jumpAddress(self):
+        a = self.tempLineEdit.text()
+        if(len(a) == 8):
+            self.updateMemoryView(a)
+        
+        
+        
+        
 
     def changeTheme(self):
         if self.currentTheme == "Dark Theme":
@@ -185,6 +221,7 @@ class mainScreen(QWidget, UiComponents):
         self.save_button.clicked.connect(lambda: self.fileSave())
         self.compile_button.clicked.connect(lambda: self.fileCompile())
         self.theme_button.clicked.connect(lambda: self.changeTheme())
+        self.jump_button.clicked.connect(lambda: self.jumpAddress())
 
         self.updateMemoryView("10000000")
         self.updateRegisterView()

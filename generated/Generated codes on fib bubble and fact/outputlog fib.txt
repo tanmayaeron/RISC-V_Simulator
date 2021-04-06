@@ -7777,3 +7777,135 @@ The value of PC is : 00000058
 The instruction in IR is : 00650533
 Decode stage:
 code : {'neumonic': 'add', 'opcode': '0b0110011', 'funct3': '0b000', 'funct7': '0b0000000', 'rs1': '01010', 'rs2': '00110', 'rd': '01010', 'format': 'R', 'id': 0}
+RA is : 00000002
+RB is : 00000003
+rd is : 10
+Execute stage:
+operand1 is 00000002 operand2 is: 00000003
+RZ is : 00000005
+Memory Access stage:
+Register Update Stage:
+RD: RY: 10 00000005
+cycle is : 522
+Fetch stage:
+The value of PC is : 0000005c
+The instruction in IR is : 00008067
+Decode stage:
+code : {'neumonic': 'jalr', 'opcode': '0b1100111', 'funct3': '0b000', 'rs1': '00001', 'rd': '00000', 'immediate': '000000000000', 'format': 'I', 'id': 23}
+RA is : 00000048
+rd is : 0
+imm is : 00000000
+Execute stage:
+operand1 is 00000048 operand2 is: 00000003
+RZ is : 0000004b
+Memory Access stage:
+Register Update Stage:
+RD: RY: 0 00000060
+cycle is : 523
+Fetch stage:
+The value of PC is : 00000048
+The instruction in IR is : 00012303
+Decode stage:
+code : {'neumonic': 'lw', 'opcode': '0b0000011', 'funct3': '0b010', 'rs1': '00010', 'rd': '00110', 'immediate': '000000000000', 'format': 'I', 'id': 14}
+RA is : 7fffffe4
+rd is : 6
+imm is : 00000000
+Execute stage:
+operand1 is 7fffffe4 operand2 is: 00000000
+RZ is : 7fffffe4
+Memory Access stage:
+Register Update Stage:
+RD: RY: 6 00000008
+cycle is : 524
+Fetch stage:
+The value of PC is : 0000004c
+The instruction in IR is : 00410113
+Decode stage:
+code : {'neumonic': 'addi', 'opcode': '0b0010011', 'funct3': '0b000', 'rs1': '00010', 'rd': '00010', 'immediate': '000000000100', 'format': 'I', 'id': 9}
+RA is : 7fffffe4
+rd is : 2
+imm is : 00000004
+Execute stage:
+operand1 is 7fffffe4 operand2 is: 00000004
+RZ is : 7fffffe8
+Memory Access stage:
+Register Update Stage:
+RD: RY: 2 7fffffe8
+cycle is : 525
+Fetch stage:
+The value of PC is : 00000050
+The instruction in IR is : 00412083
+Decode stage:
+code : {'neumonic': 'lw', 'opcode': '0b0000011', 'funct3': '0b010', 'rs1': '00010', 'rd': '00001', 'immediate': '000000000100', 'format': 'I', 'id': 14}
+RA is : 7fffffe8
+rd is : 1
+imm is : 00000004
+Execute stage:
+operand1 is 7fffffe8 operand2 is: 00000004
+RZ is : 7fffffec
+Memory Access stage:
+Register Update Stage:
+RD: RY: 1 00000008
+cycle is : 526
+Fetch stage:
+The value of PC is : 00000054
+The instruction in IR is : 00810113
+Decode stage:
+code : {'neumonic': 'addi', 'opcode': '0b0010011', 'funct3': '0b000', 'rs1': '00010', 'rd': '00010', 'immediate': '000000001000', 'format': 'I', 'id': 9}
+RA is : 7fffffe8
+rd is : 2
+imm is : 00000008
+Execute stage:
+operand1 is 7fffffe8 operand2 is: 00000008
+RZ is : 7ffffff0
+Memory Access stage:
+Register Update Stage:
+RD: RY: 2 7ffffff0
+cycle is : 527
+Fetch stage:
+The value of PC is : 00000058
+The instruction in IR is : 00650533
+Decode stage:
+code : {'neumonic': 'add', 'opcode': '0b0110011', 'funct3': '0b000', 'funct7': '0b0000000', 'rs1': '01010', 'rs2': '00110', 'rd': '01010', 'format': 'R', 'id': 0}
+RA is : 00000005
+RB is : 00000008
+rd is : 10
+Execute stage:
+operand1 is 00000005 operand2 is: 00000008
+RZ is : 0000000d
+Memory Access stage:
+Register Update Stage:
+RD: RY: 10 0000000d
+cycle is : 528
+Fetch stage:
+The value of PC is : 0000005c
+The instruction in IR is : 00008067
+Decode stage:
+code : {'neumonic': 'jalr', 'opcode': '0b1100111', 'funct3': '0b000', 'rs1': '00001', 'rd': '00000', 'immediate': '000000000000', 'format': 'I', 'id': 23}
+RA is : 00000008
+rd is : 0
+imm is : 00000000
+Execute stage:
+operand1 is 00000008 operand2 is: 00000008
+RZ is : 00000010
+Memory Access stage:
+Register Update Stage:
+RD: RY: 0 00000060
+cycle is : 529
+Fetch stage:
+The value of PC is : 00000008
+The instruction in IR is : 0580006F
+Decode stage:
+code : {'neumonic': 'jal', 'opcode': '0b1101111', 'immediate': '000000000000001011000', 'rd': '00000', 'format': 'UJ', 'id': 22}
+rd is : 0
+imm is : 00000058
+Execute stage:
+operand1 is 00000008 operand2 is: 00000008
+RZ is : 00000010
+Memory Access stage:
+Register Update Stage:
+RD: RY: 0 0000000c
+cycle is : 530
+Fetch stage:
+The value of PC is : 00000060
+The instruction in IR is : 00000000

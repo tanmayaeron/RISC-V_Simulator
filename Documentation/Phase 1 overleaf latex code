@@ -1,0 +1,101 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{geometry}
+ \geometry{
+ a4paper,
+ total={210mm,297mm},
+ left=10mm,
+ top=30mm,
+ right=10mm
+ }
+
+\graphicspath{{./}}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+    \node[shape=circle,draw,inner sep=0.5pt] (char) {#1};}}
+
+\title{ 
+\normalfont \large 
+\textsc{Indian Institute of Technology, Ropar} \\    [40pt] 
+\horrule{} \\[0.4cm] 
+\Huge CS204 Course Project - Phase I\\ 
+\horrule{} \\[0.5cm] 
+\large
+\textup{SAATH (Shikhar, Aneeket, Aditya, Tanmay, Het)}\\
+\horrule{} \\[0.2cm] 
+Lecturer - Dr. T.V. Kalyan
+\date{}
+\centering
+\protect\vspace{5.0cm}
+
+\includegraphics[width=1.0\textwidth]{riscv-logo-1.png}
+}
+
+
+\begin{document}
+\maketitle
+\newpage
+\begin{centering}
+\begin{Huge}
+\textsf{Project Description}\\
+\end{Huge}
+\end{centering}
+\protect\vspace{2.0cm}
+\large
+The aim of this project is to simulate the machine level execution of RISC V instructions using a high level language.\\
+
+The Project also aims to give updates to the user regarding each step of the execution of the program. It also returns the final status of the memory and registers as output for the user to analyse the working of their program thoroughly.\\
+
+The Project currently allows the user to use 29 different instructions and can be extended to allow the use of any number of instructions by editing the .csv files as long as the instructions are supported by 32-bit RISC V ISA.\\
+
+ For each instruction the program gives various updates like IR, PC, decoded instruction, temporary registers like RZ, RY etc during each cycle and prints the number of cycle.\\\\
+The program executes each instruction using five stages in the RISC V architecture.
+
+\begin{centering}
+\begin{Huge}
+\vspace{2.0cm}
+\textsf{Technologies employed}\\
+\end{Huge}
+\end{centering}
+\protect\vspace{2.0cm}
+\textbf{}
+Back-end - Python3
+\begin{enumerate}
+  \item {\bf pandas} for reading {\bf .csv} files.
+  \item {\bf os} for getting and adding path to certain file locations.
+  \item {\bf defaultdict} to make a hash map for out memory.
+  \item {\bf sys} for reading and editing files with ease.
+\end{enumerate}\\
+\textbf{}
+
+Front-end - Python3
+\begin{enumerate}
+  \item {\bf PyQt5} for the Graphic User Interface.
+  \item {\bf qdarkstyle} for dark theme.
+\end{enumerate}
+
+\newpage
+\begin{centering}
+\begin{Huge}
+\textsf{Implementation Details}\\
+\end{Huge}
+\end{centering}
+\protect\vspace{1.0cm}
+We have implemented the project using the following method:
+\newline\newline
+First it takes the input file from a \textsl{\textbf{.mc}} formatted as input.\\
+Then, it stores the \textsl{\textbf{.data}} part into the upper half of the memory and the \textsl{\textbf{.text}} part on the start of the memory.
+Once that is completed, we run the program using the following method:
+\begin{enumerate}
+\item Instruction Fetch: Data is fetched and the Program Counter is incremented by 4, and the instruction is stored in the Instruction Register.
+
+\item Instruction Decode: The instruction is decoded using the opcode, and the funct3 section of the machine code, and then computes the values of rs1, rs2, and rd, whichever are present.
+\item Execute: The ALU executes the instruction by computing the desired output using values stored in registers in RA, RB, imm etc., thus resulting in PC and temporary registers update. We are updating the output in the RZ register.
+\item Memory Access: Memory is read and written in this stage. This stage is used only for load and store instructions. For the remaining instructions, this sta If it is a store instruction we are storing the value of RM at the given memory location MAR. If it is a load instruction we load the MDR in the MuXY. The memory read and update is extremely slow compared to register read and update.
+\item Register Write-back: Here we are storing the value of the temporary register RZ in the rd register thus updating the register file. The register update is extremely fast compared to memory read and update.
+
+\end{enumerate}
+\end{document}

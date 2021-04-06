@@ -150,7 +150,7 @@ class mainScreen(QWidget, UiComponents):
         self.App = App
         self.title = "RISC-V Simulator"
         self.directoryPath = os.getcwd()
-        self.currFilePath = os.path.join(self.directoryPath, "test", "test1.mc")
+        self.currFilePath = os.path.join(self.directoryPath, "test", "main.mc")
         self.link = frontBackEndInteraction(self.directoryPath)
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)

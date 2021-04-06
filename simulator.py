@@ -107,34 +107,24 @@ class Processor:
         info_code = identify(self._IR, self.df_main)
         print("code :", info_code)
         self._currOperationId = info_code['id']
-        try:
-            registernumber = int(info_code['rs1'], 2)
-            self._RA = self._registerFile.get_register(registernumber)
-            print("RA is :", self._RA)
-        except:
-            pass
 
-        try:
-            registernumber = int(info_code['rs2'], 2)
-            self._RB = self._registerFile.get_register(registernumber)
-            self._RM = self._RB
-            print("RB is :", self._RB)
-        except:
-            pass
+        registernumber = int(info_code['rs1'], 2)
+        self._RA = self._registerFile.get_register(registernumber)
+        print("RA is :", self._RA)
 
-        try:
-            rd = int(info_code['rd'], 2)
-            self._rd = rd
-            print("rd is :", self._rd)
-        except:
-            pass
+        registernumber = int(info_code['rs2'], 2)
+        self._RB = self._registerFile.get_register(registernumber)
+        self._RM = self._RB
+        print("RB is :", self._RB)
 
-        try:
-            immediate = extendImmediate(info_code['immediate'])
-            self._imm = binToHex(immediate)
-            print("imm is :", self._imm)
-        except:
-            pass
+        rd = int(info_code['rd'], 2)
+        self._rd = rd
+        print("rd is :", self._rd)
+
+        immediate = extendImmediate(info_code['immediate'])
+        self._imm = binToHex(immediate)
+        print("imm is :", self._imm)
+
 
     def execute(self):
         print("Execute stage:")

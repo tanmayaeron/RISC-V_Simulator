@@ -33,20 +33,16 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
+    <li><a href="#instructions-to-use-gui">Usage</a></li>
   </ol>
 </details>
 
 
-
-<!-- ABOUT THE PROJECT -->
 ## About The Project
 
 
-The aim of this project is to simulate the machine level execution of RISC V 32-bit instructions using a high level language.\\
-
-The Project also aims to give updates to the user regarding each step of the execution of the program. It also returns the final status of the memory and registers as output for the user to analyse the working of their programs thoroughly.
-The Project currently allows the user to use 29 different instructions and can be extended to allow the use of any number of instructions by editing the .csv files as long as the instructions are supported by 32-bit RISC V ISA.
+The aim of this project is to simulate the machine level execution of RISC V 32-bit instructions using a high level language. The Project also aims to give updates to the user regarding each step of the execution of the program.
+It also returns the final status of the memory and registers as output for the user to analyse the working of their programs thoroughly. The Project currently allows the user to use 29 different instructions and can be extended to allow the use of any number of instructions by editing the .csv files as long as the instructions are supported by 32-bit RISC V ISA.
 For each instruction the program gives various updates like IR, PC, decoded instruction, temporary registers like RA, RB, RZ, RY, etc. during each cycle and prints the number of cycles.
 The program executes each instruction using five stages as described in the RISC V architecture.
 
@@ -68,7 +64,7 @@ This is an example of how to list things you need to use the software and how to
 * <b>pandas: </b> for reading .csv files.
 * <b>os: </b> for getting and adding path to certain file locations.
 * <b>defaultdict: </b> to make a hash map for memory.
-* <b> sys: </b> for reading and editing files with ease.
+* <b>sys: </b> for reading and editing files with ease.
 
 #### Front-end - Python3
 * <b>PyQT5: </b> for the Graphic User Interface.
@@ -76,22 +72,50 @@ This is an example of how to list things you need to use the software and how to
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. Unzip fileName.zip and locate the folder directory using cmd
+
+2. Install required libraries using
    ```sh
-   git clone https://github.com/your_username_/Project-Name.git
+    pip install -r requirements.txt
    ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```JS
-   const API_KEY = 'ENTER YOUR API';
-   ```
+3. To run the GUI version enter
+  ```sh
+  python main.py
+  ```
+4. To run the non-GUI version on the default file
+  ```sh
+  python main.py 2
+  ```
+5. To run the non-GUI version on a specific file
+  ```sh
+  python main.py 2 filename.mc
+  ```
+  <b>Note:- </b> file should be present in the test directory
 
 
 
+### Instructions to use GUI
+1. Write the code you wish to run in the editor window. You may copy it from any other location as wel.
+2. You may save the file using save button.
+3. To run the file, press compile button. Once the code completes execution, a tick sign will be visible on the button.
+4. You may use the register and memory tabs to see their current state.
+
+### Input Format
+* In text segment, data is word by word while in data segment it is byte by byte.
+* Text segment followed by data segment demarcated by '$', each line is of format: "address data".
+* Example:
+  ```
+    0x0 0x00500513
+    0x4 0x008000EF
+    0x8 0x0440006F
+    $
+    0x10000000 0x64
+  ```
+### Output Format
+Check the generated folder for details of compilation. It contains:
+  * <b>memory.txt: </b> details of memory
+  * <b>register.txt: </b> details of registers
+  * <b>outputLog.txt: </b> details of changes in temporary registers for each cycle
 
 ### Contributors
 * Aditya Agarwal - 2019CSB1064

@@ -185,6 +185,7 @@ class Processor:
 
     def reset(self):
         self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
+        sys.stdout = self._outputLogFile
         self._registerFile.initialise_registers()
         self._PMI.clearMemory()
         self._IAG.initialiseIAG()

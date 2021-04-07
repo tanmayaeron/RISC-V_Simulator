@@ -1,8 +1,6 @@
 <br />
 <p align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
     <img src="GUI/Images/logo.png" alt="Logo" width="580" height="200">
-  </a>
 
   <h3 align="center">RISC-V Simulator</h3>
 
@@ -117,6 +115,16 @@ Check the generated folder for details of compilation. It contains:
   * <b>register.txt: </b> details of registers
   * <b>outputLog.txt: </b> details of changes in temporary registers for each cycle
 
+
+### ScreenShots
+<p align="center">
+    <img src="Documentation/Images/pic1.png" alt="Logo" width="1080" height="500">
+ </p>
+<p align="center">
+    <img src="Documentation/Images/pic2.png" alt="Logo" width="1080" height="500">
+ </p>
+   
+   
 ### Contributors
 * Aditya Agarwal - 2019CSB1064
 * Aneeket Mangal - 2019CSB1071

@@ -190,6 +190,7 @@ class mainScreen(QWidget, UiComponents):
         
     def jumpAddress(self):
         a = self.tempLineEdit.text()
+        a = a.lower()
         if(len(a) == 8):
             self.updateMemoryView(a)
         

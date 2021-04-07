@@ -23,5 +23,4 @@ if __name__ == '__main__':
         window = mainScreen(App)
         sys.exit(App.exec_())
         
-        
-   
+

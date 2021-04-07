@@ -36,9 +36,3 @@ class RegisterFile:
     def set_register(self, index, data, writeEnable):
         if index != 0 and writeEnable == 1:
             self._registers[index] = data[-8:]
-
-
-if __name__ == '__main__':
-    rf = RegisterFile()
-    rf.initialise_registers()
-    rf.print_registers()

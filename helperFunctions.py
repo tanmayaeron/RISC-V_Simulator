@@ -28,7 +28,6 @@ def extendImmediate(immediate,isSignExtended = True):
         immediate = immediate[-32:]
     return immediate
 
-
 def hexToBin(operand):
     generatedBinaryNumber = "{0:08b}".format(int(operand, 16))
     return generatedBinaryNumber

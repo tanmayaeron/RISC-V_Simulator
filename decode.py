@@ -1,7 +1,4 @@
 import pandas as pd
-
-# df_main = pd.read_csv('instructions.csv')
-
 def identify(code, df_main):
     """
 

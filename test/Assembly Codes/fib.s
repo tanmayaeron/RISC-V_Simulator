@@ -11,8 +11,8 @@ addi sp,sp,-8
 sw x10,0(sp)
 sw x1,4(sp)
 li x11,1
-bge x10,x11,l1
-beq x10,x11,l1
+
+blt x11,x10,l1
 addi sp,sp,8
 jalr x0,x1,0
 

@@ -23,14 +23,13 @@
     <li>
       <a href="#about-the-project">About The Project</a>
       <ul>
-        <li><a href="#contributors">Built With</a></li>
+        <li><a href="#contributors">Contributors</a></li>
       </ul>
     </li>
     <li>
       <a href="">Getting Started</a>
       <ul>
-        <li><a href="libraries-used">Libraries Used</a></li>
-        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#libraries-used">Libraries Used</a></li>
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
@@ -94,8 +93,7 @@ This is an example of how to list things you need to use the software and how to
 
 
 
-<!-- CONTACT -->
-## Contributors
+### Contributors
 * Aditya Agarwal - 2019CSB1064
 * Aneeket Mangal - 2019CSB1071
 * Fadia Het Rakeshkumar - 2019CSB1084

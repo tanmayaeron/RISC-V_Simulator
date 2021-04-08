@@ -187,9 +187,14 @@ class mainScreen(QWidget, UiComponents):
         self.compile_button.setText("\U00002705")
         self.updateRegisterView()
         self.updateMemoryView("10000000")
+        loop = QEventLoop()
+        QTimer.singleShot(1000,loop.quit)
+        loop.exec_()
+        self.compile_button.setText("Compile")
         
     def jumpAddress(self):
         a = self.tempLineEdit.text()
+        a = a.lower()
         if(len(a) == 8):
             self.updateMemoryView(a)
         

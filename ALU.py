@@ -18,7 +18,6 @@ class ALU:
         self._control = 0
         self._output = 0
 
-
     def operate(self, operand1, operand2, control):
         self._input1 = hexToDec(operand1)
         self._input2 = hexToDec(operand2)

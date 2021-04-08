@@ -29,6 +29,9 @@ class frontBackEndInteraction:
         mem = self.processor.getData()
         l=[]
         address_in_dec = hexToDec(address)
+        temp = address_in_dec%4
+        address_in_hex = "0" * 8 + hex(address_in_dec -temp)[2:]
+        address_in_dec = hexToDec(address_in_hex)
         for i in range(40):
             address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
             address_in_hex = address_in_hex[-8:]

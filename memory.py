@@ -1,7 +1,6 @@
 from collections import defaultdict
 from helperFunctions import *
 
-
 def make_length(data, length):
     data = "0"*length+data
     return data[-length:]
@@ -163,9 +162,3 @@ class PMI:
         elif currMemoryEnable == 2:
             self.storeData(size)
 
-if __name__ == '__main__':
-    interface = PMI()
-    interface.setMAR("1000000f")
-    interface.setMDR("DEADBEAF")
-    interface.storeData(2)
-    print(interface.print_memory())

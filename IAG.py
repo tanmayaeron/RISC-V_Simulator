@@ -1,12 +1,6 @@
 from helperFunctions import *
         
 class IAG:
-
-    '''
-    data:
-
-    method:
-    '''
     def __init__(self):
         self.initialiseIAG()
 

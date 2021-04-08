@@ -9,7 +9,7 @@ from register import RegisterFile
 from decode import identify
 from helperFunctions import *
 from input import ReadFile
-
+ 
 class Processor:
 
     def __init__(self, currFolderPath):
@@ -169,6 +169,7 @@ class Processor:
         filename = os.path.join(self._currFolderPath, "generated", 'memory.txt')
         memorySnapshot = self._PMI.getMemory()
         self._fileReader.printMemory(memorySnapshot, filename)
+        self._outputLogFile.close()
 
     def printRegisters(self):
         registers = self._registerFile.get_registerFile()
@@ -183,6 +184,8 @@ class Processor:
         return self._PMI.getMemory()
 
     def reset(self):
+        self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
+        sys.stdout = self._outputLogFile
         self._registerFile.initialise_registers()
         self._PMI.clearMemory()
         self._IAG.initialiseIAG()

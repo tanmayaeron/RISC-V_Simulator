@@ -1,0 +1,19 @@
+Fetch stage:
+The value of PC is : 00000000
+The instruction in IR is : 00150513
+Decode stage:
+code : {'funct3': '0b000', 'immediate': '000000000001', 'format': 'I', 'opcode': '0b0010011', 'neumonic': 'addi', 'id': 9, 'rs1': '01010', 'rs2': '00001', 'rd': '01010'}
+RA is : 00000000
+RB is : 00000000
+rd is : 10
+imm is : 00000001
+Execute stage:
+operand1 is 00000000 operand2 is: 00000001
+RZ is : 00000001
+Memory Access stage:
+Register Update Stage:
+RD: RY: 10 00000001
+cycle is : 1
+Fetch stage:
+The value of PC is : 00000004
+The instruction in IR is : 00000000

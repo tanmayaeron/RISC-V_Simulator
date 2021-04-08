@@ -5,8 +5,8 @@ For each instruction the program gives various updates like IR, PC, decoded inst
 The program executes each instruction using five stages as described in the RISC V architecture.
 
 Prerequisites
-    * python (>3.7)
-    * pip (>21.0.3)
+    * python (>=3.7)
+    * pip (>=21.0.3)
 
 Libraries Used
 # Back-end - Python3
@@ -20,7 +20,7 @@ Libraries Used
     * qdarkstyle: for dark theme
 
 Installation
-    1. Unzip fileName.zip and locate the folder directory using cmd
+    1. Unzip the zip file and locate the folder directory using cmd
 
     2. Install required libraries using
         pip install -r requirements.txt
@@ -76,5 +76,5 @@ Work split among team members:-
 * Aditya Agarwal - memory.py, main.py, documentation, simulator.py, testing
 * Aneeket Mangal - ALU.py, mainPage.py, frontBack.py, readme files, simulator.py
 * Fadia Het Rakeshkumar - testing, input.py, helperFunctions.py, simulator.py, documentation
-* Shikhar Soni - testing, controls.csv, simulator.py, memory.py, ALU.py
+* Shikhar Soni - documentation, controls.csv, simulator.py, memory.py, ALU.py
 * Tanmay Aeron - decode.py, IAG.py, register.py, instructions.csv, simulator.py

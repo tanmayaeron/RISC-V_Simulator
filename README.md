@@ -74,7 +74,7 @@ This is an example of how to list things you need to use the software and how to
 
 2. Install required libraries using
    ```sh
-    pip install -r requirements.txt
+   pip install -r requirements.txt
    ```
 3. To run the GUI version enter
   ```sh

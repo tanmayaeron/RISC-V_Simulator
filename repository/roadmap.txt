@@ -1,49 +1,59 @@
--read .mc file load data into data segment
+- dual boot memory                                                         #aneeket  
+  text memory
+  - word aligned
+  data memory
+  - not word aligned
+  -memory access simultaneously
+  -two mar mdr
+  #change simulator.py
+  -IR and memory access
+  -function PMI class text & data or one more signal 
+  
+- pipeline buffers                                                         #shikhar
+  - class
+    - member 
+      - dictionary
+        - key - name of register IR etc.
+        - value - value of register (string) 
+    - method 
+      - get send key, return value , check if key present 
+      - set key value pair send
 
-memory class
+- Branch target buffer                                                     #tanmay
+  - class 
+    - member 
+      - dictionary 
+      - max limit 
+    - method 
+      - set
+      - check if present   
 
--data segment - implement in dictionary
- -key - byte address
- -value- string 
- -little endian  
- -functions - access byte, access word,read byte, read word
+- comparator for decode stage                                              #aditya
+  - class
+  - members
+    input1
+    input2
+  - methods 
+    caller 
+    - param : input1 input2 mode 
+    - equal, greater than equal to, less than, not equal 
+      - make list and call list[mode] ? 
+      - helper functions 
+    - return "for equal" 1 if equal 0 otherwise                                                  
 
--text segment
- -instructions are word aligned
- -
  
--stack
+ 
+- data forwarding
+  include data path for MtoE forwarding etc
 
-memory interface class 
-- MAR MDR member field
-- write read memory member functs
+- identify data hazard
+  which two ? 
+ 
+- stalling pipeline
 
-register file class 
--
+- flushing the pipeline 
 
-Program counter, instruction register
-
-
-fetch 
-memory class interaction
-
-decode
-- input - machine code
-- output -  
-- data in file 
-- csv/json
-- key opcode
-  - funct3
-  - funct7
-  
-  
-  ####### To Do 1 April 2021 #######
-  - size signal
-  - PC to muxA
-  - make twos complement in helper function
-  - immediate extension in identify ( see if it is already happening in decode) 
-  - signal for muxA
-  - mux for INC select signal 
+- static branch prediction  
 
 
 

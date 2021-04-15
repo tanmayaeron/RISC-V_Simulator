@@ -11,11 +11,10 @@ class BTB:
     """
 
     def __init__(self):
-        self.lookup = defaultdict(str)
-        pass
+        self.lookup = defaultdict(list)
 
     def insert(self, PC, target):
-        if PC not in self.lookup.keys():
+        if PC not in self.lookup:
             self.lookup[PC] = [0, target]
 
     def predict(self, PC):
@@ -23,10 +22,10 @@ class BTB:
 
     def getTarget(self, PC):
         return self.lookup[PC][1]
-    
+
     def setTarget(self, PC, newTarget):
         self.lookup[PC][1] = newTarget
-        
+
     def changeState(self, PC, Outcome):
         if Outcome != self.lookup[PC][0]:
             self.lookup[PC][0] = 1 - self.lookup[PC][0]

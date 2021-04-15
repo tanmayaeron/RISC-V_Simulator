@@ -1,4 +1,4 @@
-class buffer:
+class Buffer:
     
     def __init__(self):
         dict = {}

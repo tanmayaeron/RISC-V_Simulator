@@ -23,7 +23,10 @@ class BTB:
 
     def getTarget(self, PC):
         return self.lookup[PC][1]
-
+    
+    def setTarget(self, PC, newTarget):
+        self.lookup[PC][1] = newTarget
+        
     def changeState(self, PC, Outcome):
         if Outcome != self.lookup[PC][0]:
             self.lookup[PC][0] = 1 - self.lookup[PC][0]

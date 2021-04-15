@@ -16,10 +16,10 @@ class BTB:
             self.lookup[PC] = [0, target]
 
     def predict(self, PC):
-		return self.lookup[PC][0]
+	return self.lookup[PC][0]
 
     def getTarget(self, PC):
-		return self.lookup[PC][1]
+	return self.lookup[PC][1]
 
     def changeState(self, PC, Outcome):
         if Outcome != self.lookup[PC][0]:

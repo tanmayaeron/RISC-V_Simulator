@@ -15,10 +15,10 @@ class BTB:
         if PC not in self.lookup.keys():
             self.lookup[PC] = [0, target]
 
-	def predict(self, PC):
+    def predict(self, PC):
 		return self.lookup[PC][0]
 
-	def getTarget(self, PC):
+    def getTarget(self, PC):
 		return self.lookup[PC][1]
 
     def changeState(self, PC, Outcome):

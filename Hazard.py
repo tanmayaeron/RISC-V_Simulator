@@ -1,3 +1,4 @@
+
 from collections import defaultdict
 
 
@@ -11,11 +12,11 @@ class HDU:
     WB->rd
     """
 
-    def _init_(self):
+    def __init__(self):
         self.dict = defaultdict(int)
 
-    # don't call for branch instruction beq, blt
     def isHazard(self, cycle, rs1=-1, rs2=-2, rd=-3):
+        # don't call for branch instruction beq, blt
         if rd == 0:
             return False  # no hazard as x0 register
         # (stage, cycle number)
@@ -23,8 +24,8 @@ class HDU:
         rdprev2 = self.dict[(2, cycle-2)] if self.dict[(2, cycle-2)] else -5
         return False if len(set([rs1, rs2, rdprev1, rdprev2])) == 4 else True
 
-    # load then store hazard
     def isAfterLoadHazard(self, cycle, rs1=-1, rs2=-1, rd=-3):
+        # load then store hazard
         """
         li x12 0x1000000
         ld x11,0(x12)
@@ -36,6 +37,16 @@ class HDU:
         rdprev2 = self.dict[(2, cycle-2)] if self.dict[(2, cycle-2)] else -5
         rdprev3 = self.dict[(2, cycle-3)] if self.dict[(2, cycle-3)] else -6
         return False if len(set([rs1, rs2, rdprev1, rdprev2, rdprev3])) == 5 else True
+
+    def isStoreLoadHazard(self, cycle, rs1=-1, rs2=-1, rd=-3):
+        """
+        sw x11,0(x12)
+        lw x12,0(x12)
+        """
+        if rd == 0:
+            return False  # no hazard as x0 register
+
+        pass
 
     def set_hdu(self, cycle, stage, result):
 

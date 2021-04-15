@@ -1,3 +1,6 @@
+from collections import defaultdict
+
+
 class BTB:
 
     """
@@ -7,14 +10,13 @@ class BTB:
         target is the target address if Taken
     """
 
-    def _init_(self):
+    def __init__(self):
         self.lookup = defaultdict(str)
         pass
 
     def insert(self, PC, target):
         if PC not in self.lookup.keys():
             self.lookup[PC] = [0, target]
-        return
 
     def predict(self, PC):
         return self.lookup[PC][0]

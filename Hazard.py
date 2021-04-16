@@ -1,29 +1,29 @@
 from collections import defaultdict
 
-"""
-    normal
-    normal
+class Buffer:
 
-    sw
-    normal
+    def __init__(self):
+        self.dict = defaultdict(lambda: "0"*8)
+    
+    def fetchB(self, value):
+        self.dict[1] = value
 
-    lw
-    normal
+    def decodeB(self, RA = "0"*8, RB = "0"*8, rd = -1, instruction, PC): #RA, RB, rd, addi, PC
+        self.dict[2] = {"RA": RA, "RB": RB, "rd": rd, "type": instruction, "PC": PC}
 
-lw x10 add
-sw x10 add //hazard
+    def executeB(self, RZ, rd = -1, instruction): #RZ, rd
+        self.dict[3] = RZ, rd, instruction
 
+    def memoryB(self, RY, rd = -1): #RY, rd
+        self.dict[4] = RY, rd, instruction
 
-    lw  x10 add // addi x10 x10 x10
-    sw x10 adress2 M->M
+    def get(self, stage):
+        if stage in self.dict:
+            return self.dict[stage]
 
-    addi x10 
-    lw x10 add //1 stalling
-    sw x11 0(x10)
+    def flush(self):
+        self.dict.clear()
 
-        sw x10 add //no hazard
-        lw x11 add
-"""
 
 class HDU:
     """
@@ -40,30 +40,31 @@ class HDU:
     """
 
     def __init__(self):
-        self.dict = defaultdict(int)
+        self.obj = Buffer()
 
-    def isHazard(self, cycle, rs1 = -1, rs2 = -2, rd = -3): #don't call for branch instruction beq, blt
-        if rd == 0:
-            return False  # no hazard as x0 register
-        
-        if self.dict[(6,cycle-1)] and (self.dict[(2,cycle-1)] == rs2 and rs2):
-            return True
-        
-        rdprev1 = self.dict[(2,cycle-1)] if self.dict[(2,cycle-1)] else -4 # (stage, cycle number)
-        rdprev2 = self.dict[(2,cycle-2)] if self.dict[(2,cycle-2)] else -5
-        return False if len(set([rs1, rs2, rdprev1, rdprev2])) == 4 else True
+    def detectHazard(self, rs1 = -2, rs2 = -3):
+        # dict[3] or dict[4] #rdprev1, rdprev2
+        rdprev1 = self.obj.get(3)[1] #execute buffer rd
+        rdprev2 = self.obj.get(4)[1] #memory buffer rd
 
-    def set_hdu(self, cycle, stage, result, ifload = False, ifstore = False):
-        if type(result) == str:
-            result = int(result, 16)
-        if ifload:
-            self.dict[(6,cycle)] = 1
-        if ifstore:
-            self.dict[(7,cycle)] = 1
-        self.dict[(stage, cycle)] = result
+        prevtype1 = self.obj.get(3)[2] #lw, lh, lb #stalling
+        prevtype2 = self.obj.get(4)[2] #MM
 
-    def RAW(self):
-        #M->E
-        #Eend->Estart
-        #M->M
-        pass
+        #return [ifHazard, type, stalls]
+        if rdprev1 == rdprev2 == -1:
+            return [False, "NO", 0]
+
+        if 12<=prevtype1<=14 and rdprev1 in [rs1, rs2]:
+            return [False, "ME", 1]
+
+        if 12<=prevtype2<=14 and rdprev2 in [rs1, rs2]:
+            return [False, "MM", 0]
+
+        if rdprev1 in [rs1, rs2]: #E->E
+            return [True, "EE", 0]
+
+        if rdprev2 in [rs1, rs2]: #M->E
+            return [True, "ME", 0]
+
+
+        return [False, "NO", 0]

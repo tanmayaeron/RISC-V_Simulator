@@ -10,7 +10,7 @@ class BTB:
         target is the target address if Taken
     """
 
-    def __init__(self):
+    def _init_(self):
         self.lookup = defaultdict(list)
 
     def insert(self, PC, target):
@@ -26,6 +26,7 @@ class BTB:
     def setTarget(self, PC, newTarget):
         self.lookup[PC][1] = newTarget
 
-    def changeState(self, PC, Outcome):
+    def changeState(self, PC, Outcome,newTarget):
         if Outcome != self.lookup[PC][0]:
             self.lookup[PC][0] = 1 - self.lookup[PC][0]
+            self.setTarget(PC,newTarget)

@@ -30,3 +30,4 @@ class BTB:
         if Outcome != self.lookup[PC][0]:
             self.lookup[PC][0] = 1 - self.lookup[PC][0]
             self.setTarget(PC,newTarget)
+        

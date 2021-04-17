@@ -3,19 +3,21 @@ from collections import defaultdict
 class Buffer:
 
     def __init__(self):
-        self.dict = defaultdict(lambda: "0"*8)
+        self.dict = defaultdict()
     
-    def fetchB(self, value):
-        self.dict[1] = value
+    def fetchB(self, PC, IR):
+        self.dict[1] = PC, IR
 
-    def decodeB(self, RA = "0"*8, RB = "0"*8, rd = -1, instruction, PC): #RA, RB, rd, addi, PC
-        self.dict[2] = {"RA": RA, "RB": RB, "rd": rd, "type": instruction, "PC": PC}
+    #instruction -> index of instruction in csv, PC, RA, RB->hex string, rd -> destination register = -1
+    def decodeB(self, id, PC, RA = "0"*8, RB = "0"*8, RM = "0"*8, rd = -1):
+        #those who don't have rd should give -1 to this function, decode update
+        self.dict[2] = id, PC, RA, RB, RM, rd
 
-    def executeB(self, RZ, rd = -1, instruction): #RZ, rd
-        self.dict[3] = RZ, rd, instruction
+    def executeB(self, id, RZ, rd = -1): #RZ, rd
+        self.dict[3] = id, RZ, rd
 
-    def memoryB(self, RY, rd = -1): #RY, rd
-        self.dict[4] = RY, rd, instruction
+    def memoryB(self, id, RY, rd = -1): #RY, rd
+        self.dict[4] = id, RY, rd
 
     def get(self, stage):
         if stage in self.dict:
@@ -23,6 +25,11 @@ class Buffer:
 
     def flush(self):
         self.dict.clear()
+
+    def clearStage(self, stage):
+        #delete dict[1] dict[2] and so on
+        if stage in self.dict:
+            del self.dict[stage]
 
 
 class HDU:

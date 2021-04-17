@@ -109,3 +109,14 @@ class HDU:
             return [True, 1]
 
         return [False, 0]
+
+
+class controlHazard:
+    def __init__(self,btb_obj):
+        self.obj=btb_obj;
+
+    def branchHazard(self,PC,id,RZ,newTarget):
+        # newTarget comes from IAG
+        if not 18<=id<=23: # if it is not beq or jump return False
+            return 
+        self.obj.changeState(PC,RZ,newTarget)

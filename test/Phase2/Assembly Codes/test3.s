@@ -1,5 +1,4 @@
-# if 12<=prevtype1<=14 and 15 <= id <= 17 and rdprev1 in [rs1, rs2]: #load then store
-# load then store
+# load then normal
 .data
 store: .word 0x10000010
 

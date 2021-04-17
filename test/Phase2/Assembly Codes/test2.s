@@ -7,8 +7,8 @@ store: .word 0x10000010
 addi x10,x10,1
 addi x11,x11,2
 la x9,store
-lw x10,0(x9) # 15 <= id <= 17 
-sw x11,0(x10) # rdprev1 = x10= rs1 so hazard
+lw x10,0(x9) 
+sw x11,0(x10) # rdprev1 = x10= rs1 so hazard # 15 <= id <= 17 
 
 
 

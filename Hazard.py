@@ -1,5 +1,5 @@
 from collections import defaultdict
-
+from register import RegisterFile
 class Buffer:
 
     def __init__(self):
@@ -9,7 +9,7 @@ class Buffer:
         self.dict[1] = PC, IR
 
     #instruction -> index of instruction in csv, PC, RA, RB->hex string, rd -> destination register = -1
-    def decodeB(self, id, PC, RA = "0"*8, RB = "0"*8, RM = "0"*8, rd = -1):
+    def decodeB(self, id, PC , RA = "0"*8, RB = "0"*8, RM = "0"*8, rd = -1):
         #those who don't have rd should give -1 to this function, decode update
         if 15 <= id <= 17:
             rd = -1
@@ -52,11 +52,15 @@ class HDU:
     def __init__(self, bufferobj, registerobj):
         self.obj = bufferobj #bufferobj
         self.registerobj = registerobj
-        self.inf = float("inf")
+        
 
     #don't call for branch instructions positively
     def detectHazard(self, id, rs1 = 0, rs2 = 0): #data forwarding
         # dict[3] or dict[4] #rdprev1, rdprev2
+        
+        if id == 24 or id == 25:
+            return [False, "NO", 0, "0"*8, "0"*8]
+
         rdprev1 = self.obj.get(3)[2] #execute buffer rd
         rdprev2 = self.obj.get(4)[2] #memory buffer rd
 
@@ -65,7 +69,7 @@ class HDU:
         
         # return [ifHazard, type, stalls, rs1value, rs2value]
         if rs1 == rs2 == 0:
-            return [False, "NO", 0, 0, 0]
+            return [False, "NO", 0, "0"*8, "0"*8]
         
         if rdprev1 == 0:
             rdprev1 = -1
@@ -85,26 +89,29 @@ class HDU:
 
         if 12<=prevtype1<=14 and rdprev1 in [rs1, rs2]: #if the prev were load type and we use it then we need to stall
             
-            return [True, "ME", 1, self.inf, self.inf] # inf value, check after stall cycle to get original value
+            return [True, "ME", 1, "0"*8, "0"*8] # inf value, check after stall cycle to get original value
 
         if 12<=prevtype2<=14 and rdprev2 in [rs1, rs2]: #if the previous of previous were load then M->E beginning
             rs1_value=self.registerobj.get_register(rs1) if rs1!=rdprev2 else self.obj.get(4)[1]
-            rs2_value=self.registerobj.get_register(rs2) if rs1!=rdprev2 else self.obj.get(4)[1]
+            rs2_value=self.registerobj.get_register(rs2) if rs2!=rdprev2 else self.obj.get(4)[1]
             return [True, "ME", 0, rs1_value, rs2_value]
 
         if rdprev1 in [rs1, rs2]: #E->E
             rs1_value=self.registerobj.get_register(rs1) if rs1!=rdprev1 else self.obj.get(3)[1]
-            rs2_value=self.registerobj.get_register(rs2) if rs1!=rdprev1 else self.obj.get(3)[1]
+            rs2_value=self.registerobj.get_register(rs2) if rs2!=rdprev1 else self.obj.get(3)[1]
             return [True, "EE", 0, rs1_value, rs2_value]
 
         if rdprev2 in [rs1, rs2]: #M->E
             rs1_value=self.registerobj.get_register(rs1) if rs1!=rdprev2 else self.obj.get(4)[1]
-            rs2_value=self.registerobj.get_register(rs2) if rs1!=rdprev2 else self.obj.get(4)[1]
+            rs2_value=self.registerobj.get_register(rs2) if rs2!=rdprev2 else self.obj.get(4)[1]
             return [True, "ME", 0, rs1_value, rs2_value]
 
         return [False, "NO", 0, self.registerobj.get_register(rs1), self.registerobj.get_register(rs2)]
 
     def detectHazardS(self, id, rs1 = 0, rs2 = 0): # stalling
+        
+        if id == 24 or id == 25:
+            return [False, "NO", 0]
 
         rdprev1 = self.obj.get(3)[2] #execute buffer rd
         rdprev2 = self.obj.get(4)[2] #memory buffer rd
@@ -150,5 +157,85 @@ class HDU:
 
         return self.detectHazardS(id, rs1, rs2)[1:]
 
-        
-        
+if __name__ == "__main__":
+    Buffer=Buffer()
+    register = RegisterFile()
+    HDU = HDU(Buffer,register)
+    
+    
+    #Test case 1: NO
+    #     addi x10,x11,1 #  F D E M W
+    #     addi x10,x10,1 #    F D E M W
+    # Buffer.executeB(9, "0"*7+"1", 10, "0"*8)
+    # l = HDU.detectHazard(9, 10, 3)
+    # print(l)
+    
+    #Test case 2: NO
+    #     sw x10,0(x10)
+    #     sw x11,0(x11)
+    # Buffer.executeB(17, "0"*7+"1", 0, "0"*8)
+    # l = HDU.detectHazard(17, 11, 11)
+    # print(l)
+    
+    #Test case 3: NO
+    #     sw x10,0(x10)
+    #     sw x11,0(x10)
+    # Buffer.executeB(17, "0"*7+"1", 0, "0"*8)
+    # l = HDU.detectHazard(17, 11, 10)
+    # print(l)
+    
+    #Test case 4: M->M
+    #   lw x10,0(x9) 
+    #   sw x11,0(x10) 
+    # rdprev1 = x10= rs1 so hazard # 15 <= id <= 17 
+    # Buffer.executeB(14, "0"*7+"1", 10, "0"*8)
+    # l = HDU.detectHazard(17, 11, 10)
+    # print(l)
+    
+    #Test case 5: M->E and 1 stall
+    #    lw x10,0(x9) # 15 <= id <= 17 
+    #    add x11,x10,x10 
+    # rdprev1 = x10= rs1 so hazard # 15 <= id <= 17 
+    # Buffer.executeB(14, "0"*7+"1", 10, "0"*8)
+    # l = HDU.detectHazard(0, 10, 10)
+    # print(l)
+    
+    #Test case 6: M->E
+    #    lw x10,0(x9) # 15 <= id <= 17 
+    #    add x0,x0,x0
+    #    add x11,x10,x10 
+    # rdprev1 = x10= rs1 so hazard # 15 <= id <= 17 
+    # Buffer.memoryB(14, "0"*7+"1", 10)
+    # Buffer.executeB(0, "0"*7+"1", 0, "0"*8)
+    # l = HDU.detectHazard(0, 10, 11)
+    # print(l)        
+    
+    #Test case 7: E->E
+    #    addi x10,x0,10
+    #    add x11,x10,x10 
+    # rdprev1 = x10= rs1 so hazard # 15 <= id <= 17 
+    # Buffer.executeB(9, "0"*7+"1", 10, "0"*8)
+    # l = HDU.detectHazard(0, 10, 10)
+    # print(l)  
+    
+    #Test case 8: M->E
+    #    addi x10,x0,10 # 15 <= id <= 17 
+    #    add x31,x0,x0
+    #    add x11,x10,x10 
+    # rdprev1 = x10= rs1 so hazard # 15 <= id <= 17 
+    # Buffer.memoryB(9, "0"*7+"2", 10)
+    # Buffer.executeB(0, "0"*7+"1", 31, "0"*8)
+    # l = HDU.detectHazard(0, 10, 10)
+    # print(l)
+    
+    #Test case 9: M->E
+    #    add x4,x5,x6 # 15 <= id <= 17 
+    #    add x9,x7,x8
+    #    beq x9,x4,label 
+    # rdprev1 = x10= rs1 so hazard # 15 <= id <= 17 
+    Buffer.memoryB(0, "0"*7+"2", 4)
+    Buffer.executeB(0, "0"*7+"1", 9, "0"*8)
+    l = HDU.detectHazard(18, 0, 4)
+    print(l)
+    l = HDU.detectHazard(18, 9, 0)
+    print(l)

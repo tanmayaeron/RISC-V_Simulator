@@ -10,7 +10,7 @@ class BTB:
         target is the target address if Taken
     """
 
-    def _init_(self):
+    def __init__(self):
         self.lookup = defaultdict(list)
 
     def insert(self, PC, target):

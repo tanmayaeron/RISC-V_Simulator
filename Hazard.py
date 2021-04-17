@@ -113,10 +113,15 @@ class HDU:
 
 class controlHazard:
     def __init__(self,btb_obj):
-        self.obj=btb_obj;
+        self.obj=btb_obj
 
-    def branchHazard(self,PC,id,RZ,newTarget):
+    def branchHazard(self, PC, id, RZ, newTarget):
+        # PC is str id is int RZ is str of hex newTarget is str of hex
         # newTarget comes from IAG
+        
         if not 18<=id<=23: # if it is not beq or jump return False
             return 
-        self.obj.changeState(PC,RZ,newTarget)
+        if 22<=id<=23:
+            RZ="0"*7+"1"
+        self.obj.changeState(PC, RZ, newTarget)
+        

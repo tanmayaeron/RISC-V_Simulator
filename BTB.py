@@ -27,7 +27,8 @@ class BTB:
         self.lookup[PC][1] = newTarget
 
     def changeState(self, PC, Outcome,newTarget):
-        if Outcome != self.lookup[PC][0]:
+        # Outcome is str of hex and lookup[PC][0] is int
+        if int(Outcome,16) != self.lookup[PC][0]:
             self.lookup[PC][0] = 1 - self.lookup[PC][0]
             self.setTarget(PC,newTarget)
         

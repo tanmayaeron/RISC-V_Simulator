@@ -1,0 +1,61 @@
+from collections import defaultdict
+
+
+class Buffer:
+
+    def __init__(self):
+        self.dict = defaultdict(lambda: "0"*8)
+
+    def set(self, register_name, register_value):
+        self.dict[register_name] = register_value
+
+    def get(self, register_name):
+        if register_name in self.dict:
+            return self.dict[register_name]
+
+    def flush(self):
+        self.dict.clear()
+
+"""
+F D E M W
+  F D E M W
+    F D E M W
+      F D E M W
+        F D E M W
+          F D E M W
+
+F b D b E b M b W
+
+stalling
+reverse
+writeback -> standard
+Memory -> M->M  E->M memor
+Execute -> 
+"""
+
+"""
+#instruction
+    normal
+    normal
+
+    sw
+    normal
+
+    lw
+    normal
+
+lw x10 add
+sw x10 add //hazard
+
+
+    lw  x10 add // addi x10 x10 x10
+    sw x10 adress2 M->M
+
+    addi x10 
+    lw x10 add //1 stalling
+    addi x11 x10 
+    sw x11 0(x10)
+
+        sw x10 add //no hazard
+        lw x10 add
+"""

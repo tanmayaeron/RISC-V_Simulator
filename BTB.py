@@ -1,5 +1,5 @@
 class BTB:
-    
+
     def __init__(self):
         self.lookup = {}
         self.maxlimit = 32
@@ -16,7 +16,7 @@ class BTB:
             prediction = 0
         if num_instructions < self.maxlimit:
             self.lookup[PC]=[type_ins,target,prediction]
-            
+
     def check_ins(self,PC):
         if PC in self.lookup.keys():
             return self.lookup[PC]

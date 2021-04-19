@@ -9,7 +9,8 @@ from register import RegisterFile
 from decode import identify
 from helperFunctions import *
 from input import ReadFile
- 
+import Hazard
+# M_select RM_select to be added
 class Processor:
 
     def __init__(self, currFolderPath):
@@ -18,6 +19,8 @@ class Processor:
         self._IAG = IAG.IAG()
         self._fileReader = ReadFile()
         self._registerFile = RegisterFile()
+        self._buffer = Hazard.Buffer()
+        
         self._currFolderPath = currFolderPath
         self.df_control = pd.read_csv(os.path.join(self._currFolderPath, 'repository', "controls.csv"))
         self.df_control = self.df_control.dropna(axis=0, how='any')
@@ -28,7 +31,7 @@ class Processor:
         self.initialiseControls()
         
         sys.stdout = self._outputLogFile
-        self._currOperationId = 0
+        currOpID = 0
         self.cycle = 0
 
     def initialiseTempRegisters(self):
@@ -50,6 +53,8 @@ class Processor:
         self.INC_select = list(self.df_control['muxINC'].astype(int))
         self.PC_select = list(self.df_control['muxPC'].astype(int))
         self.S_select = list(self.df_control['muxS'].astype(int))
+        self._muxM = list(self.df_control['muxM'].astype(int))
+        self._muxRM = list(self.df_control['muxRM'].astype(int))
         self._writeEnable = list(self.df_control['WE'].astype(int))
         self.SizeEnable = list(self.df_control['SE'].astype(int))
 
@@ -59,7 +64,16 @@ class Processor:
         else:
             return self._IAG.getPC()
         
-
+    def comparator(in1, in2, control):
+        if(control == 0):
+            return(in1 == in2)
+        if(control == 1):
+            return(in1 != in2)
+        if(control == 2):
+            return(in1 >= in2)
+        if(control == 3):
+            return(in1 < in2)
+        
     def setIR(self, enable):
         if enable == 1:
             self._IR = self._PMI.getMDR()
@@ -70,14 +84,37 @@ class Processor:
     def muxA(self, A_select):
         if(A_select == 0):
             return self._RA
-        else:
+        elif(A_select == 1):
             return self._IAG.getPC()
-
+        elif(A_select == 2):
+            return self._RZ
+        else:
+            return self._RY
+        
     def muxB(self, B_select):
         if(B_select == 0):
             return self._RB
-        else:
+        elif(B_select == 1):
             return self._imm
+        elif(B_select == 2):
+            return self._RZ
+        else:
+            return self._RY
+        
+    def muxM(self, M_select): #new
+        if(M_select == 0):
+            return self._RY
+        else:
+            return self._RM
+        
+    def muxRM(self, RM_select): #new
+        if(RM_select == 0):
+            return self._RY
+        elif(RM_select == 1):
+            return self._RZ
+        else:
+            return self._RB
+        
 
     def muxY(self, Y_select):
         if(Y_select == 0):
@@ -93,77 +130,95 @@ class Processor:
 
     def fetch(self):
         print("Fetch stage:")
-        print("The value of PC is :", self._IAG.getPC())
+        print("PC:", self._IAG.getPC())
         outputmuxMA = self.muxMA(1)  # MAR gets value of PC
         self._IAG.updatePC_temp()  # PC_Temp gets PC+4
         self._PMI.setMAR(outputmuxMA)
         # MDR gets value stored at address in MAR
-        self._PMI.accessMemory(1,2)
+        self._PMI.accessMemory(1, 2, 0)
         self.setIR(1)  # IR gets value of MDR
-        print("The instruction in IR is :", self._IR)
+        self._buffer.fetchB(self._IAG.getPC(), self._IR)
+        print("IR:", self._IR)
 
     def decode(self):
         print("Decode stage:")
-        info_code = identify(self._IR, self.df_main)
-        print("code :", info_code)
-        self._currOperationId = info_code['id']
+        PC, IR = self._buffer.get(1)
+        info_code = identify(IR, self.df_main)
+        print("code:", info_code)
+        
+        currOpID = info_code['id']
+        currMuxRM = self._muxRM[currOpID]
+        rs1 = int(info_code['rs1'], 2)
+        self._RA = self._registerFile.get_register(rs1)
+        print("RA:", self._RA)
 
-        registernumber = int(info_code['rs1'], 2)
-        self._RA = self._registerFile.get_register(registernumber)
-        print("RA is :", self._RA)
+        rs2 = int(info_code['rs2'], 2)
+        self._RB = self._registerFile.get_register(rs2)
+        self._RM = self.muxRM(currMuxRM) #new
+        print("RB:", self._RB)
 
-        registernumber = int(info_code['rs2'], 2)
-        self._RB = self._registerFile.get_register(registernumber)
-        self._RM = self._RB
-        print("RB is :", self._RB)
-
-        rd = int(info_code['rd'], 2)
-        self._rd = rd
-        print("rd is :", self._rd)
+        self._rd = int(info_code['rd'], 2)
+        print("rd:", self._rd)
 
         immediate = extendImmediate(info_code['immediate'])
         self._imm = binToHex(immediate)
-        print("imm is :", self._imm)
-
+        print("imm:", self._imm)
+        self._buffer.decodeB(currOpID, PC, self._RA, self._RB, self._RM, self._rd, self._imm)
 
     def execute(self):
         print("Execute stage:")
-        currALU_select = self._ALU_select[self._currOperationId]
-        currMuxB = self._muxB[self._currOperationId]
-        currMuxA = self._muxA[self._currOperationId]
-        currINCSelect = self.INC_select[self._currOperationId]
-        currSSelect = self.S_select[self._currOperationId]
+        currOpID, PC, RA, RB, RM, rd, imm = self._buffer.get(2)
+        #controls
+        currALU_select = self._ALU_select[currOpID]
+        currMuxB = self._muxB[currOpID]
+        currMuxA = self._muxA[currOpID]
+        currINCSelect = self.INC_select[currOpID]
+        currSSelect = self.S_select[currOpID]
 
         operand1 = self.muxA(currMuxA)
         operand2 = self.muxB(currMuxB)
-        print("operand1 is", operand1, "operand2 is:", operand2)
+        print("operand1:", operand1)
+        print("operand2:", operand2)
         self._RZ = self._ALU.operate(operand1, operand2, currALU_select)
-        print("RZ is :", self._RZ)
-        self._IAG.muxPC(self.PC_select[self._currOperationId], self._RA)
+        print("RZ:", self._RZ) 
+
+        #to edit, start
+        self._IAG.muxPC(self.PC_select[currOpID], RA)
         self._IAG.updatePC(1)
-        self._IAG.muxINC(currINCSelect, currSSelect, self._imm, self._RZ)
+        self._IAG.muxINC(currINCSelect, currSSelect, imm, self._RZ)
         self._IAG.adder()
-        self._IAG.muxPC(0, self._RA)
+        self._IAG.muxPC(0, RA)
         self._IAG.updatePC(1)
+        #end
+        
+        self._buffer.executeB(currOpId, self._RZ, rd, RM)
+       
 
     def memoryAccess(self):
+        currOpId, RZ, rd, RM = self._buffer.get(3)
         print("Memory Access stage:")
-        currMemoryEnable = self._memoryEnable[self._currOperationId]
-        currSizeEnable = self.SizeEnable[self._currOperationId]
+        currMemoryEnable = self._memoryEnable[currOpID]
+        currSizeEnable = self.SizeEnable[currOpID]
+        currMuxM = self._muxM[currOpID]
         outputmuxMA = self.muxMA(0)
         self._PMI.setMAR(outputmuxMA)
-        self._PMI.setMDR(self._RM)
+        self._PMI.setMDR(self.muxM(currMuxM)) #csv me baki hai
+        print("MDR:", self._PMI.getMDR())
+        print("MAR:", self._PMI.getMAR())
         self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
-        self._RY = self.muxY(self._muxY[self._currOperationId])
+        self._RY = self.muxY(self._muxY[currOpID])
+        self._buffer.memoryB(currOpId, self._RY, rd)        
 
     def registerUpdate(self):
+        currOpId, RY, rd = self._buffer.get(4)
         print("Register Update Stage:")
-        currWriteEnable = self._writeEnable[self._currOperationId]
-        self._registerFile.set_register(self._rd, self._RY, currWriteEnable)
-        print("RD: RY:", self._rd, self._RY)
+        currWriteEnable = self._writeEnable[currOpID]
+        self._registerFile.set_register(rd, RY, currWriteEnable)
+        print("RD: ", rd)
+        print("RY: ", RY)
         self.cycle += 1
-        print("cycle is :", self.cycle)
-
+        print("Cycles:", self.cycle)
+        
     def printData(self):
         filename = 'output.txt'
         filename = os.path.join(self._currFolderPath, "generated", 'memory.txt')

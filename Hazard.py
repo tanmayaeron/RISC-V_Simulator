@@ -3,7 +3,7 @@ from register import RegisterFile
 class Buffer:
 
     def __init__(self):
-        self.dict = defaultdict(list)
+        self.dict = {}
     
     def fetchB(self, PC, IR):
         self.dict[1] = PC, IR
@@ -11,8 +11,6 @@ class Buffer:
     #instruction -> index of instruction in csv, PC, RA, RB->hex string, rd -> destination register = -1
     def decodeB(self, id, PC , RA = "0"*8, RB = "0"*8, RM = "0"*8, rd = -1):
         #those who don't have rd should give -1 to this function, decode update
-        if 15 <= id <= 17:
-            rd = -1
         self.dict[2] = id, PC, RA, RB, RM, rd
 
     def executeB(self, id, RZ, rd, RM): #RZ, rd #dict[3][1]
@@ -24,7 +22,12 @@ class Buffer:
     def get(self, stage):
         if stage in self.dict:
             return self.dict[stage]
-        return [-1]*6
+        return (-1, -1, -1, -1, -1, -1)
+
+    def ifPresent(self, stage): #erased buffers won't be accessed and we'll get out of that stage
+        if stage in self.dict:
+            return True
+        return False
 
     def flush(self):
         self.dict.clear()
@@ -37,28 +40,22 @@ class Buffer:
 
 class HDU:
     """
-    we are making dictionaries for cycle as key 
-    F->IR
+    F->IR -> string
     D->rd -> number
-    6 -> lw..
-    (6,cycle) = 1
-    7 -> sw..
-    (7,cycle) = 1
-    E->RZ -> number, change type from string
-    ME->RY -> number, change type from string 
-    WB->rd
+    E->RZ -> string
+    M->RY -> string
+    W->rd -> no need here
     """
 
     def __init__(self, bufferobj, registerobj):
         self.obj = bufferobj #bufferobj
         self.registerobj = registerobj
-        
 
     #don't call for branch instructions positively
     def detectHazard(self, id, rs1 = 0, rs2 = 0): #data forwarding
         # dict[3] or dict[4] #rdprev1, rdprev2
         
-        if id == 24 or id == 25:
+        if id == 24 or id == 25: #if the instruction is lui or auipc, no forwarding/stalling
             return [False, "NO", 0, "0"*8, "0"*8]
 
         rdprev1 = self.obj.get(3)[2] #execute buffer rd
@@ -80,7 +77,7 @@ class HDU:
         if rdprev1 == rdprev2 == -1:
             return [False, "NO", 0, self.registerobj.get_register(rs1), self.registerobj.get_register(rs2)]
 
-        if 12<=prevtype1<=14 and 15 <= id <= 17 and rdprev1 == rs2: #load then store
+        if 12 <= prevtype1 <= 14 and 15 <= id <= 17 and rdprev1 == rs2 and rdprev1 != rs1: #load then store
             """
             lw x10,0(x11)
             sw x10,0(x11) # rs1+imm and rs2==rdprev1
@@ -88,7 +85,6 @@ class HDU:
             return [True, "MM", 0, self.registerobj.get_register(rs1), self.obj.get(4)[1]] #MM
 
         if 12<=prevtype1<=14 and rdprev1 in [rs1, rs2]: #if the prev were load type and we use it then we need to stall
-            
             return [True, "ME", 1, "0"*8, "0"*8] # inf value, check after stall cycle to get original value
 
         if 12<=prevtype2<=14 and rdprev2 in [rs1, rs2]: #if the previous of previous were load then M->E beginning
@@ -132,13 +128,13 @@ class HDU:
         if rdprev1 == rdprev2 == -1:
             return [False, "NO", 0]
 
-        if 12<= prevtype1 <=14 and 15 <= id <= 17 and rdprev1 in [rs1, rs2]: #load then store(15<=id<=17)
+        if 12<= prevtype1 <=14 and 15 <= id <= 17 and rdprev1 == rs2 and rdprev1 != rs1: #load then store(15<=id<=17)
             return [True, "MM", 1] #MM
 
-        if 12<=prevtype1<=14 and rdprev1 in [rs1, rs2]: #if the prev were load type and we use it then we need to stall
+        if 12 <= prevtype1 <= 14 and rdprev1 in [rs1, rs2]: #if the prev were load type and we use it then we need to stall
             return [True, "ME", 2] #ME
 
-        if 12<=prevtype2<=14 and rdprev2 in [rs1, rs2]: #if the previous of previous were load then M->E beginning
+        if 12 <= prevtype2 <= 14 and rdprev2 in [rs1, rs2]: #if the previous of previous were load then M->E beginning
             return [True, "ME", 1]
 
         if rdprev1 in [rs1, rs2]: #E->E
@@ -150,12 +146,10 @@ class HDU:
         return [False,"NO", 0]
 
     def dataForwarding(self, id, rs1, rs2):
-        
-        return self.detectHazard(id, rs1, rs2)[1:]
+        return self.detectHazard(id, rs1, rs2)
     
     def stalling(self, id, rs1, rs2):
-
-        return self.detectHazardS(id, rs1, rs2)[1:]
+        return self.detectHazardS(id, rs1, rs2)
 
 if __name__ == "__main__":
     Buffer=Buffer()
@@ -233,9 +227,9 @@ if __name__ == "__main__":
     #    add x9,x7,x8
     #    beq x9,x4,label 
     # rdprev1 = x10= rs1 so hazard # 15 <= id <= 17 
-    Buffer.memoryB(0, "0"*7+"2", 4)
-    Buffer.executeB(0, "0"*7+"1", 9, "0"*8)
-    l = HDU.detectHazard(18, 0, 4)
-    print(l)
-    l = HDU.detectHazard(18, 9, 0)
-    print(l)
+    # Buffer.memoryB(0, "0"*7+"2", 4)
+    # Buffer.executeB(0, "0"*7+"1", 9, "0"*8)
+    # l = HDU.detectHazard(18, 0, 4)
+    # print(l)
+    # l = HDU.detectHazard(18, 9, 0)
+    # print(l)

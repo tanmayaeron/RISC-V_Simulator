@@ -51,13 +51,13 @@ class HDU:
         self.obj = bufferobj #bufferobj
         self.registerobj = registerobj
 
-    #don't call for branch instructions positively
     def detectHazard(self, id, rs1 = 0, rs2 = 0): #data forwarding
         # dict[3] or dict[4] #rdprev1, rdprev2
         
         if id == 24 or id == 25: #if the instruction is lui or auipc, no forwarding/stalling
             return [False, "NO", 0, "0"*8, "0"*8]
 
+        rdprevbranch = self.obj.get(2)[5] #decode buffer rd, one stall in branch
         rdprev1 = self.obj.get(3)[2] #execute buffer rd
         rdprev2 = self.obj.get(4)[2] #memory buffer rd
 
@@ -73,6 +73,18 @@ class HDU:
 
         if rdprev2 == 0:
             rdprev2 = -1
+
+        if 18 <= id <= 21: #branch
+            if rdprevbranch in [rs1, rs2]: #one stall case
+                return [True, "ED", 1, "0"*8, "0"*8]
+            if rdprev1 in [rs1, rs2]:
+                rs1_value = self.registerobj.get_register(rs1) if rs1!=rdprev1 else self.obj.get(3)[1]
+                rs2_value = self.registerobj.get_register(rs2) if rs2!=rdprev1 else self.obj.get(3)[1]
+                return [True, "ED", 0, rs1_value, rs2_value]
+            if rdprev2 in [rs1, rs2]:
+                rs1_value=self.registerobj.get_register(rs1) if rs1!=rdprev2 else self.obj.get(4)[1]
+                rs2_value=self.registerobj.get_register(rs2) if rs2!=rdprev2 else self.obj.get(4)[1]
+                return [True, "MD", 0, rs1_value, rs2_value]
         
         if rdprev1 == rdprev2 == -1:
             return [False, "NO", 0, self.registerobj.get_register(rs1), self.registerobj.get_register(rs2)]
@@ -124,6 +136,14 @@ class HDU:
 
         if rdprev2 == 0:
             rdprev2 = -1
+
+        if 18 <= id <= 21: #branch
+            if rdprevbranch in [rs1, rs2]: #special stall case where the previous is still stored in decode buffer
+                return [True, "ED", 3]
+            if rdprev1 in [rs1, rs2]:
+                return [True, "ED", 2]
+            if rdprev2 in [rs1, rs2]:
+                return [True, "MD", 1]
 
         if rdprev1 == rdprev2 == -1:
             return [False, "NO", 0]

@@ -64,7 +64,7 @@ class HDU:
         prevtype1 = self.obj.get(3)[0] #lw, lh, lb #stalling
         prevtype2 = self.obj.get(4)[0] #MM
         
-        # return [ifHazard, type, stalls, rs1value, rs2value]
+        # return [ifHazard, type of hazard, no of stalls, rs1value, rs2value]
         if rs1 == rs2 == 0:
             return [False, "NO", 0, "0"*8, "0"*8]
         
@@ -127,7 +127,7 @@ class HDU:
         prevtype1 = self.obj.get(3)[0] #lw, lh, lb #stalling
         prevtype2 = self.obj.get(4)[0] #MM
 
-        #return [ifHazard, type, stalls]  returned type for printing
+        #return [ifHazard, type, no of stalls]  returned type for printing
         if rs1 == rs2 == 0:
             return [False, "NO", 0]
         
@@ -138,12 +138,11 @@ class HDU:
             rdprev2 = -1
 
         if 18 <= id <= 21: #branch
-            if rdprevbranch in [rs1, rs2]: #special stall case where the previous is still stored in decode buffer
-                return [True, "ED", 3]
+            
             if rdprev1 in [rs1, rs2]:
-                return [True, "ED", 2]
+                return [True, "EE", 2]
             if rdprev2 in [rs1, rs2]:
-                return [True, "MD", 1]
+                return [True, "ME", 1]
 
         if rdprev1 == rdprev2 == -1:
             return [False, "NO", 0]

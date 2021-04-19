@@ -10,10 +10,7 @@ class BTB:
     #            1 -> branch
     def add_ins(self,PC,target,type_ins,sign):
         num_instructions = len(self.lookup.keys())
-        if sign==1:
-            prediction = 1
-        else:
-            prediction = 0
+        prediction = sign
         if num_instructions < self.maxlimit:
             self.lookup[PC]=[type_ins,target,prediction]
 

@@ -47,15 +47,14 @@ class HDU:
     W->rd -> no need here
     """
 
-    def __init__(self, bufferobj, registerobj):
+    def __init__(self, bufferobj):
         self.obj = bufferobj #bufferobj
-        self.registerobj = registerobj
-
+        
     def detectHazard(self, id, rs1 = 0, rs2 = 0): #data forwarding
         # dict[3] or dict[4] #rdprev1, rdprev2
         
         if id == 24 or id == 25: #if the instruction is lui or auipc, no forwarding/stalling
-            return [False, "NO", 0, "0"*8, "0"*8]
+            return [False, "NO", 0]
 
         rdprevbranch = self.obj.get(2)[5] #decode buffer rd, one stall in branch
         rdprev1 = self.obj.get(3)[2] #execute buffer rd
@@ -66,7 +65,7 @@ class HDU:
         
         # return [ifHazard, type of hazard, no of stalls, rs1value, rs2value]
         if rs1 == rs2 == 0:
-            return [False, "NO", 0, "0"*8, "0"*8]
+            return [False, "NO", 0]
         
         if rdprev1 == 0:
             rdprev1 = -1
@@ -76,45 +75,45 @@ class HDU:
 
         if 18 <= id <= 21: #branch
             if rdprevbranch in [rs1, rs2]: #one stall case
-                return [True, "ED", 1, "0"*8, "0"*8]
+                return [True, "ED", 1]
             if rdprev1 in [rs1, rs2]:
                 rs1_value = self.registerobj.get_register(rs1) if rs1!=rdprev1 else self.obj.get(3)[1]
                 rs2_value = self.registerobj.get_register(rs2) if rs2!=rdprev1 else self.obj.get(3)[1]
-                return [True, "ED", 0, rs1_value, rs2_value]
+                return [True, "ED", 0]
             if rdprev2 in [rs1, rs2]:
                 rs1_value=self.registerobj.get_register(rs1) if rs1!=rdprev2 else self.obj.get(4)[1]
                 rs2_value=self.registerobj.get_register(rs2) if rs2!=rdprev2 else self.obj.get(4)[1]
-                return [True, "MD", 0, rs1_value, rs2_value]
+                return [True, "MD", 0]
         
         if rdprev1 == rdprev2 == -1:
-            return [False, "NO", 0, self.registerobj.get_register(rs1), self.registerobj.get_register(rs2)]
+            return [False, "NO", 0]
 
         if 12 <= prevtype1 <= 14 and 15 <= id <= 17 and rdprev1 == rs2 and rdprev1 != rs1: #load then store
             """
             lw x10,0(x11)
             sw x10,0(x11) # rs1+imm and rs2==rdprev1
             """
-            return [True, "MM", 0, self.registerobj.get_register(rs1), self.obj.get(4)[1]] #MM
+            return [True, "MM", 0] #MM
 
         if 12<=prevtype1<=14 and rdprev1 in [rs1, rs2]: #if the prev were load type and we use it then we need to stall
-            return [True, "ME", 1, "0"*8, "0"*8] # inf value, check after stall cycle to get original value
+            return [True, "ME", 1] # inf value, check after stall cycle to get original value
 
         if 12<=prevtype2<=14 and rdprev2 in [rs1, rs2]: #if the previous of previous were load then M->E beginning
             rs1_value=self.registerobj.get_register(rs1) if rs1!=rdprev2 else self.obj.get(4)[1]
             rs2_value=self.registerobj.get_register(rs2) if rs2!=rdprev2 else self.obj.get(4)[1]
-            return [True, "ME", 0, rs1_value, rs2_value]
+            return [True, "ME", 0]
 
         if rdprev1 in [rs1, rs2]: #E->E
             rs1_value=self.registerobj.get_register(rs1) if rs1!=rdprev1 else self.obj.get(3)[1]
             rs2_value=self.registerobj.get_register(rs2) if rs2!=rdprev1 else self.obj.get(3)[1]
-            return [True, "EE", 0, rs1_value, rs2_value]
+            return [True, "EE", 0]
 
         if rdprev2 in [rs1, rs2]: #M->E
             rs1_value=self.registerobj.get_register(rs1) if rs1!=rdprev2 else self.obj.get(4)[1]
             rs2_value=self.registerobj.get_register(rs2) if rs2!=rdprev2 else self.obj.get(4)[1]
-            return [True, "ME", 0, rs1_value, rs2_value]
+            return [True, "ME", 0]
 
-        return [False, "NO", 0, self.registerobj.get_register(rs1), self.registerobj.get_register(rs2)]
+        return [False, "NO", 0]
 
     def detectHazardS(self, id, rs1 = 0, rs2 = 0): # stalling
         
@@ -169,6 +168,10 @@ class HDU:
     
     def stalling(self, id, rs1, rs2):
         return self.detectHazardS(id, rs1, rs2)
+    
+    def getDataFromBuffer(i):
+        return obj.get(i)
+        
 
 if __name__ == "__main__":
     Buffer=Buffer()

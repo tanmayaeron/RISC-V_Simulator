@@ -1,7 +1,8 @@
+import pandas as pd
 class Buffer:
   #  #
     def __init__(self):
-    111  self.dict = {}
+        self.dict = {}
     
     """
         buffers are set after their repective stages, fetch after the fetch stage and so on
@@ -83,7 +84,7 @@ class HDU:
                         result[0]=[True,"MM",0]                                             #not required in execute
                     else:
                         result[0]=[True,"ME",1]
-            if result[0][0] = False:
+            if result[0][0] == False:
                 prev_id, rd = buffer_obj.get(3)[0],buffer_obj.get(3)[2] 
                 currWE = self.WE[prev_id]
                 if currWE==1 and rs1==rd:
@@ -110,7 +111,7 @@ class HDU:
                         result[1]=[True,"MM",0]                                             #not required in execute
                     else:
                         result[1]=[True,"ME",1]
-            if result[1][0] = False:
+            if result[1][0] == False:
                 prev_id, rd = buffer_obj.get(3)[0],buffer_obj.get(3)[2] 
 
                 currWE = self.WE[prev_id]
@@ -121,3 +122,8 @@ class HDU:
 
         if stall:
             pass            
+if __name__ == "__main__":
+    df_control = pd.read_csv("controls.csv")
+    df_control = df_control.dropna(axis=0, how='any')
+    buf = Buffer()
+    hdu = HDU(df_control)

@@ -2,7 +2,7 @@ class Buffer:
   #  #
     def __init__(self):
     111  self.dict = {}
-    
+
     """
         buffers are set after their repective stages, fetch after the fetch stage and so on
         set after each cycle
@@ -46,7 +46,7 @@ class HDU:
     def __init__(self, df_control):
         self.df_control = df_control #read csv and pass to HDU object
         self.initialiseControls()
-    
+
     def initialiseControls(self):
         self.isExecuters1 = list(self.df_control['rs1E'].astype(int))
         self.isExecuters2 = list(self.df_control['rs2E'].astype(int))
@@ -56,12 +56,12 @@ class HDU:
         self.WE = list(self.df_control['WE'].astype(int))
 
     def forwarding2(self, buffer_obj,id, rs1 = 0, rs2 = 0):
-        
+
         result = [[],[]]
         is_rs1 = max(self.isExecuters1[id],self.isMemoryrs1[id])
         is_rs2 = max(self.isExecuters1[id],self.isMemoryrs1[id])
-        
-    
+
+
         if rs1 == 0:
             result[0] = [False,"NO",0]
         elif is_rs1 == 0:
@@ -84,11 +84,11 @@ class HDU:
                     else:
                         result[0]=[True,"ME",1]
             if result[0][0] = False:
-                prev_id, rd = buffer_obj.get(3)[0],buffer_obj.get(3)[2] 
+                prev_id, rd = buffer_obj.get(3)[0],buffer_obj.get(3)[2]
                 currWE = self.WE[prev_id]
                 if currWE==1 and rs1==rd:
                    result[0]=[True,"ME",0]
-            
+
         if rs2 == 0:
             result[1] = [False,"NO",0]
         elif is_rs2 == 0:
@@ -111,7 +111,7 @@ class HDU:
                     else:
                         result[1]=[True,"ME",1]
             if result[1][0] = False:
-                prev_id, rd = buffer_obj.get(3)[0],buffer_obj.get(3)[2] 
+                prev_id, rd = buffer_obj.get(3)[0],buffer_obj.get(3)[2]
 
                 currWE = self.WE[prev_id]
                 if currWE==1 and rs1==rd:
@@ -120,4 +120,4 @@ class HDU:
         stall = max(result[0][2],result[1][2])
 
         if stall:
-            pass            
+            pass

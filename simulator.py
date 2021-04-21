@@ -25,7 +25,8 @@ class Processor:
         self.df_control = pd.read_csv(os.path.join(self._currFolderPath, 'repository', "controls.csv"))
         self.df_control = self.df_control.dropna(axis=0, how='any')
         self.df_main = pd.read_csv(os.path.join(self._currFolderPath, 'repository', "instructions.csv"))
-
+        
+        self.hdu = Hazard.HDU(df_control)
         self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
         self.initialiseTempRegisters()
         self.initialiseControls()
@@ -151,17 +152,26 @@ class Processor:
         print("Fetch stage:")
         print("PC:", self._IAG.getPC())
         outputmuxMA = self.muxMA(1)  # MAR gets value of PC
+        #muxMA can be removed
         self._IAG.updatePC_temp()  # PC_Temp gets PC+4
+        #we should remove this from here, just use PC+4 directly in MuxY
         self._PMI.setMAR(outputmuxMA)
         # MDR gets value stored at address in MAR
         self._PMI.accessMemory(1, 2, 0)
         self.setIR(1)  # IR gets value of MDR
+        if self.getIR() == "0"*8:
+            return False
         
         self.bufferStore[0] = (self._IAG.getPC(), self._IR)
         
         print("IR:", self._IR)
+        return True
 
     def decode(self):
+
+        if not self.buffer.ifPresent(1):
+            return False, 0, [[False, "NO", 0],[False, "NO", 0]] #if no memory buffer value set before it, don't run and don't set it's buffer too
+
         print("Decode stage:")
         PC, IR = self.buffer.get(1)
         info_code = identify(IR, self.df_main)
@@ -184,10 +194,17 @@ class Processor:
         immediate = extendImmediate(info_code['immediate'])
         self._imm = binToHex(immediate)
         print("imm:", self._imm)
-        
+        resultarray = self.hdu.forwarding2(buffer, currOpID, rs1, rs2)
+
         self.bufferStore[1] = (currOpID, PC, self._RA, self._RB, self._RM, self._rd, self._imm)
 
+        return True, max(resultarray[0][2], resultarray[1][2]), resultarray
+
     def execute(self):
+
+        if not self.buffer.ifPresent(2):
+            return False #if no memory buffer value set before it, don't run and don't set it's buffer too
+
         print("Execute stage:")
         currOpID, PC, RA, RB, RM, rd, imm = self.buffer.get(2)
         #controls
@@ -217,12 +234,17 @@ class Processor:
        
 
     def memoryAccess(self):
+
+        if not self.buffer.ifPresent(3):
+            return False #if no memory buffer value set before it, then don't go further
+
         currOpId, RZ, rd, RM = self.buffer.get(3)
         print("Memory Access stage:")
         currMemoryEnable = self._memoryEnable[currOpID]
         currSizeEnable = self.SizeEnable[currOpID]
         currMuxM = self._muxM[currOpID]
         outputmuxMA = self.muxMA(0)
+
         self._PMI.setMAR(outputmuxMA)
         self._PMI.setMDR(self.muxM(currMuxM)) #csv me baki hai
         print("MDR:", self._PMI.getMDR())
@@ -230,16 +252,18 @@ class Processor:
         self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
         self._RY = self.muxY(self._muxY[currOpID])
         self.bufferStore[3] = (currOpId, self._RY, rd)    
+        return True
 
     def registerUpdate(self):
+
+        if not self.buffer.ifPresent(4):
+            return #if no memory buffer value set before it, then don't go further
         currOpId, RY, rd = self.buffer.get(4)
         print("Register Update Stage:")
         currWriteEnable = self._writeEnable[currOpID]
         self._registerFile.set_register(rd, RY, currWriteEnable)
         print("RD: ", rd)
         print("RY: ", RY)
-        self.cycle += 1
-        print("Cycles:", self.cycle)
         
     def bufferUpdate(self, watchArray):
         if(watchArray[0]):
@@ -250,7 +274,78 @@ class Processor:
             self.buffer.executeB(*self.bufferStore[2])
         if(watchArray[3]):
             self.buffer.memoryB(*self.bufferStore[3])
-        self.bufferStore = [(), (), (), ()]
+
+    def run_this(self):
+        Pipeline_cycle = 0
+        while True:
+            Pipeline_cycle += 1
+            MemBufferSignal = ExecBufferSignal = DecodeBufferSignal = FetchBufferSignal = True
+            Miss = False
+            isStall = False
+            hazardlist = [[],[]], hazardlistE = [[],[]]
+            for i in range(5):
+                if i == 4:
+                    FetchBufferSignal = self.fetch()
+                if i == 3:
+                    DecodeBufferSignal, isStall, hazardlist = self.decode()
+                    if isStall:
+                        break
+                if i == 2:
+                    ExecBufferSignal, Miss, hazardlistE = self.execute()
+                if i == 1:
+                    MemBufferSignal = self.memoryAccess()
+                if i == 0:
+                    self.registerUpdate()
+            #In case of a miss
+            #send a signal from execute to clear buffers of decode and fetch
+            #PC is already updated to the required by IAG and will be fetched next
+
+            #In case of stall = 1, we know
+            #M->E, we realise it in decode, pass a signal
+            #The signal will tell us the stall
+            #Don't update decode buffer and fetch, don't delete the fetch buffer but decode is deleted
+            #as the decode buffer was deleted no execute occurs in the next cycle
+            #fetch buffer wasn't deleted or updated so decode occurs with same IR, PC
+            #this way we stalled the whole thing by one cycle
+
+            if DecodeBufferSignal and isStall == 0:
+                if hazardlist[0][0] == True: #rs1
+                    if hazardlist[0][1] == "ME":
+                        pass #take RY and make RA = RY
+                    elif hazardlist[0][1] == "EE":
+                        pass #take RZ and make RA = RY
+                        
+                if hazardlist[1][0] == True: #rs2
+                    if hazardlist[1][1] == "ME":
+                        pass
+                    elif hazardlist[1][1] == "EE":
+                        pass
+            
+            if ExecBufferSignal:
+                if hazardlistE[0][0] == True: #rs1
+                    if hazardlistE[0][1][0] == 'M':
+                        pass #M->M in this case only
+                    else:
+                        pass
+            #pass the hazard list to buffer decode buffer used in execute and helps resolve M->M
+            
+            if MemBufferSignal:
+                pass
+            if ExecBufferSignal:
+                pass
+            else: #it's a miss or no fetch buffer before it
+                pass
+            if DecodeBufferSignal and Miss == False and isStall == 0: #set buffer only here
+                pass
+            else: #delete pre existing buffer
+                pass
+            if isStall:
+                isStall -= 1
+                continue
+            if FetchBufferSignal and Miss == False: #set buffer only here
+                pass
+            #clear buffer store
+            self.bufferStore = [(), (), (), ()]
         
     def printData(self):
         filename = 'output.txt'

@@ -1,5 +1,4 @@
 from helperFunctions import *
-        
 class IAG:
     def __init__(self):
         self.initialiseIAG()
@@ -18,11 +17,19 @@ class IAG:
     def getPC_Temp(self):
         return self._PC_Temp
         
-    def muxPC(self,PC_select, RA): 
-        if PC_select == 1 :
-            self.output_muxPC =  RA
-        else:
+    def muxPC(self, PC_select, buffer, RA = "0"*8, BTB = "0"*8):
+        if PC_select == 0:
+            self.output_muxPC = self._PC
+        elif PC_select == 1:
             self.output_muxPC = self.output_adder
+        elif PC_select == 2:
+            self.output_muxPC = self.buffer.get(2)[1]
+        elif PC_select == 3:
+            self.output_muxPC = RA 
+        elif PC_select == 4:
+            self.output_muxPC = BTB 
+
+            
             
     def muxINC(self, INC_select, S_select, imm, RZ):
         if(S_select == 1):

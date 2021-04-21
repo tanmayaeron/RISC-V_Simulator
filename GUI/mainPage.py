@@ -17,10 +17,12 @@ class UiComponents():
     def buttonTile(self, name, height, width):
         button = QPushButton()
         button.setText(name)
-        button.setFont(self.fixedfont)
+        button.setFont(QFont('Times', 30))
+        # button.setPointSize(13)
         button.setFixedHeight(height)
         button.setFixedWidth(width)
         return button
+    # def labelTile2(self, name, height, width)
 
     def labelTile(self, labelName, height, width, isBorder):
         temp = QLabel()
@@ -31,13 +33,15 @@ class UiComponents():
         if (isBorder):
             temp.setStyleSheet("border :1px solid white;")
         temp.setAlignment(QtCore.Qt.AlignCenter)
+        # temp.setStyleSheet("color: black;");
         return temp
 
     def mainLabel(self, top, left, height, width):
-        self.save_button = self.buttonTile("Save", 50, 100)
-        self.compile_button = self.buttonTile("Compile", 50, 100)
+        self.save_button = self.buttonTile("\U0001F4BE", 50, 40)
+        self.compile_button = self.buttonTile("\U00002699", 50, 40)
         self.currentTheme = "Dark Theme"
-        self.theme_button = self.buttonTile("Change\nTheme", 50, 100)
+        self.theme_button = self.buttonTile("\U0001F4A1", 50, 40)
+        self.exit_button = self.buttonTile("\U0001F4A1", 50, 40)
         self.theme_button.setContentsMargins(10,10,20,10)
         self.save_button.setContentsMargins(10, 10, 20, 10)
         self.compile_button.setContentsMargins(10, 10, 20, 10)
@@ -46,27 +50,42 @@ class UiComponents():
         main_label_image_pixmap = main_label_image_pixmap.scaled(300, 80)
         main_label_image.setPixmap(main_label_image_pixmap)
         main_label_hBox = QHBoxLayout()
+        
         main_label_hBox.addWidget(main_label_image)
         main_label_hBox.addWidget(self.save_button)
         main_label_hBox.addWidget(self.compile_button)
         main_label_hBox.addWidget(self.theme_button)
-        main_label_hBox.setContentsMargins(10, 10, 10, 10)
-        return main_label_hBox
+        main_label_hBox.setContentsMargins(10, 10, 20, 10)
+        mlh = QGroupBox()
+        mlh.setLayout(main_label_hBox)
+        
+        mlh.setStyleSheet("border:none;")
+        mlh2 = QHBoxLayout()
+        
+        mlh2.addWidget(mlh)
+        
+        # main_label_hBox.set
+        return mlh2
 
     def editor(self, filePath):
         self.editorScroll = QScrollArea()
         self.editorlayout = QVBoxLayout()
         self.editorScreen = QPlainTextEdit()
+        
         self.editorScreen.setFont(self.fixedfont)
         self.path = filePath
         self.editorlayout.addWidget(self.editorScreen)
         self.container = QGroupBox()
+        
         self.container.setLayout(self.editorlayout)
         self.fileOpen()
         self.editorScreen.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.editorScroll.setWidget(self.container)
         self.editorScroll.setWidgetResizable(True)
-
+        self.editorScroll.setFrameStyle(QFrame.NoFrame)
+        self.container.setStyleSheet("border:none")
+        self.editorScreen.setFrameStyle(QFrame.NoFrame)
+        # self.container.setFrameStyle(QFrame.NoFrame)
 
     def memoryDisplay(self):
         self.scroll = QScrollArea()
@@ -109,9 +128,16 @@ class UiComponents():
         self.displayWidget.setLayout(gridbox)
         self.scroll.setWidget(self.displayWidget)
         self.scroll.setWidgetResizable(True)
+        self.scroll.setFrameStyle(QFrame.NoFrame)
+        self.displayWidget.setStyleSheet("border:none")
+        # gridbox.setStyleSheet("border:none")
+        # self.container.setFrameStyle(QFrame.NoFrame)
 
     def tabbedView1(self):
         self.tabs = QTabWidget()
+        # self.setTabPosition(QtWidgets.QTabWidget.West)
+        # self.tabs.setTab
+        self.tabs.setStyleSheet("border:none")
         self.tab1 = self.scroll1
         self.tab2 = self.scroll
         self.tabs.addTab(self.tab1, "Registers")
@@ -119,6 +145,7 @@ class UiComponents():
 
     def tabbedView2(self):
         self.tabsMain = QTabWidget()
+        self.tabsMain.setStyleSheet("border:none")
         self.tabMain1 = self.editorScroll
         self.tabsMain.addTab(self.tabMain1, "Editor")
 
@@ -151,7 +178,7 @@ class mainScreen(QWidget, UiComponents):
         self.title = "RISC-V Simulator"
         self.directoryPath = os.getcwd()
         self.currFilePath = os.path.join(self.directoryPath, "test", "main.mc")
-        self.link = frontBackEndInteraction(self.directoryPath)
+        # self.link = frontBackEndInteraction(self.directoryPath)
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
         QTimer.singleShot(3000, self.initWindow)
@@ -208,7 +235,9 @@ class mainScreen(QWidget, UiComponents):
 
     def initWindow(self):
         self.splash.close()
-        self.setWindowTitle(self.title)
+        self.setStyleSheet("background-color: #313638;",)
+        self.setWindowFlag(Qt.FramelessWindowHint)
+        # self.setWindowTitle("no title")
         logo_label = self.mainLabel(top=100, left=100, width=200, height=50)
 
         self.editor(self.currFilePath)
@@ -219,8 +248,7 @@ class mainScreen(QWidget, UiComponents):
         self.theme_button.clicked.connect(lambda: self.changeTheme())
         self.jump_button.clicked.connect(lambda: self.jumpAddress())
 
-        self.updateMemoryView("10000000")
-        self.updateRegisterView()
+        # self.updateMemoryVssiew()
 
         self.tabbedView1()
         self.tabbedView2()
@@ -233,11 +261,20 @@ class mainScreen(QWidget, UiComponents):
         hbox.addWidget(memoryDisplay, 4)
         hbox.setContentsMargins(10, 10, 10, 10)
         vbox = QVBoxLayout()
+        
+        self.titleBar = MyBar()
+        self.titleBar.ButtonRestore.setVisible(True)
+        vbox.addWidget(self.titleBar)
         vbox.addLayout(logo_label)
         vbox.addLayout(hbox)
         vbox.setContentsMargins(10, 10, 10, 10)
         self.setLayout(vbox)
         self.showMaximized()
 
-
-
+App = QApplication(sys.argv)
+# sshFile="GUI/me.qss"
+# with open(sshFile,"r") as fh:
+#     App.setStyleSheet(fh.read())
+App.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+window = mainScreen(App)
+sys.exit(App.exec_())

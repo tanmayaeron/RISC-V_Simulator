@@ -28,7 +28,7 @@ class ReadFile:
         file = open(filepath, 'r')
         flag = 0
         for lines in file:
-            if(line == "$"):
+            if(lines == "$" or lines == "$\n"):
                 flag = 1
                 continue
             

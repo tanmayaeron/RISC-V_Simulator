@@ -25,7 +25,7 @@ class Buffer:
     def get(self, stage):
         if stage in self.dict:
             return self.dict[stage]
-        return (-1, -1, -1, -1, -1, -1, -1, -1) #the Buffer is empty and shouldn't be accessed
+        return (0, 0, 0, 0, 0, 0, 0, 0) #the Buffer is empty and shouldn't be accessed
 
     def ifPresent(self, stage): #erased buffers won't be accessed and we'll get out of that stage
         if stage in self.dict:
@@ -47,6 +47,7 @@ class HDU:
     def __init__(self, df_control):
         self.df_control = df_control #read csv and pass to HDU object
         self.initialiseControls()
+        self.unprocessed = [0]*32
     
     def initialiseControls(self):
         self.isExecuters1 = list(self.df_control['rs1E'].astype(int))
@@ -60,7 +61,32 @@ class HDU:
         
         result = [[],[]]
         is_rs1 = max(self.isExecuters1[id],self.isMemoryrs1[id])
-        is_rs2 = max(self.isExecuters1[id],self.isMemoryrs1[id])
+        is_rs2 = max(self.isExecuters2[id],self.isMemoryrs2[id])
+
+        """
+        addi x10 x9 1 E->E by this code, that's ok
+        sw x10 0(x9)
+
+        lw x10 add  
+        addi x9 x10 1 #stall case
+
+        lw x10 add
+        sw x10 add2 #MM case
+
+        addi x10 x9 1 
+        addi x11 x10 9 #EE case
+
+        addi x9 x10 9
+        
+
+        rs1 + imm
+
+        F D E M W
+          F D E M W
+            F D D E M W #stall
+                F D E M W
+        
+        """
         
     
         if rs1 == 0:
@@ -121,9 +147,31 @@ class HDU:
         stall = max(result[0][2],result[1][2])
 
         if stall:
-            pass            
+            pass
+        return result
+
+    def stalling3(self, id, rd, rs1, rs2):
+        is_rs1 = rs1 if max(self.isExecuters1[id],self.isMemoryrs1[id]) == 1 else 0
+        is_rs2 = rs2 if max(self.isExecuters2[id],self.isMemoryrs2[id]) == 1 else 0
+        is_rd = rd if self.WE[id] == 1 else 0
+        if self.unprocessed[is_rs1] > 0 or self.unprocessed[is_rs2] > 0:
+            return True
+        
+        if is_rd != 0:
+            self.unprocessed[is_rd] += 1
+        return False
+    
+    def update_process(self, rd): #call in WB stage
+        is_rd = rd if self.WE[id] == 1 else 0
+        if is_rd != 0:
+            if(self.unprocessed[is_rd] < 1):
+                print("Error\n")
+            self.unprocessed[is_rd] -= 1
+            
 if __name__ == "__main__":
     df_control = pd.read_csv("controls.csv")
     df_control = df_control.dropna(axis=0, how='any')
     buf = Buffer()
     hdu = HDU(df_control)
+    buf.decodeB(14, "0"*8, 10, 9, rd = 10)
+    print(hdu.forwarding2(buf, 17, 10, 10))

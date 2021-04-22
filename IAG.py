@@ -48,3 +48,9 @@ class IAG:
         PC = int(self._PC,16)
         PC+=4
         self._PC_Temp = '{:08x}'.format(PC)[-8:]
+
+    def setPC(self, newPC):
+        self._PC = newPC
+    
+    
+    

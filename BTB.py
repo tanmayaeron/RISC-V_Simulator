@@ -1,14 +1,32 @@
 from collections import defaultdict
+# beq x11,x11,fib
+# addi x11,x11,10
+# fib:
+# # runs for the second time
+# # RZ = 1
+# # self.predicted[PC] = 0
+# # our prediction = False and flush = True we are correct
 
+
+# back:
+# beq x11,x11, back
+
+# # RZ =1
+# # self.predicted[PC] = 1
+# # our prediction = True and Flush = False
+
+
+# backward:
+# beq x11,x12, backward
+# # RZ = 0
+# # self.predicted[PC] = 1
 
 class BTB:
 
     def __init__(self):
         self.lookup = defaultdict(int)
-        
         #  branch and jal instruction in self.lookup
-        
-        self.predicted = defaultdict(int)
+        self.predicted = defaultdict(lambda: -1)
         # stores True if taken else False
 
     # prediction - 1 -> Taken
@@ -21,13 +39,31 @@ class BTB:
         return int(imm[0],16)>=8
 
     def predict(self, PC ):
-        
         return [True, self.lookup[PC]] if PC in self.lookup else [False, "0"*8]
 
-    def HitMiss(self, RZ, PC):
-        # prediction 
-        if self.lookup[PC] == RZ:
+    def isFlush(self, PC, RZ, isJalr, S_Select, isBTB):
+        # True means Flush
+        # False means we do not flush
+        
+        if PC not in self.lookup and isBTB:
+            # if the jump or branch instruction is occuring for the first time we return True
             return True
+        
+        elif isJalr:
+            # we always Flush in jalr
+            return True
+        
+        elif not isBTB:
+            return False
+
+        elif not S_Select:
+            # this instruction is JAL as isBTB is True and not sselect
+            # we dont flush as jal if jal comes ( when it comes for the first time is checked earlier)
+            return False
+        
+        elif self.predicted[PC] != int(RZ[-1],16):
+            return True
+        
         return False
 
     def addInstruction(self, PC, PC_temp, imm, target, S_Select, isBTB):

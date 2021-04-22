@@ -9,7 +9,9 @@ from register import RegisterFile
 from decode import identify
 from helperFunctions import *
 from input import ReadFile
+from BTB import BTB
 import Hazard
+
 # M_select RM_select to be added
 class Processor:
 
@@ -32,9 +34,10 @@ class Processor:
         self.initialiseControls()
         self.bufferStore = [[], [], [], []]
         
-        #sys.stdout = self._outputLogFile
+        sys.stdout = self._outputLogFile
         currOpID = 0
         self.cycle = 0
+        self._BTB = BTB()
 
     def initialiseTempRegisters(self):
         self._IR = '0'*8
@@ -55,10 +58,9 @@ class Processor:
         self.INC_select = list(self.df_control['muxINC'].astype(int))
         self.PC_select = list(self.df_control['muxPC'].astype(int))
         self.S_select = list(self.df_control['muxS'].astype(int))
-        #self._muxM = list(self.df_control['muxM'].astype(int))
-        #self._muxRM = list(self.df_control['muxRM'].astype(int))
         self._writeEnable = list(self.df_control['WE'].astype(int))
         self.SizeEnable = list(self.df_control['SE'].astype(int))
+        self._isBTB = list(self.df_control['isBTB'].astype(int))
 
     def muxMA(self, MA_select):
         if(MA_select == 0):
@@ -111,19 +113,15 @@ class Processor:
         #     return self.buffer.get(4)[1]
         
     def muxB(self, B_select):
-        if(B_select == 0):
+        if B_select == 0:
             return self._RB
-        elif(B_select == 1):
+        else:
             return self._imm
-        # elif(B_select == 2):
-        #     return self.buffer.get(3)[1]
-        # else:
-        #     return self.buffer.get(4)[1]
+
         
     def muxM(self, M_select): #new
-        if(M_select == 0):
+        if M_select == 0:
             return self.buffer.get(4)[1]
-
         else:
             return self.buffer.get(3)[3]
         
@@ -154,7 +152,7 @@ class Processor:
         print("Fetch stage:")
         print("PC:", self._IAG.getPC())
         outputmuxMA = self.muxMA(1)  # MAR gets value of PC
-
+        
         #PC_temp
         self._IAG.updatePC_temp()  # PC_Temp gets PC+4
 
@@ -168,11 +166,17 @@ class Processor:
         if self.getIR() == "0"*8:
             return False
         
+        predict = self._BTB.predict(self._IAG.getPC())
         self.bufferStore[0] = [self._IAG.getPC(), self._IR, self._IAG.getPC_Temp()]
 
-        self._IAG.adder(self._IAG.getPC())
-        self._IAG.muxPC(0, "0"*8)
-        self._IAG.updatePC(1)
+
+        if predict[0]:
+            self._IAG.setPC(predict[1])
+            # predict[1] is target
+        else:
+            self._IAG.adder(self._IAG.getPC())
+            self._IAG.muxPC(0, "0"*8)
+            self._IAG.updatePC(1)
         
         print("IR:", self._IR)
         return True
@@ -225,6 +229,7 @@ class Processor:
 
         print("Execute stage:")
         currOpID, PC, RA, RB, RM, rd, rs1, rs2, imm, PC_temp, resultarray = self.buffer.get(2)
+        
         #controls
         print(self.buffer.get(2))
         print("PC :", PC)
@@ -235,6 +240,7 @@ class Processor:
         ##
         currINCSelect = self.INC_select[currOpID]
         currSSelect = self.S_select[currOpID]
+        isBTB = self._isBTB[currOpID]
         ##
 
         operand1 = self.muxA(currMuxA)
@@ -244,6 +250,11 @@ class Processor:
         self._RZ = self._ALU.operate(operand1, operand2, currALU_select)
         print("RZ:", self._RZ)
 
+        self._IAG.adder(PC, imm)
+        self._IAG.muxPC(0, RA)
+
+        # PC, PC_temp, imm, target, S_Select, isBTB
+        self._BTB.addInstruction(PC, PC_temp, imm, self._IAG.output_muxPC, currSSelect, isBTB)
         #to edit, start
         # self._IAG.muxPC(self.PC_select[currOpID], RA)
         # self._IAG.updatePC(1)
@@ -273,9 +284,12 @@ class Processor:
                 self._IAG.muxPC(0, RA)
                 self._IAG.updatePC(1)
                 Miss = True
-        else:
-            pass
         
+        isJalr = self.PC_select[currOpID]
+        isBTB = self._BTB[currOpID]
+        # self, PC, RZ, isJalr, S_Select, isBTB
+        Miss = self._BTB.isFlush(PC, self._RZ, isJalr, currSSelect, isBTB)
+
         self.bufferStore[2] = [currOpID, self._RZ, rd, RM, rs1, rs2, PC_temp]
         print((self.bufferStore[2]))
         return True, Miss, resultarray       
@@ -290,24 +304,24 @@ class Processor:
         currMemoryEnable = self._memoryEnable[currOpID]
         currSizeEnable = self.SizeEnable[currOpID]
 
-
-        # currMuxM = self._muxM[currOpID] #not needed
-
         outputmuxMA = self.muxMA(0)
 
         self._PMI.setMAR(outputmuxMA)
-        #print((self.buffer.get(3)))
+
         print("RM :", RM, type(RM))
+        
         self._PMI.setMDR(RM) #csv me baki hai
 
 
         print("MDR:", self._PMI.getMDR())
+        
         print("MAR:", self._PMI.getMAR())
 
         self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
 
         self._RY = self.muxY(self._muxY[currOpID])
         self.bufferStore[3] = [currOpID, self._RY, rd]
+        
         return True
 
     def registerUpdate(self,knob2=True):
@@ -412,8 +426,6 @@ class Processor:
             else: #delete pre existing buffer
                 self.buffer.clearStage(2)
             
-            # if Pipeline_cycle > 100:
-            #     break
             if isStall:
                 isStall -= 1
                 Stall_Count+=1
@@ -428,7 +440,7 @@ class Processor:
             if MemBufferSignal == ExecBufferSignal == DecodeBufferSignal == FetchBufferSignal == False:
                 break
         self._registerFile.print_registers()
-        # print(self._PMI.getMemory(0))
+
         print("No of stall are",Stall_Count)
 
     
@@ -478,6 +490,7 @@ class Processor:
         
         
     def run_this_temp(self):
+
         print(self._PMI.getMemory(0))
         Pipeline_cycle = 0
         Stall_Count = 0
@@ -519,27 +532,6 @@ class Processor:
 
             self.forwarding(hazardlist,isStall,DecodeBufferSignal)
             self.forwardingE(hazardlistE,isStall,DecodeBufferSignal)
-
-            # if DecodeBufferSignal and isStall == 0:
-            #     if hazardlist[0][0] == True: #rs1
-            #         if hazardlist[0][1] == "ME":
-            #             pass #take RY and make RA = RY
-            #         elif hazardlist[0][1] == "EE":
-            #             pass #take RZ and make RA = RY
-                        
-            #     if hazardlist[1][0] == True: #rs2
-            #         if hazardlist[1][1] == "ME":
-            #             pass
-            #         elif hazardlist[1][1] == "EE":
-            #             pass
-            
-            # if ExecBufferSignal:
-            #     if hazardlistE[0][0] == True: #rs1
-            #         if hazardlistE[0][1][0] == 'M':
-            #             pass #M->M in this case only
-            #         else:
-            #             pass
-            #pass the hazard list to buffer decode buffer used in execute and helps resolve M->M
             
             if MemBufferSignal:
                 self.bufferUpdate(3)
@@ -556,12 +548,12 @@ class Processor:
             else: #delete pre existing buffer
                 self.buffer.clearStage(2)
             
-            # if Pipeline_cycle > 100:
-            #     break
+            
             if isStall:
                 Stall_Count+=1
                 isStall -= 1
                 continue
+            
             if FetchBufferSignal and Miss == False: #set buffer only here
                 self.bufferUpdate(0)
             else:
@@ -579,9 +571,13 @@ class Processor:
     def printData(self):
         filename = 'output.txt'
         filename = os.path.join(self._currFolderPath, "generated", 'memory.txt')
-        memorySnapshot = self._PMI.getMemory()
+        memorySnapshot = self._PMI.getMemory(1)
         self._fileReader.printMemory(memorySnapshot, filename)
-        self._outputLogFile.close()
+        print("hey there")
+        print(self._PMI.getMemory(0))
+        print("mem",memorySnapshot)
+        
+        # self._outputLogFile.close()
 
     def printRegisters(self):
         registers = self._registerFile.get_registerFile()

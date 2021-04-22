@@ -1,4 +1,5 @@
 from helperFunctions import *
+        
 class IAG:
     def __init__(self):
         self.initialiseIAG()
@@ -17,19 +18,11 @@ class IAG:
     def getPC_Temp(self):
         return self._PC_Temp
         
-    def muxPC(self, PC_select, buffer, RA = "0"*8, BTB = "0"*8):
-        if PC_select == 0:
-            self.output_muxPC = self._PC
-        elif PC_select == 1:
+    def muxPC(self,PC_select, RA): 
+        if PC_select == 1 :
+            self.output_muxPC =  RA
+        else:
             self.output_muxPC = self.output_adder
-        elif PC_select == 2:
-            self.output_muxPC = self.buffer.get(2)[1]
-        elif PC_select == 3:
-            self.output_muxPC = RA 
-        elif PC_select == 4:
-            self.output_muxPC = BTB 
-
-            
             
     def muxINC(self, INC_select, S_select, imm, RZ):
         if(S_select == 1):
@@ -40,10 +33,11 @@ class IAG:
         else:
             self.inputB_adder = imm
 
-    def adder(self):
-        operandA = int(self._PC,16)
-        operandB = int(self.inputB_adder,16)
+    def adder(self, PC, imm = "0"*7+"4"):
+        operandA = int(PC,16)
+        operandB = int(imm,16)
         output = operandA+operandB
+        print("PC, imm :", operandA, operandB, output)
         self.output_adder = '{:08x}'.format(output)[-8:]
         
     def updatePC(self,PC_enable):
@@ -54,4 +48,3 @@ class IAG:
         PC = int(self._PC,16)
         PC+=4
         self._PC_Temp = '{:08x}'.format(PC)[-8:]
-

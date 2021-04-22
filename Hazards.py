@@ -1,4 +1,5 @@
 import pandas as pd
+import sys
 class Buffer:
   #  #
     def __init__(self):
@@ -8,16 +9,17 @@ class Buffer:
         buffers are set after their repective stages, fetch after the fetch stage and so on
         set after each cycle
     """
-    def fetchB(self, PC, IR):
-        self.dict[1] = PC, IR
+    def fetchB(self, PC, IR, PC_temp):
+        self.dict[1] = PC, IR, PC_temp
 
-    def decodeB(self, id, PC , rs1, rs2, RA = "0"*8, RB = "0"*8, RM = "0"*8, rd = 0):
-        self.dict[2] = id, PC, RA, RB, RM, rd, rs1, rs2 #RM contains the value of rs2 by default if it's not to be written then ME = 0
+    def decodeB(self, id, PC, RA = "0"*8, RB = "0"*8, RM = "0"*8, rd = 0, rs1 = 0, rs2 = 0, imm = "0"*8, PC_temp = "0"*8, arraylist = [[False, "NO", 0],[False, "NO", 0]]):
+        self.dict[2] = id, PC, RA, RB, RM, rd, rs1, rs2, imm, PC_temp, arraylist
+        #RM contains the value of rs2 by default if it's not to be written then ME = 0
         #RA and RB may not be used and rejected by muxes
 
-    def executeB(self, id, RZ, rd, RM, rs1, rs2):
+    def executeB(self, id, RZ, rd, RM, rs1, rs2, PC_temp):
         #included rs1, rs2 in the after execute buffer, this will be needed for X->M forwarding/stalling
-        self.dict[3] = id, RZ, rd, RM, rs1, rs2 # RZ is the result
+        self.dict[3] = id, RZ, rd, RM, rs1, rs2, PC_temp # RZ is the result
 
     def memoryB(self, id, RY, rd):
         self.dict[4] = id, RY, rd # RY is the result
@@ -57,7 +59,7 @@ class HDU:
         self.is_AE = list(self.df_control['isAE'].astype(int))
         self.WE = list(self.df_control['WE'].astype(int))
 
-    def forwarding2(self, buffer_obj,id, rs1 = 0, rs2 = 0):
+    def forwarding2(self, buffer_obj, id, rs1 = 0, rs2 = 0):
         
         result = [[],[]]
         is_rs1 = max(self.isExecuters1[id],self.isMemoryrs1[id])
@@ -155,17 +157,18 @@ class HDU:
         is_rs2 = rs2 if max(self.isExecuters2[id],self.isMemoryrs2[id]) == 1 else 0
         is_rd = rd if self.WE[id] == 1 else 0
         if self.unprocessed[is_rs1] > 0 or self.unprocessed[is_rs2] > 0:
-            return True
+            return [[True, "NO", 1],[True, "NO", 1]]
         
         if is_rd != 0:
             self.unprocessed[is_rd] += 1
-        return False
+        return [[False, "NO", 0], [False, "NO", 0]]
     
-    def update_process(self, rd): #call in WB stage
+    def update_process(self, id, rd): #call in WB stage
         is_rd = rd if self.WE[id] == 1 else 0
         if is_rd != 0:
             if(self.unprocessed[is_rd] < 1):
-                print("Error\n")
+                print("rd: ",is_rd)
+                sys.exit()
             self.unprocessed[is_rd] -= 1
             
 if __name__ == "__main__":

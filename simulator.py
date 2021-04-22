@@ -328,6 +328,7 @@ class Processor:
     def run_this(self):
         print(self._PMI.getMemory(0))
         Pipeline_cycle = 0
+        Stall_Count = 0
         while True:
             Pipeline_cycle += 1
             MemBufferSignal = ExecBufferSignal = DecodeBufferSignal = FetchBufferSignal = True
@@ -402,6 +403,7 @@ class Processor:
             # if Pipeline_cycle > 100:
             #     break
             if isStall:
+                Stall_Count += 1
                 isStall -= 1
                 continue
             if FetchBufferSignal and Miss == False: #set buffer only here
@@ -415,6 +417,7 @@ class Processor:
                 break
         self._registerFile.print_registers()
         print(self._PMI.getMemory(0))
+        print("Stalls :", Stall_Count)
         
     def printData(self):
         filename = 'output.txt'

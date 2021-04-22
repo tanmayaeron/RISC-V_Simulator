@@ -30,9 +30,7 @@ class Buffer:
         return (0,)*15 #the Buffer is empty and shouldn't be accessed
 
     def ifPresent(self, stage): #erased buffers won't be accessed and we'll get out of that stage
-        if stage in self.dict:
-            return True
-        return False
+        return stage in self.dict
 
     def flush(self):
         self.dict.clear()

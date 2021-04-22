@@ -33,7 +33,7 @@ class Processor:
         self.initialiseTempRegisters()
         self.initialiseControls()
         self.bufferStore = [[], [], [], []]
-        
+        # self.bufferStore is list of list as it is updated in forwardingE 
         sys.stdout = self._outputLogFile
         currOpID = 0
         self.cycle = 0

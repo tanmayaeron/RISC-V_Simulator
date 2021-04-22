@@ -148,6 +148,7 @@ class Processor:
     def load_mc(self, currFileName):
         filepath = os.path.join(self._currFolderPath,'test', currFileName)
         self._fileReader.read_mc(filepath, self._PMI)
+        print(self._PMI.getMemory(0))
 
     def fetch(self):
         print("Fetch stage:")
@@ -162,6 +163,8 @@ class Processor:
         self._PMI.accessMemory(1, 2, 0)
 
         self.setIR(1)  # IR gets value of MDR
+        print("IR ->>>>>> ", self.getIR())
+        print("PC :", self._IAG.getPC())
         if self.getIR() == "0"*8:
             return False
         
@@ -216,6 +219,8 @@ class Processor:
         print("Execute stage:")
         currOpID, PC, RA, RB, RM, rd, rs1, rs2, imm, PC_temp, resultarray = self.buffer.get(2)
         #controls
+        print(self.buffer.get(2))
+        print("PC :", PC)
         currALU_select = self._ALU_select[currOpID] #ALU 
         currMuxB = self._muxB[currOpID]
         currMuxA = self._muxA[currOpID]
@@ -243,22 +248,26 @@ class Processor:
         Miss = False
         if 18 <= currOpID <= 23:
             if 18 <= currOpID <= 21: #beq, ..
-                if RZ[-1] == "0": #false
-                    self._IAG.adder(PC)
+                if self._RZ[-1] == "0": #false
+                    pass
                 else: #true
                     self._IAG.adder(PC, imm)
+                    self._IAG.muxPC(0, RA)
+                    self._IAG.updatePC(1)
                     Miss = True
-            elif id == 22: #jal
+            elif currOpID == 22: #jal
+                print("Yes there was a miss !", PC, imm)
                 self._IAG.adder(PC, imm)
+                self._IAG.muxPC(0, RA)
+                self._IAG.updatePC(1)
                 Miss = True
             else: #jalr
-                self._IAG.adder(PC)
+                self._IAG.adder(RA, imm)
+                self._IAG.muxPC(0, RA)
+                self._IAG.updatePC(1)
                 Miss = True
         else:
-            self._IAG.adder(PC)
-        
-        self._IAG.muxPC(self.PC_select[currOpID], RA)
-        self._IAG.updatePC(1)
+            pass
         
         self.bufferStore[2] = (currOpID, self._RZ, rd, RM, rs1, rs2, PC_temp)
         print((self.bufferStore[2]))
@@ -317,12 +326,13 @@ class Processor:
             self.buffer.memoryB(*self.bufferStore[3])
 
     def run_this(self):
+        print(self._PMI.getMemory(0))
         Pipeline_cycle = 0
         while True:
             Pipeline_cycle += 1
             MemBufferSignal = ExecBufferSignal = DecodeBufferSignal = FetchBufferSignal = True
             Miss = False
-            isStall = False
+            isStall = 0
             hazardlist = [[False, "NO", 0],[False, "NO", 0]]
             hazardlistE = [[False, "NO", 0],[False, "NO", 0]]
             for i in range(5):
@@ -335,6 +345,8 @@ class Processor:
                         break
                 if i == 2:
                     ExecBufferSignal, Miss, hazardlistE = self.execute()
+                    if Miss:
+                        break
                 if i == 1:
                     MemBufferSignal = self.memoryAccess()
                 if i == 0:
@@ -386,6 +398,9 @@ class Processor:
                 self.bufferUpdate(1)
             else: #delete pre existing buffer
                 self.buffer.clearStage(2)
+            
+            # if Pipeline_cycle > 100:
+            #     break
             if isStall:
                 isStall -= 1
                 continue
@@ -398,8 +413,8 @@ class Processor:
 
             if MemBufferSignal == ExecBufferSignal == DecodeBufferSignal == FetchBufferSignal == False:
                 break
-            if Pipeline_cycle > 100:
-                break
+        self._registerFile.print_registers()
+        print(self._PMI.getMemory(0))
         
     def printData(self):
         filename = 'output.txt'

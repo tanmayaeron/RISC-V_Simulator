@@ -25,7 +25,7 @@ class Buffer:
     def get(self, stage):
         if stage in self.dict:
             return self.dict[stage]
-        return (0, 0, 0, 0, 0, 0, 0, 0) #the Buffer is empty and shouldn't be accessed
+        return (0,)*15 #the Buffer is empty and shouldn't be accessed
 
     def ifPresent(self, stage): #erased buffers won't be accessed and we'll get out of that stage
         if stage in self.dict:

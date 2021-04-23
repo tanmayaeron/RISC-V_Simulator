@@ -39,7 +39,7 @@ class BTB:
     def isImmediatePositive(self,imm):
         # returns 1 if imm is greater than 0
         # imm is in hex and sign extended
-        return int(imm[0],16)>=8
+        return int(imm[0],16)<8
 
     def predict(self, PC):
         return [True, self.lookup[PC]] if PC in self.lookup else [False, "0"*8]

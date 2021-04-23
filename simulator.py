@@ -68,32 +68,6 @@ class Processor:
         else:
             return self._IAG.getPC() #getPC
         
-    def comparator(self,reg1,reg2,control,select_mux1,select_mux2):
-        in1 = 0
-        in2 = 0
-        if(select_mux1==0):
-            in1 = self._registerFile.get_register(reg1)         #value of register
-        elif(select_mux1==1):
-            in1 =  self.buffer.get(3)[1]                        #E to D
-        else:
-            in1 =  self.buffer.get(4)[1]                        #M to D
-
-        if(select_mux2 ==0):
-            in2 = self._registerFile.get_register(reg2)         #value of register
-        elif(select_mux2==1):
-            in2 =  self.buffer.get(3)[1]                        #E to D
-        else:
-            in2 =  self.buffer.get(4)[1]  
-
-        if(control == 0):
-            return(in1 == in2)
-        if(control == 1):
-            return(in1 != in2)
-        if(control == 2):
-            return(in1 >= in2)
-        if(control == 3):
-            return(in1 < in2)
-        
     def setIR(self, enable):
         if enable == 1:
             self._IR = self._PMI.getMDR(0)
@@ -104,13 +78,9 @@ class Processor:
     def muxA(self, A_select):
         if(A_select == 0):
             return self.buffer.get(2)[2] #RA
-        elif(A_select == 1):
+        else:
             return self.buffer.get(2)[1] #auipc / PC
             #return self._IAG.getPC()
-        # elif(A_select == 2):
-        #     return self.buffer.get(3)[1]
-        # else:
-        #     return self.buffer.get(4)[1]
         
     def muxB(self, B_select):
         if B_select == 0:
@@ -167,6 +137,8 @@ class Processor:
             return False
         
         predict = self._BTB.predict(self._IAG.getPC())
+
+
         self.bufferStore[0] = [self._IAG.getPC(), self._IR, self._IAG.getPC_Temp()]
 
 
@@ -229,19 +201,15 @@ class Processor:
 
         print("Execute stage:")
         currOpID, PC, RA, RB, RM, rd, rs1, rs2, imm, PC_temp, resultarray = self.buffer.get(2)
-        
-        #controls
-        print(self.buffer.get(2))
-        print("PC :", PC)
+
         currALU_select = self._ALU_select[currOpID] #ALU 
         currMuxB = self._muxB[currOpID]
         currMuxA = self._muxA[currOpID]
 
-        ##
         currINCSelect = self.INC_select[currOpID]
         currSSelect = self.S_select[currOpID]
         isBTB = self._isBTB[currOpID]
-        ##
+        isJalr = self.PC_select[currOpID]
 
         operand1 = self.muxA(currMuxA)
         operand2 = self.muxB(currMuxB)
@@ -253,7 +221,10 @@ class Processor:
         self._IAG.adder(PC, imm)
         self._IAG.muxPC(0, RA)
 
+        Miss = False
         # PC, PC_temp, imm, target, S_Select, isBTB
+        Miss = self._BTB.isFlush(PC, self._RZ, isJalr, currSSelect, isBTB) #order wise first
+
         self._BTB.addInstruction(PC, PC_temp, imm, self._IAG.output_muxPC, currSSelect, isBTB)
         #to edit, start
         # self._IAG.muxPC(self.PC_select[currOpID], RA)
@@ -263,32 +234,16 @@ class Processor:
         # self._IAG.muxPC(0, RA)
         # self._IAG.updatePC(1)
         #end
-        Miss = False
-        if 18 <= currOpID <= 23:
-            if 18 <= currOpID <= 21: #beq, ..
-                if self._RZ[-1] == "0": #false
-                    pass
-                else: #true
-                    self._IAG.adder(PC, imm)
-                    self._IAG.muxPC(0, RA)
-                    self._IAG.updatePC(1)
-                    Miss = True
-            elif currOpID == 22: #jal
-                print("Yes there was a miss !", PC, imm)
-                self._IAG.adder(PC, imm)
-                self._IAG.muxPC(0, RA)
-                self._IAG.updatePC(1)
-                Miss = True
-            else: #jalr
+        
+        if Miss:
+            if isJalr:
                 self._IAG.adder(RA, imm)
                 self._IAG.muxPC(0, RA)
                 self._IAG.updatePC(1)
-                Miss = True
-        
-        isJalr = self.PC_select[currOpID]
-        isBTB = self._BTB[currOpID]
-        # self, PC, RZ, isJalr, S_Select, isBTB
-        Miss = self._BTB.isFlush(PC, self._RZ, isJalr, currSSelect, isBTB)
+            else:
+                self._IAG.adder(PC, imm)
+                self._IAG.muxPC(0, RA)
+                self._IAG.updatePC(1)
 
         self.bufferStore[2] = [currOpID, self._RZ, rd, RM, rs1, rs2, PC_temp]
         print((self.bufferStore[2]))
@@ -307,15 +262,12 @@ class Processor:
         outputmuxMA = self.muxMA(0)
 
         self._PMI.setMAR(outputmuxMA)
-
-        print("RM :", RM, type(RM))
         
-        self._PMI.setMDR(RM) #csv me baki hai
+        self._PMI.setMDR(RM)
 
-
-        print("MDR:", self._PMI.getMDR())
-        
-        print("MAR:", self._PMI.getMAR())
+        if currMemoryEnable:
+            print("MDR:", self._PMI.getMDR())
+            print("MAR:", self._PMI.getMAR())
 
         self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
 
@@ -350,100 +302,7 @@ class Processor:
         if(i == 3):
             self.buffer.memoryB(*self.bufferStore[3])
 
-    def run_this(self):
-        print(self._PMI.getMemory(0))
-        Pipeline_cycle = 0
-        
-        Stall_Count=0
-        while True:
-            Pipeline_cycle += 1
-            MemBufferSignal = ExecBufferSignal = DecodeBufferSignal = FetchBufferSignal = True
-            Miss = False
-            isStall = 0
-            hazardlist = [[False, "NO", 0],[False, "NO", 0]]
-            hazardlistE = [[False, "NO", 0],[False, "NO", 0]]
-            for i in range(5):
-                if i == 4:
-                    FetchBufferSignal = self.fetch()
-                if i == 3:
-                    DecodeBufferSignal, isStall, hazardlist = self.decode()
-                    print("Stalling :", isStall)
-                    if isStall:
-                        break
-                if i == 2:
-                    ExecBufferSignal, Miss, hazardlistE = self.execute()
-                    if Miss:
-                        break
-                if i == 1:
-                    MemBufferSignal = self.memoryAccess()
-                if i == 0:
-                    self.registerUpdate()
-            #In case of a miss
-            #send a signal from execute to clear buffers of decode and fetch
-            #PC is already updated to the required by IAG and will be fetched next
-
-            #In case of stall = 1, we know
-            #M->E, we realise it in decode, pass a signal
-            #The signal will tell us the stall
-            #Don't update decode buffer and fetch, don't delete the fetch buffer but decode is deleted
-            #as the decode buffer was deleted no execute occurs in the next cycle
-            #fetch buffer wasn't deleted or updated so decode occurs with same IR, PC
-            #this way we stalled the whole thing by one cycle
-
-            # if DecodeBufferSignal and isStall == 0:
-            #     if hazardlist[0][0] == True: #rs1
-            #         if hazardlist[0][1] == "ME":
-            #             pass #take RY and make RA = RY
-            #         elif hazardlist[0][1] == "EE":
-            #             pass #take RZ and make RA = RY
-                        
-            #     if hazardlist[1][0] == True: #rs2
-            #         if hazardlist[1][1] == "ME":
-            #             pass
-            #         elif hazardlist[1][1] == "EE":
-            #             pass
-            
-            # if ExecBufferSignal:
-            #     if hazardlistE[0][0] == True: #rs1
-            #         if hazardlistE[0][1][0] == 'M':
-            #             pass #M->M in this case only
-            #         else:
-            #             pass
-            #pass the hazard list to buffer decode buffer used in execute and helps resolve M->M
-            
-            if MemBufferSignal:
-                self.bufferUpdate(3)
-            else:
-                self.buffer.clearStage(4)
-            
-            if ExecBufferSignal:
-                self.bufferUpdate(2)
-            else: #it's a miss or no fetch buffer before it
-                self.buffer.clearStage(3)
-
-            if DecodeBufferSignal and Miss == False and isStall == 0: #set buffer only here
-                self.bufferUpdate(1)
-            else: #delete pre existing buffer
-                self.buffer.clearStage(2)
-            
-            if isStall:
-                isStall -= 1
-                Stall_Count+=1
-                continue
-            if FetchBufferSignal and Miss == False: #set buffer only here
-                self.bufferUpdate(0)
-            else:
-                self.buffer.clearStage(1)
-            #clear buffer store
-            self.bufferStore = [[],[],[],[]]
-
-            if MemBufferSignal == ExecBufferSignal == DecodeBufferSignal == FetchBufferSignal == False:
-                break
-        self._registerFile.print_registers()
-
-        print("No of stall are",Stall_Count)
-
-    
+    ###Control unit that decides the type of forwarding
     def forwarding(self, hazardlist, isStall, DecodeBufferSignal):
         if hazardlist[0][0]==hazardlist[1][0]==False:
             return 
@@ -460,7 +319,6 @@ class Processor:
             elif hazardlist[0][1] == "EE":
                 self.bufferStore[1][2]=self.bufferStore[2][1]# RZ value to RA
         
-
         if hazardlist[1][0] == True: #rs2
 
             if hazardlist[1][1] == "ME":
@@ -468,6 +326,7 @@ class Processor:
             
             elif hazardlist[1][1] == "EE":
                 self.bufferStore[1][3]=self.bufferStore[2][1]# RZ value to RB
+    
             
     def forwardingE(self, hazardlistE, isStall, DecodeBufferSignal):
         if hazardlistE[0][0]==hazardlistE[1][0]==False:
@@ -484,16 +343,16 @@ class Processor:
         if hazardlistE[1][0]==True and hazardlistE[1][1]=="MM":
             #RY vale to RZ
             self.bufferStore[2][1]=self.bufferStore[3][1]
-        
+    ###uptil here
 
 
-        
-        
-    def run_this_temp(self):
+    def runPipelining_False_for_Forwarding(self, knob2 = True):
+        #defaults to stalling when knob is unset or True in our code
 
-        print(self._PMI.getMemory(0))
         Pipeline_cycle = 0
         Stall_Count = 0
+        Miss_Count = 0
+
         while True:
             Pipeline_cycle += 1
             MemBufferSignal = ExecBufferSignal = DecodeBufferSignal = FetchBufferSignal = True
@@ -505,18 +364,19 @@ class Processor:
                 if i == 4:
                     FetchBufferSignal = self.fetch()
                 if i == 3:
-                    DecodeBufferSignal, isStall, hazardlist = self.decode(False)
+                    DecodeBufferSignal, isStall, hazardlist = self.decode(knob2)
                     print("Stalling :", isStall)
                     if isStall:
                         break
                 if i == 2:
                     ExecBufferSignal, Miss, hazardlistE = self.execute()
                     if Miss:
+                        Miss_Count += 1
                         break
                 if i == 1:
                     MemBufferSignal = self.memoryAccess()
                 if i == 0:
-                    self.registerUpdate(False)
+                    self.registerUpdate(knob2)
             
             #In case of a miss
             #send a signal from execute to clear buffers of decode and fetch
@@ -530,8 +390,9 @@ class Processor:
             #fetch buffer wasn't deleted or updated so decode occurs with same IR, PC
             #this way we stalled the whole thing by one cycle
 
-            self.forwarding(hazardlist,isStall,DecodeBufferSignal)
-            self.forwardingE(hazardlistE,isStall,DecodeBufferSignal)
+            if knob2 == False: #forwarding occurs
+                self.forwarding(hazardlist, isStall, DecodeBufferSignal)
+                self.forwardingE(hazardlistE, isStall, DecodeBufferSignal)
             
             if MemBufferSignal:
                 self.bufferUpdate(3)
@@ -548,7 +409,6 @@ class Processor:
             else: #delete pre existing buffer
                 self.buffer.clearStage(2)
             
-            
             if isStall:
                 Stall_Count+=1
                 isStall -= 1
@@ -563,10 +423,14 @@ class Processor:
 
             if MemBufferSignal == ExecBufferSignal == DecodeBufferSignal == FetchBufferSignal == False:
                 break
+        
         self._registerFile.print_registers()
-        print(self._PMI.getMemory(0))
-        print("Stalls :", Stall_Count)
+        if not knob2:
+            print("Stalls in only Forwarding case with a static branch predictor:", Stall_Count)
+        else:
+            print("Stalls in only Stalling case with a static branch predictor:", Stall_Count)
 
+        print("Total number of branch misses:", Miss_Count)
 
     def printData(self):
         filename = 'output.txt'
@@ -576,14 +440,11 @@ class Processor:
         print("hey there")
         print(self._PMI.getMemory(0))
         print("mem",memorySnapshot)
-        
-        # self._outputLogFile.close()
 
     def printRegisters(self):
         registers = self._registerFile.get_registerFile()
         filename = os.path.join(self._currFolderPath, "generated", 'registers.txt')
         self._fileReader.printRegisters(registers, filename)
-        
         
     def getRegisters(self):
         return self._registerFile.get_registerFile()

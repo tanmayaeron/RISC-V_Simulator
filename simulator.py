@@ -63,7 +63,7 @@ class Processor:
         self._isBTB = list(self.df_control['isBTB'].astype(int))
 
     def muxMA(self, MA_select):
-        if(MA_select == 0):
+        if MA_select == 0:
             return self.buffer.get(3)[1] #RZ
         else:
             return self._IAG.getPC() #getPC
@@ -76,7 +76,7 @@ class Processor:
         return self._IR
 
     def muxA(self, A_select):
-        if(A_select == 0):
+        if A_select == 0:
             return self.buffer.get(2)[2] #RA
         else:
             return self.buffer.get(2)[1] #auipc / PC
@@ -97,9 +97,9 @@ class Processor:
         
     def muxRM(self, RM_select): #new
         #doubt
-        if(RM_select == 0):
+        if RM_select == 0:
             return self._RY
-        elif(RM_select == 1):
+        elif RM_select == 1:
             return self._RZ
         else:
             return self._RB
@@ -221,7 +221,7 @@ class Processor:
         self._IAG.adder(PC, imm)
         self._IAG.muxPC(0, RA)
 
-        Miss = False
+
         # PC, PC_temp, imm, target, S_Select, isBTB
         Miss = self._BTB.isFlush(PC, self._RZ, isJalr, currSSelect, isBTB) #order wise first
 
@@ -246,7 +246,7 @@ class Processor:
                 self._IAG.updatePC(1)
 
         self.bufferStore[2] = [currOpID, self._RZ, rd, RM, rs1, rs2, PC_temp]
-        print((self.bufferStore[2]))
+        print(*self.bufferStore[2])
         return True, Miss, resultarray       
 
     def memoryAccess(self):
@@ -293,13 +293,13 @@ class Processor:
         print("RY: ", RY)
         
     def bufferUpdate(self, i):
-        if(i == 0):
+        if i == 0:
             self.buffer.fetchB(*self.bufferStore[0])
-        if(i == 1):
+        elif i == 1:
             self.buffer.decodeB(*self.bufferStore[1])
-        if(i == 2):
+        elif i == 2:
             self.buffer.executeB(*self.bufferStore[2])
-        if(i == 3):
+        elif i == 3:
             self.buffer.memoryB(*self.bufferStore[3])
 
     ###Control unit that decides the type of forwarding
@@ -437,9 +437,8 @@ class Processor:
         filename = os.path.join(self._currFolderPath, "generated", 'memory.txt')
         memorySnapshot = self._PMI.getMemory(1)
         self._fileReader.printMemory(memorySnapshot, filename)
-        print("hey there")
         print(self._PMI.getMemory(0))
-        print("mem",memorySnapshot)
+        print(memorySnapshot)
 
     def printRegisters(self):
         registers = self._registerFile.get_registerFile()

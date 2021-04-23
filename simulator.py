@@ -22,7 +22,7 @@ class Processor:
         self._fileReader = ReadFile()
         self._registerFile = RegisterFile()
         self.buffer = Hazard.Buffer()
-        
+        self.outputD = [{}, {}, {}, {}, {}]
         self._currFolderPath = currFolderPath
         self.df_control = pd.read_csv(os.path.join(self._currFolderPath, 'repository', "controls.csv"))
         self.df_control = self.df_control.dropna(axis=0, how='any')
@@ -119,26 +119,18 @@ class Processor:
         print(self._PMI.getMemory(0))
 
     def fetch(self):
-        print("Fetch stage:")
-        print("PC:", self._IAG.getPC())
         outputmuxMA = self.muxMA(1)  # MAR gets value of PC
-        
-        #PC_temp
-        self._IAG.updatePC_temp()  # PC_Temp gets PC+4
-
+        self._IAG.updatePC_temp()
         self._PMI.setMAR(outputmuxMA, 0)
-        # MDR gets value stored at address in MAR
         self._PMI.accessMemory(1, 2, 0)
 
         self.setIR(1)  # IR gets value of MDR
-        print("IR ->>>>>> ", self.getIR())
-        print("PC :", self._IAG.getPC())
+        self.outputD[0]["IR"] = self.getIR()
+        self.outputD[0]["PC"] = self._IAG.getPC()
         if self.getIR() == "0"*8:
             return False
         
         predict = self._BTB.predict(self._IAG.getPC())
-
-
         self.bufferStore[0] = [self._IAG.getPC(), self._IR, self._IAG.getPC_Temp()]
 
 
@@ -150,7 +142,7 @@ class Processor:
             self._IAG.muxPC(0, "0"*8)
             self._IAG.updatePC(1)
         
-        print("IR:", self._IR)
+        self.outputD[0]["IR"] = self.getIR()
         return True
 
     def decode(self,knob2=True):
@@ -158,29 +150,28 @@ class Processor:
         if not self.buffer.ifPresent(1):
             return False, 0, [[False, "NO", 0],[False, "NO", 0]] #if no memory buffer value set before it, don't run and don't set it's buffer too
 
-        print("Decode stage:")
         PC, IR, PC_temp = self.buffer.get(1)
         info_code = identify(IR, self.df_main)
-        print("code:", info_code)
+        self.outputD[1]["code"] = info_code
         
         currOpID = info_code['id']
         #currMuxRM = self._muxRM[currOpID]
         rs1 = int(info_code['rs1'], 2)
         self._RA = self._registerFile.get_register(rs1)
-        print("RA:", self._RA)
+        self.outputD[1]["RA"] = self._RA
 
         rs2 = int(info_code['rs2'], 2)
         self._RB = self._registerFile.get_register(rs2)
         #self._RM = self.muxRM(currMuxRM) #new
         self._RM = self._RB #change RM along with rs2 Data forwarding
-        print("RB:", self._RB)
+        self.outputD[1]["RB"] = self._RB
 
         self._rd = int(info_code['rd'], 2)
-        print("rd:", self._rd)
+        self.outputD[1]["rd"] = self._rd
 
         immediate = extendImmediate(info_code['immediate'])
         self._imm = binToHex(immediate)
-        print("imm:", self._imm)
+        self.outputD[1]["imm"] = self._imm
         
         
         if knob2:
@@ -199,7 +190,6 @@ class Processor:
         if not self.buffer.ifPresent(2):
             return False, 0, [[False, "NO", 0],[False, "NO", 0]] #if no memory buffer value set before it, don't run and don't set it's buffer too
 
-        print("Execute stage:")
         currOpID, PC, RA, RB, RM, rd, rs1, rs2, imm, PC_temp, resultarray = self.buffer.get(2)
 
         currALU_select = self._ALU_select[currOpID] #ALU 
@@ -213,10 +203,11 @@ class Processor:
 
         operand1 = self.muxA(currMuxA)
         operand2 = self.muxB(currMuxB)
-        print("operand1:", operand1)
-        print("operand2:", operand2)
+        self.outputD[2]["o1"] = operand1
+        self.outputD[2]["o2"] = operand2
+        
         self._RZ = self._ALU.operate(operand1, operand2, currALU_select)
-        print("RZ:", self._RZ)
+        self.outputD[2]["RZ"] = self._RZ
 
         self._IAG.adder(PC, imm)
         self._IAG.muxPC(0, RA)
@@ -255,7 +246,6 @@ class Processor:
             return False #if no memory buffer value set before it, then don't go further
 
         currOpID, RZ, rd, RM, rs1, rs2, PC_temp = self.buffer.get(3) #buffer access
-        print("Memory Access stage:")
         currMemoryEnable = self._memoryEnable[currOpID]
         currSizeEnable = self.SizeEnable[currOpID]
 
@@ -266,8 +256,9 @@ class Processor:
         self._PMI.setMDR(RM)
 
         if currMemoryEnable:
-            print("MDR:", self._PMI.getMDR())
-            print("MAR:", self._PMI.getMAR())
+            self.outputD[3]["MDR"] = self._PMI.getMDR()
+            
+            self.outputD[3]["MAR"] =  self._PMI.getMAR()
 
         self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
 
@@ -285,12 +276,10 @@ class Processor:
         if knob2:
             # knob2 is True so we stall
             self.hdu.update_process(currOpID, rd)
-        
-        print("Register Update Stage:")
         currWriteEnable = self._writeEnable[currOpID]
         self._registerFile.set_register(rd, RY, currWriteEnable)
-        print("RD: ", rd)
-        print("RY: ", RY)
+        self.outputD[4]["rd"] = self._rd
+        self.outputD[4]["RY"] =  self._RY
         
     def bufferUpdate(self, i):
         if i == 0:
@@ -360,12 +349,14 @@ class Processor:
             isStall = 0
             hazardlist = [[False, "NO", 0],[False, "NO", 0]]
             hazardlistE = [[False, "NO", 0],[False, "NO", 0]]
+            self.outputD = [{}, {}, {}, {}, {}]
             for i in range(5):
+                
                 if i == 4:
                     FetchBufferSignal = self.fetch()
                 if i == 3:
                     DecodeBufferSignal, isStall, hazardlist = self.decode(knob2)
-                    print("Stalling :", isStall)
+                    self.outputD[1]["Stalling"] =  isStall
                     if isStall:
                         break
                 if i == 2:
@@ -377,6 +368,8 @@ class Processor:
                     MemBufferSignal = self.memoryAccess()
                 if i == 0:
                     self.registerUpdate(knob2)
+                    
+            print(self.outputD)
             
             #In case of a miss
             #send a signal from execute to clear buffers of decode and fetch
@@ -453,7 +446,7 @@ class Processor:
 
     def reset(self):
         self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
-        sys.stdout = self._outputLogFile
+        # sys.stdout = self._outputLogFile
         self._registerFile.initialise_registers()
         self._PMI.clearMemory()
         self._IAG.initialiseIAG()

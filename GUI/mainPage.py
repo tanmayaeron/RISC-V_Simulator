@@ -14,11 +14,20 @@ class UiComponents():
         self.fixedfont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
         self.fixedfont.setPointSize(16)
 
-    def buttonTile(self, name, height, width):
+    def operationTile(self):
         button = QPushButton()
         button.setText(name)
         button.setFont(QFont('Times', 30))
         # button.setPointSize(13)
+        button.setFixedHeight(height)
+        button.setFixedWidth(width)
+        return button
+        
+    def buttonTile(self, name, height, width):
+        button = QPushButton()
+        button.setText(name)
+        button.setFont(QFont('Times', 30))
+        # bto.setStyleSheet("background-color :red;")
         button.setFixedHeight(height)
         button.setFixedWidth(width)
         return button
@@ -31,12 +40,24 @@ class UiComponents():
         temp.setFixedHeight(height)
         temp.setFixedWidth(width)
         if (isBorder):
-            temp.setStyleSheet("border :1px solid white;")
+            temp.setStyleSheet("border :1px solid white; color : red;")
+        temp.setAlignment(QtCore.Qt.AlignCenter)
+        # temp.setStyleSheet("color: black;");
+        return temp
+    
+    def labelTile2(self, labelName, height, width, color):
+        temp = QLabel()
+        temp.setText(labelName)
+        temp.setFont(self.fixedfont)
+        temp.setFixedHeight(height)
+        temp.setFixedWidth(width)
+        
+        temp.setStyleSheet("position: absolute;width: 0;height: 0;border-top: 4px solid transparent;border-bottom: 5px solid transparent;border-right: 12px solid black;top:46px;left:52px;")
         temp.setAlignment(QtCore.Qt.AlignCenter)
         # temp.setStyleSheet("color: black;");
         return temp
 
-    def mainLabel(self, top, left, height, width):
+    def mainLabel(self):
         self.save_button = self.buttonTile("\U0001F4BE", 50, 40)
         self.compile_button = self.buttonTile("\U00002699", 50, 40)
         self.currentTheme = "Dark Theme"
@@ -87,6 +108,45 @@ class UiComponents():
         self.editorScreen.setFrameStyle(QFrame.NoFrame)
         # self.container.setFrameStyle(QFrame.NoFrame)
 
+    def datapath(self):
+        # self.scroll3 = QScrollArea()
+        self.displayWidget2 = QGroupBox()
+        gridbox = QGridLayout()
+        
+        l1 = []
+        l2 = []
+        tt = 0
+        name = ['F', 'D', 'E', 'MA', 'WB']
+        verticalSpacer = QtWidgets.QSpacerItem(0, 500,  QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        gridbox.addItem(verticalSpacer, 0, 0, QtCore.Qt.AlignTop)
+        # gridbox.addWidget(tempp, 0, 4, 1, 5)
+        # color = ["Purple", "Orange", "Yellow", "Blue", "Pink"]
+        for i in range(5):
+            temp = self.labelTile2(name[i], 140, 80,"Orange")
+            gridbox.addWidget(temp, 1, tt)
+            l1.append(temp)
+            tt+=1
+            if(i >= 0 and i< 4):
+                temp = self.labelTile2("", 80, 20, "black")
+                gridbox.addWidget(temp, 1, tt)
+                l2.append(temp)
+                tt+=1
+        # verticalSpacer = QtWidgets.QSpacerItem(0, 40,  QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        
+        tempp = self.labelTile2("E -> E", 40, 200,"Red")
+        # gridbox.addItem(verticalSpacer, 2, 0, QtCore.Qt.AlignTop)
+        gridbox.addWidget(tempp, 3, 4, 1, 5)
+        tempp = self.labelTile2("", 4, 200,"Green")
+        # gridbox.addItem(verticalSpacer, 2, 0, QtCore.Qt.AlignTop)
+        gridbox.addWidget(tempp, 4, 4, 1, 5)
+        # gridbox.setRowStretch(0, 1)
+        # gridbox.setRowStretch(1, 1)
+        
+        self.displayWidget2.setLayout(gridbox)
+        
+        
+                
+            
     def memoryDisplay(self):
         self.scroll = QScrollArea()
         self.displayWidget = QGroupBox()
@@ -206,8 +266,10 @@ class mainScreen(QWidget, UiComponents):
         f = open(self.currFilePath, 'w')
         self.compile_button.setText("Compile")
         f.write(text)
+        
 
     def fileCompile(self):
+        # self.paintEvent()
         self.fileSave()
         self.link.reset()
         self.link.runProgram(self.currFilePath)
@@ -236,13 +298,14 @@ class mainScreen(QWidget, UiComponents):
     def initWindow(self):
         self.splash.close()
         self.setStyleSheet("background-color: #313638;",)
-        self.setWindowFlag(Qt.FramelessWindowHint)
+        # self.setWindowFlag(Qt.FramelessWindowHint)
         # self.setWindowTitle("no title")
-        logo_label = self.mainLabel(top=100, left=100, width=200, height=50)
+        logo_label = self.mainLabel()
 
         self.editor(self.currFilePath)
         self.memoryDisplay()
         self.registerDisplay()
+        self.datapath()
         self.save_button.clicked.connect(lambda: self.fileSave())
         self.compile_button.clicked.connect(lambda: self.fileCompile())
         self.theme_button.clicked.connect(lambda: self.changeTheme())
@@ -254,7 +317,7 @@ class mainScreen(QWidget, UiComponents):
         self.tabbedView2()
 
         memoryDisplay = self.tabs
-        feed = self.tabsMain
+        feed = self.displayWidget2
 
         hbox = QHBoxLayout()
         hbox.addWidget(feed, 10)
@@ -262,9 +325,9 @@ class mainScreen(QWidget, UiComponents):
         hbox.setContentsMargins(10, 10, 10, 10)
         vbox = QVBoxLayout()
         
-        self.titleBar = MyBar()
-        self.titleBar.ButtonRestore.setVisible(True)
-        vbox.addWidget(self.titleBar)
+        # self.titleBar = MyBar()
+        # self.titleBar.ButtonRestore.setVisible(True)
+        # vbox.addWidget(self.titleBar)
         vbox.addLayout(logo_label)
         vbox.addLayout(hbox)
         vbox.setContentsMargins(10, 10, 10, 10)

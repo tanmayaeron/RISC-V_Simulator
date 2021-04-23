@@ -7,14 +7,15 @@ class frontBackEndInteraction:
         
     def runProgram(self, filePath):
         self.processor.load_mc(filePath)
-        while True:
-            self.processor.fetch()
-            if self.processor.getIR() == '0'*8:
-                break
-            self.processor.decode()
-            self.processor.execute()
-            self.processor.memoryAccess()
-            self.processor.registerUpdate()
+        self.processor.runPipelining_False_for_Forwarding(False)
+        # while True:
+        #     self.processor.fetch()
+        #     if self.processor.getIR() == '0'*8:
+        #         break
+        #     self.processor.decode()
+        #     self.processor.execute()
+        #     self.processor.memoryAccess()
+        #     self.processor.registerUpdate()
         self.processor.printRegisters()
         self.processor.printData()
         

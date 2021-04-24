@@ -1,12 +1,15 @@
-from GUI.mainPage import *
+# from GUI.mainPage import *
 from frontBack import frontBackEndInteraction
 #commented top line and added above for now
 import sys
 import os
+from termcolor import colored
+def green(a):
+    print(colored(a,'green'))
 if __name__ == '__main__':
     n = len(sys.argv)
-    print("Compiling!!!!")
-    print("Check generated folder for details.")
+    green("Compiling!!!!")
+    green("Check generated folder for details.")
     if(n == 2 and sys.argv[1] == '2'):
         directoryPath = os.getcwd()
         currFilePath = os.path.join(directoryPath, "test", "main.mc")

@@ -191,17 +191,17 @@ class UiComponents():
         self.tabs1 = QTabWidget()
         # self.setTabPosition(QtWidgets.QTabWidget.West)
         # self.tabs.setTab
-        self.tabs.setStyleSheet("border:none")
+        self.tabs1.setStyleSheet("border:none")
         self.tab1 = self.scroll1
         self.tab2 = self.scroll
-        self.tabs.addTab(self.tab1, "Registers")
-        self.tabs.addTab(self.tab2, "Memory")
+        self.tabs1.addTab(self.tab1, "Registers")
+        self.tabs1.addTab(self.tab2, "Memory")
 
     def tabbedView2(self):
         self.tabs2 = QTabWidget()
-        self.tabsMain.setStyleSheet("border:none")
+        self.tabs2.setStyleSheet("border:none")
         self.tabMain1 = self.editorScroll
-        self.tabsMain.addTab(self.tabMain1, "Editor")
+        self.tabs2.addTab(self.tabMain1, "Editor")
         
     def tabbedView3(self):
         self.tabs3 = QTabWidget()
@@ -325,8 +325,8 @@ class mainScreen(QWidget, UiComponents):
         self.tabbedView1()
         self.tabbedView2()
 
-        memoryDisplay = self.tabs
-        feed = self.tabsMain
+        memoryDisplay = self.tabs1
+        feed = self.tabs2
 
         hbox = QHBoxLayout()
         hbox.addWidget(feed, 10)

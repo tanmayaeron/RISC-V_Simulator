@@ -11,6 +11,7 @@ from helperFunctions import *
 from input import ReadFile
 from BTB import BTB
 import Hazard
+import json
 
 # M_select RM_select to be added
 class Processor:
@@ -22,7 +23,7 @@ class Processor:
         self._fileReader = ReadFile()
         self._registerFile = RegisterFile()
         self.buffer = Hazard.Buffer()
-        self.outputD = [{}, {}, {}, {}, {}]
+        self.outputD = {0:{}, 1:{}, 2:{}, 3:{}, 4:{}}
         self._currFolderPath = currFolderPath
         self.df_control = pd.read_csv(os.path.join(self._currFolderPath, 'repository', "controls.csv"))
         self.df_control = self.df_control.dropna(axis=0, how='any')
@@ -134,7 +135,6 @@ class Processor:
     def load_mc(self, currFileName):
         filepath = os.path.join(self._currFolderPath,'test', currFileName)
         self._fileReader.read_mc(filepath, self._PMI)
-        print(self._PMI.getMemory(0))
 
     def fetch(self):
         outputmuxMA = self.muxMA(1)  # MAR gets value of PC
@@ -371,7 +371,6 @@ class Processor:
 
     def runPipelining_False_for_Forwarding(self, knob2 = True):
         #defaults to stalling when knob is unset or True in our code
-
         self.Pipeline_cycle = 0
         self.Stall_Count = 0
         self.Miss_Count = 0
@@ -383,7 +382,7 @@ class Processor:
             Miss = False
             hazardlist = [[False, "NO", 0],[False, "NO", 0]]
             hazardlistE = [[False, "NO", 0],[False, "NO", 0]]
-            self.outputD = [{}, {}, {}, {}, {}]
+            self.outputD =  {0:{}, 1:{}, 2:{}, 3:{}, 4:{}}
             for i in range(5):
                 
                 if i == 4:
@@ -402,9 +401,13 @@ class Processor:
                     MemBufferSignal = self.memoryAccess()
                 if i == 0:
                     self.registerUpdate(knob2)
-                    
-            print(self.outputD)
-            
+                
+            out = json.dumps(self.outputD)
+            print(out)
+            # with open(self._outputLogFile, 'w') as json_file:
+            #     json.dump(self.outputD, json_file)
+            # json.dump(self.outputD, self._outputLogFile)
+        
             #In case of a miss
             #send a signal from execute to clear buffers of decode and fetch
             #PC is already updated to the required by IAG and will be fetched next

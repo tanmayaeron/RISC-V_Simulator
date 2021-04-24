@@ -4,6 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+import json
 class frontBackEndInteraction:
     def __init__(self, directoryPath):
         self.processor = Processor(directoryPath)
@@ -47,4 +48,8 @@ class frontBackEndInteraction:
 
     def reset(self):
         self.processor.reset()
-    
+         
+    def parseData(self):
+        with open('generated/outputLog.txt') as f:
+            data = [json.loads(line) for line in f]
+        return data

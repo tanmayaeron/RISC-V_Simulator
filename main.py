@@ -1,4 +1,6 @@
-from GUI.mainPage import *
+# from GUI.mainPage import *
+from frontBack import frontBackEndInteraction
+#commented top line and added above for now
 import sys
 import os
 if __name__ == '__main__':

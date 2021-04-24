@@ -33,10 +33,11 @@ class IAG:
         else:
             self.inputB_adder = imm
 
-    def adder(self):
-        operandA = int(self._PC,16)
-        operandB = int(self.inputB_adder,16)
+    def adder(self, PC, imm = "0"*7+"4"):
+        operandA = int(PC,16)
+        operandB = int(imm,16)
         output = operandA+operandB
+        print("PC, imm :", operandA, operandB, output)
         self.output_adder = '{:08x}'.format(output)[-8:]
         
     def updatePC(self,PC_enable):
@@ -48,3 +49,8 @@ class IAG:
         PC+=4
         self._PC_Temp = '{:08x}'.format(PC)[-8:]
 
+    def setPC(self, newPC):
+        self._PC = newPC
+    
+    
+    

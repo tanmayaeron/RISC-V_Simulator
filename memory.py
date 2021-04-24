@@ -130,6 +130,7 @@ class PMI:
         self.__MDR[control] = data
 
     def setMAR(self, address, control = 1):
+        address = make_length(address, 8)
         if control == 0:
             address_in_dec = hexToDec(address)
             temp = address_in_dec%4
@@ -169,4 +170,3 @@ class PMI:
             self.getData(size, control)
         elif currMemoryEnable == 2:
             self.storeData(size, control)
-       

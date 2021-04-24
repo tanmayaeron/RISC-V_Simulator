@@ -1,6 +1,9 @@
 from simulator import Processor
 from helperFunctions import *
-
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 class frontBackEndInteraction:
     def __init__(self, directoryPath):
         self.processor = Processor(directoryPath)

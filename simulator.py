@@ -132,7 +132,7 @@ class Processor:
         
         predict = self._BTB.predict(self._IAG.getPC())
         self.bufferStore[0] = [self._IAG.getPC(), self._IR, self._IAG.getPC_Temp()]
-
+        self.outputD[0]["buffer"] = self.bufferStore[0]
 
         if predict[0]:
             self._IAG.setPC(predict[1])
@@ -182,7 +182,7 @@ class Processor:
             resultarray = self.hdu.forwarding2(self.buffer, currOpID, rs1, rs2)
         
         self.bufferStore[1] = [currOpID, PC, self._RA, self._RB, self._RM, self._rd, rs1, rs2, self._imm, PC_temp, resultarray]
-
+        self.outputD[1]["buffer"] = self.bufferStore[1]
         return True, max(resultarray[0][2], resultarray[1][2]), resultarray
 
     def execute(self):
@@ -237,7 +237,7 @@ class Processor:
                 self._IAG.updatePC(1)
 
         self.bufferStore[2] = [currOpID, self._RZ, rd, RM, rs1, rs2, PC_temp]
-        print(*self.bufferStore[2])
+        self.outputD[2]["buffer"] = self.bufferStore[2]
         return True, Miss, resultarray       
 
     def memoryAccess(self):
@@ -264,6 +264,7 @@ class Processor:
 
         self._RY = self.muxY(self._muxY[currOpID])
         self.bufferStore[3] = [currOpID, self._RY, rd]
+        self.outputD[3]["buffer"] = self.bufferStore[3]
         
         return True
 
@@ -417,21 +418,21 @@ class Processor:
             if MemBufferSignal == ExecBufferSignal == DecodeBufferSignal == FetchBufferSignal == False:
                 break
         
-        self._registerFile.print_registers()
-        if not knob2:
-            print("Stalls in only Forwarding case with a static branch predictor:", Stall_Count)
-        else:
-            print("Stalls in only Stalling case with a static branch predictor:", Stall_Count)
+        
+        # self.printRegisters()
+        # self.printData()
+        
+        # if not knob2:
+        #     print("Stalls in only Forwarding case with a static branch predictor:", Stall_Count)
+        # else:
+        #     print("Stalls in only Stalling case with a static branch predictor:", Stall_Count)
 
-        print("Total number of branch misses:", Miss_Count)
+        # print("Total number of branch misses:", Miss_Count)
 
     def printData(self):
-        filename = 'output.txt'
-        filename = os.path.join(self._currFolderPath, "generated", 'memory.txt')
         memorySnapshot = self._PMI.getMemory(1)
+        filename = os.path.join(self._currFolderPath, "generated", 'memory.txt')
         self._fileReader.printMemory(memorySnapshot, filename)
-        print(self._PMI.getMemory(0))
-        print(memorySnapshot)
 
     def printRegisters(self):
         registers = self._registerFile.get_registerFile()
@@ -446,7 +447,7 @@ class Processor:
 
     def reset(self):
         self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
-        # sys.stdout = self._outputLogFile
+        sys.stdout = self._outputLogFile
         self._registerFile.initialise_registers()
         self._PMI.clearMemory()
         self._IAG.initialiseIAG()

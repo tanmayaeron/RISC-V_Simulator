@@ -38,7 +38,26 @@ class Processor:
         currOpID = 0
         self.cycle = 0
         self._BTB = BTB()
+        self.initializeStats()
 
+    def initializeStats(self):
+        # Stats to be printed in an output file at the end of the simulation.
+    
+        self.Pipeline_cycle = 0
+        self.instructions_executed = 0
+        self.CPI = 0
+        self.Data_transfer_instructions = 0
+        self.ALU_instructions = 0
+        self.control_instructions = 0
+        self.Total_Stall_Count = 0
+        self.Data_Hazards = 0
+        self.control_Hazards = 0
+        self.Miss_Count = 0
+        self.Stall_Count = 0
+        self.Flush = 0 
+
+
+    
     def initialiseTempRegisters(self):
         self._IR = '0'*8
         self._RA = '0'*8
@@ -80,7 +99,6 @@ class Processor:
             return self.buffer.get(2)[2] #RA
         else:
             return self.buffer.get(2)[1] #auipc / PC
-            #return self._IAG.getPC()
         
     def muxB(self, B_select):
         if B_select == 0:
@@ -155,14 +173,14 @@ class Processor:
         self.outputD[1]["code"] = info_code
         
         currOpID = info_code['id']
-        #currMuxRM = self._muxRM[currOpID]
+        
         rs1 = int(info_code['rs1'], 2)
         self._RA = self._registerFile.get_register(rs1)
         self.outputD[1]["RA"] = self._RA
 
         rs2 = int(info_code['rs2'], 2)
         self._RB = self._registerFile.get_register(rs2)
-        #self._RM = self.muxRM(currMuxRM) #new
+        
         self._RM = self._RB #change RM along with rs2 Data forwarding
         self.outputD[1]["RB"] = self._RB
 
@@ -183,6 +201,7 @@ class Processor:
         
         self.bufferStore[1] = [currOpID, PC, self._RA, self._RB, self._RM, self._rd, rs1, rs2, self._imm, PC_temp, resultarray]
         self.outputD[1]["buffer"] = self.bufferStore[1]
+
         return True, max(resultarray[0][2], resultarray[1][2]), resultarray
 
     def execute(self):
@@ -212,32 +231,27 @@ class Processor:
         self._IAG.adder(PC, imm)
         self._IAG.muxPC(0, RA)
 
+        Miss = self._BTB.isFlush(PC, self._RZ, currOpID) #order wise first
 
-        # PC, PC_temp, imm, target, S_Select, isBTB
-        Miss = self._BTB.isFlush(PC, self._RZ, isJalr, currSSelect, isBTB) #order wise first
+        self._BTB.addInstruction(PC, PC_temp, imm, self._IAG.output_muxPC, currOpID)
 
-        self._BTB.addInstruction(PC, PC_temp, imm, self._IAG.output_muxPC, currSSelect, isBTB)
-        #to edit, start
-        # self._IAG.muxPC(self.PC_select[currOpID], RA)
-        # self._IAG.updatePC(1)
-        # self._IAG.muxINC(currINCSelect, currSSelect, imm, self._RZ)
-        # self._IAG.adder()
-        # self._IAG.muxPC(0, RA)
-        # self._IAG.updatePC(1)
-        #end
-        
         if Miss:
-            if isJalr:
+            if currOpID == 23:
                 self._IAG.adder(RA, imm)
-                self._IAG.muxPC(0, RA)
-                self._IAG.updatePC(1)
             else:
-                self._IAG.adder(PC, imm)
-                self._IAG.muxPC(0, RA)
-                self._IAG.updatePC(1)
+                if currOpID == 22:
+                    self._IAG.adder(PC, imm)
+                else:
+                    if self._RZ[-1] == "1":
+                        self._IAG.adder(PC, imm)
+                    else:
+                        self._IAG.adder(PC)
+            self._IAG.muxPC(0, RA)
+            self._IAG.updatePC(1)
 
         self.bufferStore[2] = [currOpID, self._RZ, rd, RM, rs1, rs2, PC_temp]
         self.outputD[2]["buffer"] = self.bufferStore[2]
+
         return True, Miss, resultarray       
 
     def memoryAccess(self):
@@ -268,15 +282,30 @@ class Processor:
         
         return True
 
-    def registerUpdate(self,knob2=True):
+    def incrementInstructions(self,currOpID):
 
+        self.instructions_executed += 1
+
+        if 12 <= currOpID <= 17:
+            self.Data_transfer_instructions += 1
+        elif 18 <= currOpID <= 23:
+            self.control_instructions += 1
+        else:
+            self.ALU_instructions += 1
+
+
+    def registerUpdate(self,knob2=True):
+        # write back function
         if not self.buffer.ifPresent(4):
             return #if no memory buffer value set before it, then don't go further
+
         currOpID, RY, rd = self.buffer.get(4)
 
+        self.incrementInstructions(currOpID)
+
         if knob2:
-            # knob2 is True so we stall
             self.hdu.update_process(currOpID, rd)
+        
         currWriteEnable = self._writeEnable[currOpID]
         self._registerFile.set_register(rd, RY, currWriteEnable)
         self.outputD[4]["rd"] = self._rd
@@ -296,10 +325,14 @@ class Processor:
     def forwarding(self, hazardlist, isStall, DecodeBufferSignal):
         if hazardlist[0][0]==hazardlist[1][0]==False:
             return 
+        
+
         if isStall:
             return
         if not DecodeBufferSignal:
             return 
+        
+        self.Data_Hazards += 1
         
         if hazardlist[0][0] == True: #rs1
 
@@ -339,15 +372,15 @@ class Processor:
     def runPipelining_False_for_Forwarding(self, knob2 = True):
         #defaults to stalling when knob is unset or True in our code
 
-        Pipeline_cycle = 0
-        Stall_Count = 0
-        Miss_Count = 0
-
+        self.Pipeline_cycle = 0
+        self.Stall_Count = 0
+        self.Miss_Count = 0
+        isStall = 0
+        PrevIsStall = 0
         while True:
-            Pipeline_cycle += 1
+            self.Pipeline_cycle += 1
             MemBufferSignal = ExecBufferSignal = DecodeBufferSignal = FetchBufferSignal = True
             Miss = False
-            isStall = 0
             hazardlist = [[False, "NO", 0],[False, "NO", 0]]
             hazardlistE = [[False, "NO", 0],[False, "NO", 0]]
             self.outputD = [{}, {}, {}, {}, {}]
@@ -363,7 +396,7 @@ class Processor:
                 if i == 2:
                     ExecBufferSignal, Miss, hazardlistE = self.execute()
                     if Miss:
-                        Miss_Count += 1
+                        self.Miss_Count += 1
                         break
                 if i == 1:
                     MemBufferSignal = self.memoryAccess()
@@ -383,7 +416,13 @@ class Processor:
             #as the decode buffer was deleted no execute occurs in the next cycle
             #fetch buffer wasn't deleted or updated so decode occurs with same IR, PC
             #this way we stalled the whole thing by one cycle
-
+            
+            if knob2:
+                if PrevIsStall==0 and isStall:
+                    self.Data_Hazards += 1
+            
+            PrevIsStall = isStall
+            
             if knob2 == False: #forwarding occurs
                 self.forwarding(hazardlist, isStall, DecodeBufferSignal)
                 self.forwardingE(hazardlistE, isStall, DecodeBufferSignal)
@@ -404,7 +443,7 @@ class Processor:
                 self.buffer.clearStage(2)
             
             if isStall:
-                Stall_Count+=1
+                self.Stall_Count += 1
                 isStall -= 1
                 continue
             
@@ -417,17 +456,13 @@ class Processor:
 
             if MemBufferSignal == ExecBufferSignal == DecodeBufferSignal == FetchBufferSignal == False:
                 break
-        
-        
-        # self.printRegisters()
-        # self.printData()
-        
-        # if not knob2:
-        #     print("Stalls in only Forwarding case with a static branch predictor:", Stall_Count)
-        # else:
-        #     print("Stalls in only Stalling case with a static branch predictor:", Stall_Count)
 
-        # print("Total number of branch misses:", Miss_Count)
+        # if not knob2:
+        #     print("Stalls in only Forwarding case with a static branch predictor:", self.Stall_Count)
+        # else:
+        #     print("Stalls in only Stalling case with a static branch predictor:", self.Stall_Count)
+
+        # print("Total number of branch misses:", self.Miss_Count)
 
     def printData(self):
         memorySnapshot = self._PMI.getMemory(1)
@@ -444,6 +479,42 @@ class Processor:
         
     def getData(self):
         return self._PMI.getMemory()
+        
+    def printStat(self):
+        filename = os.path.join(self._currFolderPath, "generated", 'stats.txt')
+        f = open(filename,'w')
+        f.write("Total number of Cycles in the program :"+str(self.Pipeline_cycle)+"\n")
+        f.write("\n")
+        f.write("Total number of Instructions executed :"+str(self.instructions_executed)+"\n")
+        f.write("\n")
+        try:
+            self.CPI = self.Pipeline_cycle/self.instructions_executed
+        except:
+            self.CPI = 0
+        f.write("CPI is :"+str(self.CPI)+"\n")
+        f.write("\n")
+        f.write("Data Transfer Instructions Executed :"+str(self.Data_transfer_instructions)+"\n")
+        f.write("\n")
+        f.write("ALU instructions are :"+str(self.ALU_instructions)+"\n")
+        f.write("\n")
+        f.write("Contol instructions :"+str(self.control_instructions)+"\n")
+        f.write("\n")
+
+        self.Total_Stall_Count= self.Stall_Count + self.Miss_Count*2
+        f.write("Total Stall Count are :"+str(self.Total_Stall_Count)+"\n")
+        f.write("\n")
+        f.write("Number of Data Hazards are :"+str(self.Data_Hazards)+"\n")
+        f.write("\n")
+        self.control_Hazards = self.Miss_Count
+        f.write("Total Control Hazards are :"+ str(self.control_Hazards)+"\n")
+        f.write("\n")
+        f.write("Total Branch mispredictions are :"+str(self.Miss_Count)+"\n")
+        f.write("\n")
+        f.write("Number of stalls due to data hazards are :"+str(self.Stall_Count)+"\n")
+        f.write("\n")
+        self.Flush = self.Miss_Count*2
+        f.write("Number of stalls due to control hazards are :"+str(self.Flush)+"\n")
+        f.write("\n")
 
     def reset(self):
         self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
@@ -453,4 +524,6 @@ class Processor:
         self._IAG.initialiseIAG()
         self.initialiseTempRegisters()
         self.initialiseControls()
+        self.initializeStats()
         self.cycle = 0
+

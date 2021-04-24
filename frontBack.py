@@ -21,7 +21,7 @@ class frontBackEndInteraction:
         #     self.processor.registerUpdate()
         self.processor.printRegisters()
         self.processor.printData()
-        
+        self.processor.printStat()
         # return "Compiled"
         
         

@@ -35,7 +35,6 @@ class Processor:
         self.bufferStore = [[], [], [], []]
         # self.bufferStore is list of list as it is updated in forwardingE 
         sys.stdout = self._outputLogFile
-        currOpID = 0
         self.cycle = 0
         self._BTB = BTB()
 
@@ -116,7 +115,7 @@ class Processor:
     def load_mc(self, currFileName):
         filepath = os.path.join(self._currFolderPath,'test', currFileName)
         self._fileReader.read_mc(filepath, self._PMI)
-        print(self._PMI.getMemory(0))
+        #print(self._PMI.getMemory(0))
 
     def fetch(self):
         outputmuxMA = self.muxMA(1)  # MAR gets value of PC
@@ -132,7 +131,6 @@ class Processor:
         
         predict = self._BTB.predict(self._IAG.getPC())
         self.bufferStore[0] = [self._IAG.getPC(), self._IR, self._IAG.getPC_Temp()]
-
 
         if predict[0]:
             self._IAG.setPC(predict[1])
@@ -174,11 +172,11 @@ class Processor:
         self.outputD[1]["imm"] = self._imm
         
         
-        if knob2:
-            #knob2 is true we stall as we stall
+        if not knob2:
+            #knob2 is false we stall as we stall
             resultarray = self.hdu.stalling3(currOpID, self._rd, rs1, rs2)
         else:
-            #knob2 is false we call forwarding(knob2=False means we data forward)
+            #knob2 is true we call forwarding(knob2=true means we data forward)
             resultarray = self.hdu.forwarding2(self.buffer, currOpID, rs1, rs2)
         
         self.bufferStore[1] = [currOpID, PC, self._RA, self._RB, self._RM, self._rd, rs1, rs2, self._imm, PC_temp, resultarray]
@@ -213,7 +211,6 @@ class Processor:
         self._IAG.muxPC(0, RA)
 
 
-        # PC, PC_temp, imm, target, S_Select, isBTB
         Miss = self._BTB.isFlush(PC, self._RZ, isJalr, currSSelect, isBTB) #order wise first
 
         self._BTB.addInstruction(PC, PC_temp, imm, self._IAG.output_muxPC, currSSelect, isBTB)
@@ -273,9 +270,10 @@ class Processor:
             return #if no memory buffer value set before it, then don't go further
         currOpID, RY, rd = self.buffer.get(4)
 
-        if knob2:
+        if not knob2:
             # knob2 is True so we stall
             self.hdu.update_process(currOpID, rd)
+
         currWriteEnable = self._writeEnable[currOpID]
         self._registerFile.set_register(rd, RY, currWriteEnable)
         self.outputD[4]["rd"] = self._rd
@@ -335,7 +333,7 @@ class Processor:
     ###uptil here
 
 
-    def runPipelining_False_for_Forwarding(self, knob2 = True):
+    def runPipelining_False_for_Forwarding(self, knob2 = False):
         #defaults to stalling when knob is unset or True in our code
 
         Pipeline_cycle = 0
@@ -383,7 +381,7 @@ class Processor:
             #fetch buffer wasn't deleted or updated so decode occurs with same IR, PC
             #this way we stalled the whole thing by one cycle
 
-            if knob2 == False: #forwarding occurs
+            if not knob2 == False: #forwarding occurs
                 self.forwarding(hazardlist, isStall, DecodeBufferSignal)
                 self.forwardingE(hazardlistE, isStall, DecodeBufferSignal)
             
@@ -418,7 +416,7 @@ class Processor:
                 break
         
         self._registerFile.print_registers()
-        if not knob2:
+        if knob2:
             print("Stalls in only Forwarding case with a static branch predictor:", Stall_Count)
         else:
             print("Stalls in only Stalling case with a static branch predictor:", Stall_Count)
@@ -426,7 +424,6 @@ class Processor:
         print("Total number of branch misses:", Miss_Count)
 
     def printData(self):
-        filename = 'output.txt'
         filename = os.path.join(self._currFolderPath, "generated", 'memory.txt')
         memorySnapshot = self._PMI.getMemory(1)
         self._fileReader.printMemory(memorySnapshot, filename)

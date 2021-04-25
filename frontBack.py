@@ -11,7 +11,7 @@ class frontBackEndInteraction:
         
     def runProgram(self, filePath):
         self.processor.load_mc(filePath)
-        self.processor.runPipelining_False_for_Forwarding(False)
+        self.processor.runPipelining_False_for_Forwarding(True)
         # while True:
         #     self.processor.fetch()
         #     if self.processor.getIR() == '0'*8:

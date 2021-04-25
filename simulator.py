@@ -97,31 +97,28 @@ class Processor:
     def muxA(self, A_select):
         if A_select == 0:
             return self.buffer.get(2)[2] #RA
-        else:
+        elif A_select==1:
             return self.buffer.get(2)[1] #auipc / PC
+        elif A_select==2:
+            return self.buffer.get(3)[1]
+        else:
+            return self.buffer.get(4)[1]
         
     def muxB(self, B_select):
         if B_select == 0:
-            return self._RB
+            return self.buffer.get(2)[3]
+        elif B_select==1:
+            return self.buffer.get(2)[8]
+        elif B_select==2:
+            return self.buffer.get(3)[1]
         else:
-            return self._imm
+            return self.buffer.get(4)[1]
 
-        
     def muxM(self, M_select): #new
         if M_select == 0:
             return self.buffer.get(4)[1]
         else:
             return self.buffer.get(3)[3]
-        
-    def muxRM(self, RM_select): #new
-        #doubt
-        if RM_select == 0:
-            return self._RY
-        elif RM_select == 1:
-            return self._RZ
-        else:
-            return self._RB
-        
 
     def muxY(self, Y_select):
         if(Y_select == 0):
@@ -208,21 +205,21 @@ class Processor:
 
         return True, max(resultarray[0][2], resultarray[1][2]), resultarray
 
-    def execute(self):
+    def execute(self,executeControl):
 
         if not self.buffer.ifPresent(2):
             return False, 0, [[False, "NO", 0],[False, "NO", 0]] #if no memory buffer value set before it, don't run and don't set it's buffer too
 
         currOpID, PC, RA, RB, RM, rd, rs1, rs2, imm, PC_temp, resultarray = self.buffer.get(2)
 
-        currALU_select = self._ALU_select[currOpID] #ALU 
-        currMuxB = self._muxB[currOpID]
-        currMuxA = self._muxA[currOpID]
+        currALU_select = executeControl["currALU_select"] #ALU
+        currMuxB = executeControl["currMuxB"]
+        currMuxA = executeControl["currMuxA"]
 
-        currINCSelect = self.INC_select[currOpID]
-        currSSelect = self.S_select[currOpID]
-        isBTB = self._isBTB[currOpID]
-        isJalr = self.PC_select[currOpID]
+        currINCSelect = executeControl["currINCSelect"]
+        currSSelect = executeControl["currSSelect"]
+        isBTB = executeControl["isBTB"]
+        isJalr = executeControl["isJalr"]
 
         operand1 = self.muxA(currMuxA)
         operand2 = self.muxB(currMuxB)
@@ -259,20 +256,21 @@ class Processor:
 
         return True, Miss, resultarray       
 
-    def memoryAccess(self):
+    def memoryAccess(self,memControl):
 
         if not self.buffer.ifPresent(3):
             return False #if no memory buffer value set before it, then don't go further
 
         currOpID, RZ, rd, RM, rs1, rs2, PC_temp = self.buffer.get(3) #buffer access
-        currMemoryEnable = self._memoryEnable[currOpID]
-        currSizeEnable = self.SizeEnable[currOpID]
+        currMemoryEnable = memControl["currMemoryEnable"]
+        currSizeEnable = memControl["currSizeEnable"]
 
         outputmuxMA = self.muxMA(0)
 
         self._PMI.setMAR(outputmuxMA)
-        
-        self._PMI.setMDR(RM)
+        M_select = memControl["M_select"]
+        outputMuxM = self.muxM(M_select)
+        self._PMI.setMDR(outputMuxM)
 
         if currMemoryEnable:
             self.outputD[3]["MDR"] = self._PMI.getMDR()
@@ -281,7 +279,7 @@ class Processor:
 
         self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
 
-        self._RY = self.muxY(self._muxY[currOpID])
+        self._RY = self.muxY(memControl["Y_select"])
         self.bufferStore[3] = [currOpID, self._RY, rd]
         self.outputD[3]["buffer"] = self.bufferStore[3]
         
@@ -298,8 +296,7 @@ class Processor:
         else:
             self.ALU_instructions += 1
 
-
-    def registerUpdate(self,knob2=True):
+    def registerUpdate(self,WBControl,knob2=True):
         # write back function
         if not self.buffer.ifPresent(4):
             return #if no memory buffer value set before it, then don't go further
@@ -313,8 +310,7 @@ class Processor:
             # knob2 is True so we stall
             self.hdu.update_process(currOpID, rd)
 
-
-        currWriteEnable = self._writeEnable[currOpID]
+        currWriteEnable = WBControl["currWriteEnable"]
         self._registerFile.set_register(rd, RY, currWriteEnable)
         self.outputD[4]["rd"] = self._rd
         self.outputD[4]["RY"] =  self._RY
@@ -329,61 +325,19 @@ class Processor:
         elif i == 3:
             self.buffer.memoryB(*self.bufferStore[3])
 
-    ###Control unit that decides the type of forwarding
-    def forwarding(self, hazardlist, isStall, DecodeBufferSignal):
-        if hazardlist[0][0]==hazardlist[1][0]==False:
-            return 
-        
-
-        if isStall:
-            return
-        if not DecodeBufferSignal:
-            return 
-        
-        self.Data_Hazards += 1
-        
-        if hazardlist[0][0] == True: #rs1
-
-            if hazardlist[0][1] == "ME":
-                self.bufferStore[1][2]=self.bufferStore[3][1]# RY value to RA
-
-            elif hazardlist[0][1] == "EE":
-                self.bufferStore[1][2]=self.bufferStore[2][1]# RZ value to RA
-        
-        if hazardlist[1][0] == True: #rs2
-
-            if hazardlist[1][1] == "ME":
-                self.bufferStore[1][3]=self.bufferStore[3][1]# RY value to RB
-            
-            elif hazardlist[1][1] == "EE":
-                self.bufferStore[1][3]=self.bufferStore[2][1]# RZ value to RB
-    
-            
-    def forwardingE(self, hazardlistE, isStall, DecodeBufferSignal):
-        if hazardlistE[0][0]==hazardlistE[1][0]==False:
-            return 
-        if isStall:
-            return
-        if not DecodeBufferSignal:
-            return 
-        
-        if hazardlistE[0][0]==True and hazardlistE[0][1]=="MM":
-            #RY vale to RZ
-            self.bufferStore[2][1]=self.bufferStore[3][1]
-        
-        if hazardlistE[1][0]==True and hazardlistE[1][1]=="MM":
-            #RY vale to RZ
-            self.bufferStore[2][1]=self.bufferStore[3][1]
-    ###uptil here
-
 
     def runPipelining_False_for_Forwarding(self, knob2 = False):
-        #defaults to stalling when knob is unset or True in our code
+        #defaults to non-forwarding when knob is unset or False in our code
         self.Pipeline_cycle = 0
         self.Stall_Count = 0
         self.Miss_Count = 0
         isStall = 0
         PrevIsStall = 0
+
+        executeControl = {}
+        memControl = {}
+        WBControl = {}
+
         while True:
             self.Pipeline_cycle += 1
             MemBufferSignal = ExecBufferSignal = DecodeBufferSignal = FetchBufferSignal = True
@@ -392,7 +346,6 @@ class Processor:
             hazardlistE = [[False, "NO", 0],[False, "NO", 0]]
             self.outputD =  {0:{}, 1:{}, 2:{}, 3:{}, 4:{}}
             for i in range(5):
-                
                 if i == 4:
                     FetchBufferSignal = self.fetch()
                 if i == 3:
@@ -401,17 +354,18 @@ class Processor:
                     if isStall:
                         break
                 if i == 2:
-                    ExecBufferSignal, Miss, hazardlistE = self.execute()
+                    ExecBufferSignal, Miss, hazardlistE = self.execute(executeControl)
                     if Miss:
                         self.Miss_Count += 1
                         break
                 if i == 1:
-                    MemBufferSignal = self.memoryAccess()
+                    MemBufferSignal = self.memoryAccess(memControl)
                 if i == 0:
-                    self.registerUpdate(knob2)
+                    self.registerUpdate(WBControl,knob2)
                 
             out = json.dumps(self.outputD)
             print(out)
+
             # with open(self._outputLogFile, 'w') as json_file:
             #     json.dump(self.outputD, json_file)
             # json.dump(self.outputD, self._outputLogFile)
@@ -428,18 +382,13 @@ class Processor:
             #fetch buffer wasn't deleted or updated so decode occurs with same IR, PC
             #this way we stalled the whole thing by one cycle
 
-            
             if  not knob2:
                 if PrevIsStall==0 and isStall:
                     self.Data_Hazards += 1
             
             PrevIsStall = isStall
-            
-            if not knob2 == False: #forwarding occurs
-              
-                self.forwarding(hazardlist, isStall, DecodeBufferSignal)
-                self.forwardingE(hazardlistE, isStall, DecodeBufferSignal)
-            
+
+
             if MemBufferSignal:
                 self.bufferUpdate(3)
             else:
@@ -458,19 +407,69 @@ class Processor:
             if isStall:
                 self.Stall_Count += 1
                 isStall -= 1
-                continue
             
-            if FetchBufferSignal and Miss == False: #set buffer only here
-                self.bufferUpdate(0)
             else:
-                self.buffer.clearStage(1)
+                if FetchBufferSignal and Miss == False: #set buffer only here
+                    self.bufferUpdate(0)
+                else:
+                    self.buffer.clearStage(1)
+
+                self.bufferStore = [[],[],[],[]]
+
+                if MemBufferSignal == ExecBufferSignal == DecodeBufferSignal == FetchBufferSignal == False:
+                    break
             #clear buffer store
-            self.bufferStore = [[], [], [], []]
 
-            if MemBufferSignal == ExecBufferSignal == DecodeBufferSignal == FetchBufferSignal == False:
-                break
+            # execute_control
+            executeControl.clear()
+            currOpID = self.buffer.get(2)[0]
+            executeControl["currALU_select"] = self._ALU_select[currOpID]  # ALU
+            executeControl["currMuxB"] = self._muxB[currOpID]
+            executeControl["currMuxA"] = self._muxA[currOpID]
+            executeControl["currINCSelect"] = self.INC_select[currOpID]
+            executeControl["currSSelect"] = self.S_select[currOpID]
+            executeControl["isBTB"] = self._isBTB[currOpID]
+            executeControl["isJalr"] = self.PC_select[currOpID]
 
-        
+            # mem_control
+            memControl.clear()
+            currOpID = self.buffer.get(3)[0]
+            memControl["currMemoryEnable"] = self._memoryEnable[currOpID]
+            memControl["currSizeEnable"] = self.SizeEnable[currOpID]
+            memControl["Y_select"] = self._muxY[currOpID]
+            memControl["M_select"] = 1
+
+            # wb_control
+            WBControl.clear()
+            currOpID = self.buffer.get(4)[0]
+            WBControl["currWriteEnable"] = self._writeEnable[currOpID]
+
+            if knob2 and not PrevIsStall:  # forwarding occurs
+                if DecodeBufferSignal:
+                    if hazardlist[0][0]==True or hazardlist[1][0]==True:
+                        self.Data_Hazards += 1
+
+                    if hazardlist[0][0] == True and executeControl["currMuxA"]==0:            #rs1
+                        if hazardlist[0][1] == "ME":
+                            executeControl["currMuxA"] = 3               # RY value to RA
+
+                        elif hazardlist[0][1] == "EE":
+                            executeControl["currMuxA"] = 2               # RZ value to RA
+
+                    if hazardlist[1][0] == True and executeControl["currMuxB"]==0:                                               # rs2
+
+                        if hazardlist[1][1] == "ME":
+                            executeControl["currMuxB"] = 3    # RY value to RB
+
+                        elif hazardlist[1][1] == "EE":
+                            executeControl["currMuxB"] = 2  # RZ value to RB
+
+                if hazardlistE[0][0] == True and hazardlistE[0][1] == "MM":
+                    memControl["M_select"] = 0
+
+                if hazardlistE[1][0] == True and hazardlistE[1][1] == "MM":
+                    memControl["M_select"] = 0
+
         #self._registerFile.print_registers()
         #if knob2:
         #    print("Stalls in Forwarding case with a static branch predictor:", Stall_Count)
@@ -547,4 +546,3 @@ class Processor:
         self.initialiseControls()
         self.initializeStats()
         self.cycle = 0
-

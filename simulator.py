@@ -36,7 +36,6 @@ class Processor:
         self.bufferStore = [[], [], [], []]
         # self.bufferStore is list of list as it is updated in forwardingE 
         sys.stdout = self._outputLogFile
-        currOpID = 0
         self.cycle = 0
         self._BTB = BTB()
         self.initializeStats()
@@ -136,6 +135,9 @@ class Processor:
         filepath = os.path.join(self._currFolderPath,'test', currFileName)
         self._fileReader.read_mc(filepath, self._PMI)
 
+        #print(self._PMI.getMemory(0))
+
+
     def fetch(self):
         outputmuxMA = self.muxMA(1)  # MAR gets value of PC
         self._IAG.updatePC_temp()
@@ -150,7 +152,9 @@ class Processor:
         
         predict = self._BTB.predict(self._IAG.getPC())
         self.bufferStore[0] = [self._IAG.getPC(), self._IR, self._IAG.getPC_Temp()]
+
         self.outputD[0]["buffer"] = self.bufferStore[0]
+
 
         if predict[0]:
             self._IAG.setPC(predict[1])
@@ -192,11 +196,11 @@ class Processor:
         self.outputD[1]["imm"] = self._imm
         
         
-        if knob2:
-            #knob2 is true we stall as we stall
+        if not knob2:
+            #knob2 is false we stall as we stall
             resultarray = self.hdu.stalling3(currOpID, self._rd, rs1, rs2)
         else:
-            #knob2 is false we call forwarding(knob2=False means we data forward)
+            #knob2 is true we call forwarding(knob2=true means we data forward)
             resultarray = self.hdu.forwarding2(self.buffer, currOpID, rs1, rs2)
         
         self.bufferStore[1] = [currOpID, PC, self._RA, self._RB, self._RM, self._rd, rs1, rs2, self._imm, PC_temp, resultarray]
@@ -234,6 +238,7 @@ class Processor:
         Miss = self._BTB.isFlush(PC, self._RZ, currOpID) #order wise first
 
         self._BTB.addInstruction(PC, PC_temp, imm, self._IAG.output_muxPC, currOpID)
+
 
         if Miss:
             if currOpID == 23:
@@ -301,11 +306,14 @@ class Processor:
 
         currOpID, RY, rd = self.buffer.get(4)
 
-        self.incrementInstructions(currOpID)
 
-        if knob2:
-            self.hdu.update_process(currOpID, rd)
+        self.incrementInstructions(currOpID)
         
+        if not knob2:
+            # knob2 is True so we stall
+            self.hdu.update_process(currOpID, rd)
+
+
         currWriteEnable = self._writeEnable[currOpID]
         self._registerFile.set_register(rd, RY, currWriteEnable)
         self.outputD[4]["rd"] = self._rd
@@ -369,7 +377,7 @@ class Processor:
     ###uptil here
 
 
-    def runPipelining_False_for_Forwarding(self, knob2 = True):
+    def runPipelining_False_for_Forwarding(self, knob2 = False):
         #defaults to stalling when knob is unset or True in our code
         self.Pipeline_cycle = 0
         self.Stall_Count = 0
@@ -419,14 +427,16 @@ class Processor:
             #as the decode buffer was deleted no execute occurs in the next cycle
             #fetch buffer wasn't deleted or updated so decode occurs with same IR, PC
             #this way we stalled the whole thing by one cycle
+
             
-            if knob2:
+            if  not knob2:
                 if PrevIsStall==0 and isStall:
                     self.Data_Hazards += 1
             
             PrevIsStall = isStall
             
-            if knob2 == False: #forwarding occurs
+            if not knob2 == False: #forwarding occurs
+              
                 self.forwarding(hazardlist, isStall, DecodeBufferSignal)
                 self.forwardingE(hazardlistE, isStall, DecodeBufferSignal)
             
@@ -459,6 +469,14 @@ class Processor:
 
             if MemBufferSignal == ExecBufferSignal == DecodeBufferSignal == FetchBufferSignal == False:
                 break
+
+        
+        #self._registerFile.print_registers()
+        #if knob2:
+        #    print("Stalls in Forwarding case with a static branch predictor:", Stall_Count)
+        #else:
+        #    print("Stalls in Non-Forwarding case with a static branch predictor:", Stall_Count)
+
 
         # if not knob2:
         #     print("Stalls in only Forwarding case with a static branch predictor:", self.Stall_Count)

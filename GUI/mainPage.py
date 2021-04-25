@@ -68,6 +68,17 @@ class UiComponents():
         # temp.setStyleSheet("color: black;");
         return temp
 
+    def info(self,dictionary):
+        info_grid = QGridLayout()
+        count = 0
+        for i in dictionary.keys():
+            temp = self.labelTile(i,100,200,False)
+            info_grid.addWidget(count,0)
+            temp = self.labelTile(dictionary[i],100,400,False)
+            info_grid.addWidget(count, 1)
+
+        return info_grid
+
     def mainLabel(self):
         self.save_button = self.buttonTile("\U0001F4BE", 50, 40)
         self.compile_button = self.buttonTile("\U00002699", 50, 40)

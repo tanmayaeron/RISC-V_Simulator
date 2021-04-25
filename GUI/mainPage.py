@@ -145,7 +145,11 @@ class UiComponents():
         tempp = self.operationTile("\U0000002B")
         gridbox.addWidget(tempp, 2, 5)
         l1.append(tempp)
-        
+
+        temp = self.labelTile("\U00002191     E-E     |\n" + "\U0000203E" * 15 + " \n", 100, 300, False)
+        temp.setAlignment(QtCore.Qt.AlignRight)
+        gridbox.addWidget(temp, 2, 4, 1, 2)
+
         self.displayWidget2.setLayout(gridbox)
         
         

@@ -1,0 +1,24 @@
+Total number of Cycles in the program :72
+
+Total number of Instructions executed :50
+
+CPI is :1.44
+
+Data Transfer Instructions Executed :14
+
+ALU instructions are :23
+
+Contol instructions :13
+
+Total Stall Count are :20
+
+Number of Data Hazards are :12
+
+Total Control Hazards are :10
+
+Total Branch mispredictions are :10
+
+Number of stalls due to data hazards are :0
+
+Number of stalls due to control hazards are :20
+

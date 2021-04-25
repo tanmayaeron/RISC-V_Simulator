@@ -37,7 +37,7 @@ class IAG:
         operandA = int(PC,16)
         operandB = int(imm,16)
         output = operandA+operandB
-        print("PC, imm :", operandA, operandB, output)
+        # print("PC, imm :", operandA, operandB, output)
         self.output_adder = '{:08x}'.format(output)[-8:]
         
     def updatePC(self,PC_enable):

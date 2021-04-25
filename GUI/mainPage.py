@@ -14,13 +14,13 @@ class UiComponents():
         self.fixedfont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
         self.fixedfont.setPointSize(16)
 
-    def operationTile(self):
+    def operationTile(self, name):
         button = QPushButton()
         button.setText(name)
         button.setFont(QFont('Times', 30))
         # button.setPointSize(13)
-        button.setFixedHeight(height)
-        button.setFixedWidth(width)
+        button.setFixedHeight(40)
+        button.setFixedWidth(40)
         return button
         
     def buttonTile(self, name, height, width):
@@ -52,8 +52,19 @@ class UiComponents():
         temp.setFixedHeight(height)
         temp.setFixedWidth(width)
         
-        temp.setStyleSheet("position: absolute;width: 0;height: 0;border-top: 4px solid transparent;border-bottom: 5px solid transparent;border-right: 12px solid black;top:46px;left:52px;")
+        temp.setStyleSheet("background-color:" +color+";")
         temp.setAlignment(QtCore.Qt.AlignCenter)
+        # temp.setStyleSheet("color: black;");
+        return temp
+    def buttonTile2(self, labelName, height, width, color):
+        temp = QPushButton()
+        temp.setText(labelName)
+        temp.setFont(self.fixedfont)
+        temp.setFixedHeight(height)
+        temp.setFixedWidth(width)
+        
+        temp.setStyleSheet("background-color:" +color+";")
+        # temp.setAlignment(QtCore.Qt.AlignCenter)
         # temp.setStyleSheet("color: black;");
         return temp
 
@@ -109,39 +120,36 @@ class UiComponents():
         # self.container.setFrameStyle(QFrame.NoFrame)
 
     def datapath(self):
-        # self.scroll3 = QScrollArea()
         self.displayWidget2 = QGroupBox()
+        self.countDisplay = 1
+        self.infoOfInstruction = self.labelTile("", 400, 100, 1)
         gridbox = QGridLayout()
-        
-        l1 = []
+        self.l1 = []
         l2 = []
         tt = 0
         name = ['F', 'D', 'E', 'MA', 'WB']
-        verticalSpacer = QtWidgets.QSpacerItem(0, 500,  QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        gridbox.addItem(verticalSpacer, 0, 0, QtCore.Qt.AlignTop)
-        # gridbox.addWidget(tempp, 0, 4, 1, 5)
-        # color = ["Purple", "Orange", "Yellow", "Blue", "Pink"]
+        color = ["Purple", "Orange", "Yellow", "Blue", "Pink"]
         for i in range(5):
-            temp = self.labelTile2(name[i], 140, 80,"Orange")
+            temp = self.buttonTile2(name[i], 140, 80, color[i])
             gridbox.addWidget(temp, 1, tt)
-            l1.append(temp)
+            self.l1.append(temp)
             tt+=1
             if(i >= 0 and i< 4):
                 temp = self.labelTile2("", 80, 20, "black")
                 gridbox.addWidget(temp, 1, tt)
                 l2.append(temp)
                 tt+=1
-        # verticalSpacer = QtWidgets.QSpacerItem(0, 40,  QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        
-        tempp = self.labelTile2("E -> E", 40, 200,"Red")
-        # gridbox.addItem(verticalSpacer, 2, 0, QtCore.Qt.AlignTop)
-        gridbox.addWidget(tempp, 3, 4, 1, 5)
-        tempp = self.labelTile2("", 4, 200,"Green")
-        # gridbox.addItem(verticalSpacer, 2, 0, QtCore.Qt.AlignTop)
-        gridbox.addWidget(tempp, 4, 4, 1, 5)
-        # gridbox.setRowStretch(0, 1)
-        # gridbox.setRowStretch(1, 1)
-        
+        tempp = self.operationTile("\U00002212")
+        gridbox.addWidget(tempp, 2, 4)
+        l1.append(tempp)
+        tempp = self.operationTile("\U0000002B")
+        gridbox.addWidget(tempp, 2, 5)
+        l1.append(tempp)
+
+        temp = self.labelTile("\U00002191     E-E     |\n" + "\U0000203E" * 15 + " \n", 100, 300, False)
+        temp.setAlignment(QtCore.Qt.AlignRight)
+        gridbox.addWidget(temp, 2, 4, 1, 2)
+
         self.displayWidget2.setLayout(gridbox)
         
         
@@ -194,20 +202,33 @@ class UiComponents():
         # self.container.setFrameStyle(QFrame.NoFrame)
 
     def tabbedView1(self):
-        self.tabs = QTabWidget()
+        self.tabs1 = QTabWidget()
         # self.setTabPosition(QtWidgets.QTabWidget.West)
         # self.tabs.setTab
-        self.tabs.setStyleSheet("border:none")
+        self.tabs1.setStyleSheet("border:none")
         self.tab1 = self.scroll1
         self.tab2 = self.scroll
-        self.tabs.addTab(self.tab1, "Registers")
-        self.tabs.addTab(self.tab2, "Memory")
+        self.tabs1.addTab(self.tab1, "Registers")
+        self.tabs1.addTab(self.tab2, "Memory")
 
     def tabbedView2(self):
-        self.tabsMain = QTabWidget()
+        self.tabs2 = QTabWidget()
+        self.tabs2.setStyleSheet("border:none")
+        self.tabMain1 = self.editorScroll
+        self.tabs2.addTab(self.tabMain1, "Editor")
+        
+    def tabbedView3(self):
+        self.tabs3 = QTabWidget()
+        self.tabs3.setStyleSheet("border:none")
+        self.tabMain1 = self.displayWidget2
+        self.tabs3.addTab(self.tabMain1, "Datapath")
+        
+    def tabbedView4(self):
+        self.tabs4 = QTabWidget()
         self.tabsMain.setStyleSheet("border:none")
         self.tabMain1 = self.editorScroll
         self.tabsMain.addTab(self.tabMain1, "Editor")
+        
 
     def registerDisplay(self):
         self.scroll1 = QScrollArea()
@@ -236,9 +257,10 @@ class mainScreen(QWidget, UiComponents):
         super().__init__()
         self.App = App
         self.title = "RISC-V Simulator"
+        self.datapathO = ""
         self.directoryPath = os.getcwd()
         self.currFilePath = os.path.join(self.directoryPath, "test", "main.mc")
-        # self.link = frontBackEndInteraction(self.directoryPath)
+        self.link = frontBackEndInteraction(self.directoryPath)
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
         QTimer.singleShot(3000, self.initWindow)
@@ -251,7 +273,7 @@ class mainScreen(QWidget, UiComponents):
             self.registerArray[i][1].setText(str(alt[i]))
             self.registerArray[i][2].setText("0x" + str(val[i]))
 
-    def updateMemoryView(self, address):
+    def updateMemoryView(self, address = "10000000"):
         l = self.link.getMemorySnapshot(address)
         for i in range(10):
             for j in range(5):
@@ -266,20 +288,29 @@ class mainScreen(QWidget, UiComponents):
         f = open(self.currFilePath, 'w')
         self.compile_button.setText("Compile")
         f.write(text)
+
         
 
     def fileCompile(self):
-        # self.paintEvent()
         self.fileSave()
         self.link.reset()
         self.link.runProgram(self.currFilePath)
         self.compile_button.setText("\U00002705")
         self.updateRegisterView()
         self.updateMemoryView("10000000")
+        self.datapathO = self.link.parseData()
+        # print(self.datapathO)
         loop = QEventLoop()
         QTimer.singleShot(1000,loop.quit)
         loop.exec_()
-        self.compile_button.setText("Compile")
+        
+        self.compile_button.setText("\U00002699")
+        
+    def datapathhelp(self, flag):
+        self.countDisplay +=flag
+    
+    def updatedatapath(self, stage):
+        return self.datapathO[self.countDisplay-1][str(stage)]
         
     def jumpAddress(self):
         a = self.tempLineEdit.text()
@@ -298,36 +329,30 @@ class mainScreen(QWidget, UiComponents):
     def initWindow(self):
         self.splash.close()
         self.setStyleSheet("background-color: #313638;",)
-        # self.setWindowFlag(Qt.FramelessWindowHint)
-        # self.setWindowTitle("no title")
         logo_label = self.mainLabel()
-
         self.editor(self.currFilePath)
         self.memoryDisplay()
         self.registerDisplay()
+        self.updateRegisterView()
+        self.updateMemoryView()
         self.datapath()
         self.save_button.clicked.connect(lambda: self.fileSave())
         self.compile_button.clicked.connect(lambda: self.fileCompile())
         self.theme_button.clicked.connect(lambda: self.changeTheme())
         self.jump_button.clicked.connect(lambda: self.jumpAddress())
-
-        # self.updateMemoryVssiew()
-
+        for i in range(5):
+            self.l1[i].clicked.connect(lambda: self.updatedatapath(i))
+        self.l1[5].clicked.connect(lambda: self.datapathhelp(-1))
+        self.l1[6].clicked.connect(lambda: self.datapathhelp(1))
         self.tabbedView1()
-        self.tabbedView2()
-
-        memoryDisplay = self.tabs
-        feed = self.displayWidget2
-
+        self.tabbedView3()
+        memoryDisplay = self.tabs1
+        feed = self.tabs3
         hbox = QHBoxLayout()
         hbox.addWidget(feed, 10)
         hbox.addWidget(memoryDisplay, 4)
         hbox.setContentsMargins(10, 10, 10, 10)
         vbox = QVBoxLayout()
-        
-        # self.titleBar = MyBar()
-        # self.titleBar.ButtonRestore.setVisible(True)
-        # vbox.addWidget(self.titleBar)
         vbox.addLayout(logo_label)
         vbox.addLayout(hbox)
         vbox.setContentsMargins(10, 10, 10, 10)
@@ -335,9 +360,6 @@ class mainScreen(QWidget, UiComponents):
         self.showMaximized()
 
 App = QApplication(sys.argv)
-# sshFile="GUI/me.qss"
-# with open(sshFile,"r") as fh:
-#     App.setStyleSheet(fh.read())
 App.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
 window = mainScreen(App)
 sys.exit(App.exec_())

@@ -26,15 +26,12 @@ class BTB:
     def __init__(self):
         self.lookup = defaultdict(int)
         #  branch and jal instruction in self.lookup
-        self.predicted = defaultdict(lambda: -1)
+        self.predicted = defaultdict(lambda: 0)
         # stores True if taken else False
         # initialized to -1 as it is matched to RZ which has value either 1 or 0
 
     # prediction - 1 -> Taken
     # prediction - 0 -> Not Taken
-    # isBTB for jump and branch
-    # S_Select  for branch
-    # isBTB is True and S_Select is False means jal
     
     def isImmediatePositive(self,imm):
         # returns 1 if imm is greater than 0
@@ -44,45 +41,49 @@ class BTB:
     def predict(self, PC):
         return [True, self.lookup[PC]] if PC in self.lookup else [False, "0"*8]
 
-    def isFlush(self, PC, RZ, isJalr, S_Select, isBTB):
+    def isFlush(self, PC, RZ, currOpID):
         # True means Flush
         # False means we do not flush
-        
-        if PC not in self.lookup and isBTB:
-            # if the jump or branch instruction is occuring for the first time we return True
-            # because our prediction for the first time is False
-            return True
-        
-        elif isJalr:
-            # we always Flush in jalr
-            return True
-        
-        elif not isBTB:
-            # if it is any other instruction like add etc we do not flush
+        if 18 <= currOpID <= 23:
+
+            if 18 <= currOpID <= 21: #branch
+
+                if PC not in self.lookup: #if PC was not in lookup, it's assumed not taken
+                    #if RZ == 0 then that was correct
+                    if int(RZ[-1],16) == 0:
+                        return False
+                    return True
+                
+                if self.predicted[PC] == False and int(RZ[-1],16) == 1:
+                    return True
+                if self.predicted[PC] == True and int(RZ[-1],16) == 0:
+                    return True
+                
+                return False
+            
+            elif currOpID == 22: #jal
+
+                if PC not in self.lookup:
+                    return True
+                else:
+                    return False
+                
+            else: #jalr
+                return True
+        else:
             return False
 
-        elif not S_Select:
-            # JAL instruction
-            # this instruction is JAL as isBTB is True and sselect if False
-            # we dont flush as jal comes as this is not the first occurence of jal (when it comes for the first time is checked earlier)
-            return False
+    def addInstruction(self, PC, PC_temp, imm, target, currOpID):
+        if not 18 <= currOpID <= 22:
+            return
         
-        elif self.predicted[PC] != int(RZ[-1],16):
-            # if our prediction is False we Flush
-            return True
-        
-        # our prediction is True and so we do not flush
-        return False
-
-    def addInstruction(self, PC, PC_temp, imm, target, S_Select, isBTB):
         if PC not in self.lookup:
-
-            if S_Select:
+            if 18 <= currOpID <= 21:
                 self.lookup[PC] = PC_temp if self.isImmediatePositive(imm) else target
                 self.predicted[PC] = False if self.isImmediatePositive(imm) else True
                 # if it is in lookup and positive then we predict it as False and take the next instruction(pc_temp)
                 # else we predict it as true and and take the target
-            elif isBTB:
+            elif currOpID == 22:
                 self.lookup[PC] = target
                 self.predicted[PC] = True
                 # it is jal instruction and so we take the target
@@ -93,3 +94,8 @@ class BTB:
     def clearBTB(self):
         self.lookup.clear()
         self.predicted.clear()
+
+if __name__ == "__main__":
+    btb = BTB()
+    imm = "7FFFFFFC"
+    print(btb.isImmediatePositive(imm))

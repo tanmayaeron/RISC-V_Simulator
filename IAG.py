@@ -18,17 +18,17 @@ class IAG:
     def getPC_Temp(self):
         return self._PC_Temp
         
-    def muxPC(self,PC_select,buffer,RA = "0"*8,BTB="0"*8):
+    def muxPC(self,PC_select,buffer,BTB="0"*8):
         if PC_select == 0 :
-            self.output_muxPC =  self._PC
-        elif PC_select == 1:
-            self.output_muxPC = RA
-        elif PC_select == 2:
             self.output_muxPC = self.output_adder
+        elif PC_select == 1:
+            self.output_muxPC = buffer.get(2)[2]              #RA from buffer at the end of decode
+        elif PC_select == 2:
+            self.output_muxPC = self._PC
         elif PC_select == 3:
-            self.output_muxPC = self.buffer.get(2)[1]
+            self.output_muxPC = buffer.get(2)[1]              #PC from buffer at the end of decode
         elif PC_select ==4:
-            self.output_muxPC = BTB
+            self.output_muxPC = BTB                                #target sent by BTB
             
     def muxINC(self, INC_select, S_select, imm, RZ):
         if(S_select == 1):

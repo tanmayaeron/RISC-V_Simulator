@@ -145,21 +145,10 @@ class Processor:
         self.outputD[0]["PC"] = self._IAG.getPC()
         if self.getIR() == "0"*8:
             return False
-        
-        predict = self._BTB.predict(self._IAG.getPC())
+
         self.bufferStore[0] = [self._IAG.getPC(), self._IR, self._IAG.getPC_Temp()]
 
         self.outputD[0]["buffer"] = self.bufferStore[0]
-
-
-        if predict[0]:                                                      #represent if instruction is in table
-            self._IAG.setPC(predict[1])
-            # predict[1] is target
-        else:
-            self._IAG.adder(self._IAG.getPC())
-            self._IAG.muxPC(0, "0"*8)
-            self._IAG.updatePC(1)
-        
         self.outputD[0]["IR"] = self.getIR()
         return True
 
@@ -228,29 +217,12 @@ class Processor:
         self._RZ = self._ALU.operate(operand1, operand2, currALU_select)
         self.outputD[2]["RZ"] = self._RZ
 
-        self._IAG.adder(PC, imm)
-        self._IAG.muxPC(0, RA)
-
         Miss = self._BTB.isFlush(PC, self._RZ, currOpID) #order wise first
 
         #self._IAG.output_muxPC is PC+imm
-        self._BTB.addInstruction(PC, PC_temp, imm, self._IAG.output_muxPC, currOpID)
-
-
-        if Miss:
-            if currOpID == 23:   #jalr
-                self._IAG.adder(RA, imm)
-            else:
-                if currOpID == 22: #jal
-                    self._IAG.adder(PC, imm)
-                else:              #mispredictions on branch
-                    if self._RZ[-1] == "1":
-                        self._IAG.adder(PC, imm)
-                    else:
-                        self._IAG.adder(PC)
-            self._IAG.muxPC(0, RA)
-            self._IAG.updatePC(1)
-
+        target = hexToDec(PC)+hexToDec(imm)
+        target = decToHex(target)
+        self._BTB.addInstruction(PC, PC_temp, imm, target , currOpID)
         self.bufferStore[2] = [currOpID, self._RZ, rd, RM, rs1, rs2, PC_temp]
         self.outputD[2]["buffer"] = self.bufferStore[2]
 
@@ -365,10 +337,6 @@ class Processor:
             out = json.dumps(self.outputD)
             print(out)
 
-            # with open(self._outputLogFile, 'w') as json_file:
-            #     json.dump(self.outputD, json_file)
-            # json.dump(self.outputD, self._outputLogFile)
-        
             #In case of a miss
             #send a signal from execute to clear buffers of decode and fetch
             #PC is already updated to the required by IAG and will be fetched next
@@ -380,6 +348,43 @@ class Processor:
             #as the decode buffer was deleted no execute occurs in the next cycle
             #fetch buffer wasn't deleted or updated so decode occurs with same IR, PC
             #this way we stalled the whole thing by one cycle
+
+            # updating PC for next cycle
+            if ExecBufferSignal and Miss:  # edits of execute
+
+                currOpID = self.buffer.get(2)[0]
+
+                if self.PC_select[currOpID]:          #jalr
+                    PC_select = 1
+                else:
+                    PC_select = 3
+
+                S_select = self.S_select[currOpID]
+                INC_select = self.INC_select[currOpID]
+
+                self._IAG.muxPC(PC_select,self.buffer)
+                self._IAG.updatePC(1)
+                self._IAG.muxINC(INC_select,S_select,self.buffer.get(2)[8],self._RZ)
+                self._IAG.adder()
+                self._IAG.muxPC(0,self.buffer)
+                self._IAG.updatePC(1)
+
+            if not Miss and not isStall and FetchBufferSignal:  # edits of fetch
+                predict = self._BTB.predict(self._IAG.getPC())
+
+                if predict[0]:
+                    PC_select1 = 4
+                    PC_select2 = 2
+                else:
+                    PC_select1 = 2
+                    PC_select2 = 0
+
+                self._IAG.muxPC(PC_select1, self.buffer, predict[1])
+                self._IAG.updatePC(1)
+                self._IAG.muxINC(0, 0, self.buffer.get(2)[8], self._RZ)
+                self._IAG.adder()
+                self._IAG.muxPC(PC_select2, self.buffer)
+                self._IAG.updatePC(1)
 
             if  not knob2:
                 if PrevIsStall==0 and isStall:
@@ -413,11 +418,11 @@ class Processor:
                 else:
                     self.buffer.clearStage(1)
 
+                # clear buffer store
                 self.bufferStore = [[],[],[],[]]
 
                 if MemBufferSignal == ExecBufferSignal == DecodeBufferSignal == FetchBufferSignal == False:
                     break
-            #clear buffer store
 
             # execute_control
             executeControl.clear()

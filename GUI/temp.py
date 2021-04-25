@@ -18,6 +18,7 @@ class mainScreen(QWidget, UiComponents):
         self.datapathO = ""
         self.directoryPath = os.getcwd()
         self.countDisplay = 1
+        self.window = 1
         self.currFilePath = os.path.join(self.directoryPath, "test", "main.mc")
         self.link = frontBackEndInteraction(self.directoryPath)
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
@@ -49,7 +50,12 @@ class mainScreen(QWidget, UiComponents):
             self.infoTable[count][1].setText(str(dictionary[i]))
             count+=1
             # self.memoryArray[i][j].setText(l[i][j])
-
+    def windowSwitch(self):
+        print("dfsa", self.window)
+        d = [self.window1, self.window2]
+        self.window^=1
+        d[self.window]()
+        self.connections()
         
     def fileOpen(self):
         f = open(self.currFilePath, 'r')
@@ -101,6 +107,7 @@ class mainScreen(QWidget, UiComponents):
         self.compile_button.clicked.connect(lambda: self.fileCompile())
         self.theme_button.clicked.connect(lambda: self.changeTheme())
         self.jump_button.clicked.connect(lambda: self.jumpAddress())
+        self.window_button.clicked.connect(lambda: self.windowSwitch())
         
         self.l1[0].clicked.connect(lambda: self.updateInfoView(0))
         self.l1[1].clicked.connect(lambda: self.updateInfoView(1))
@@ -111,24 +118,33 @@ class mainScreen(QWidget, UiComponents):
         self.l1[7].clicked.connect(lambda: self.datapathhelp(1))
         
             
-    def window(self):
+    def window1(self):
         self.editor(self.currFilePath)
         self.memoryDisplay()
         self.registerDisplay()
         self.updateRegisterView()
         self.updateMemoryView()
-        self.datapath()
-        self.info()
         self.tabbedView2()
         self.tabbedView1()
         self.help = self.tabs1
         self.feed = self.tabs2
-   
+        
+        
+    def window2(self):
+        self.datapath()
+        self.info()
+        self.tabbedView4()
+        self.tabbedView3()
+        self.help = self.tabs4
+        self.feed = self.tabs3
+        
     def initWindow(self):
         self.splash.close()
         logo_label = self.mainLabel()
         
-        self.window()
+        self.window2()
+        self.window1()
+        
         self.connections()
         hbox = QHBoxLayout()
 

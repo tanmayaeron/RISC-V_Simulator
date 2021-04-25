@@ -1,7 +1,6 @@
 import pandas as pd
 import os
 import sys
-import io
 import ALU
 import memory
 import IAG
@@ -37,7 +36,7 @@ class Processor:
         # self.bufferStore is list of list as it is updated in forwardingE 
         sys.stdout = self._outputLogFile
         self.cycle = 0
-        self._BTB = BTB()
+        self._BTB = BTB(self._isBTB,self.PC_select,self.S_select)
         self.initializeStats()
 
     def initializeStats(self):
@@ -114,7 +113,7 @@ class Processor:
         else:
             return self.buffer.get(4)[1]
 
-    def muxM(self, M_select): #new
+    def muxM(self, M_select):
         if M_select == 0:
             return self.buffer.get(4)[1]
         else:
@@ -153,7 +152,7 @@ class Processor:
         self.outputD[0]["buffer"] = self.bufferStore[0]
 
 
-        if predict[0]:
+        if predict[0]:                                                      #represent if instruction is in table
             self._IAG.setPC(predict[1])
             # predict[1] is target
         else:
@@ -234,16 +233,17 @@ class Processor:
 
         Miss = self._BTB.isFlush(PC, self._RZ, currOpID) #order wise first
 
+        #self._IAG.output_muxPC is PC+imm
         self._BTB.addInstruction(PC, PC_temp, imm, self._IAG.output_muxPC, currOpID)
 
 
         if Miss:
-            if currOpID == 23:
+            if currOpID == 23:   #jalr
                 self._IAG.adder(RA, imm)
             else:
-                if currOpID == 22:
+                if currOpID == 22: #jal
                     self._IAG.adder(PC, imm)
-                else:
+                else:              #mispredictions on branch
                     if self._RZ[-1] == "1":
                         self._IAG.adder(PC, imm)
                     else:
@@ -288,7 +288,6 @@ class Processor:
     def incrementInstructions(self,currOpID):
 
         self.instructions_executed += 1
-
         if 12 <= currOpID <= 17:
             self.Data_transfer_instructions += 1
         elif 18 <= currOpID <= 23:

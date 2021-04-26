@@ -87,7 +87,7 @@ Back-end - Python3
   \item {\bf os} for getting and adding path to certain file locations.
   \item {\bf collections.defaultdict} to make a hash map for memory.
   \item {\bf sys} for reading and editing files with ease.
-  \item {\bf termcolor.colored} for printing colored text in the terminal
+  \item {\bf json} for crunching data
 \end{enumerate}\\
 \textbf{}
 
@@ -95,9 +95,48 @@ Front-end - Python3
 \begin{enumerate}
   \item {\bf PyQt5} for the Graphic User Interface.
   \item {\bf qdarkstyle} for dark theme in the GUI.
-  \item {\bf json} for making dictionaries with ease in GUI
 \end{enumerate}
+\newpage
+\textsl{\textbf{How to run the code:}}\\\\
+\textsf{Instructions to run GUI version:}\\
+\textsl{python main.py -g}\\
+After running this command in the terminal, the GUI will pop up.\\
+You can then enable each knob by ticking the checkbox for each.\\
+For the fifth knob you can add the instruction number by adding the instruction in the box.\\
+Information about the Fetch, Decode, etc. can be seen in the info tab on the right side when you click on the respective buttons in the DataPath tab
+\par\noindent\rule{\textwidth}{0.4pt}
+\textsf{Instructions to run Non GUI version:}\\
+add `-k1' to enable knob1\\
+add `-k2' to enable knob2\\
+add `-k3' to enable knob3\\
+add `-k4' to enable knob4\\
+add `-k5 instruction number' to enable for that particular instruction\\\\
+If you want to run a particular file, add that file in test folder and add `-f filename', otherwise main.mc is run\\\\
+For example, if you want to enable knobs knob1, knob2 and knob3  and run fib.mc write\\
+\textsl{python main.py -k1 -k2 -k3 -f fib.mc}\\
+\newpage
+\noindent
+\textsf{Other features:}\\\\
+\\
+Arguments: [-h] [-g] [-f F] [-k1] [-k2] [-k3] [-k4] [-k5 INS]
+\\\\\\
+\textsf{Description:}\\
 
+\begin{enumerate}
+
+  \item {[-h, -help]}        show help message and exit
+  \item {[-g, -gui]}           enable GUI
+  \item {[-f F, -filename F]}  specify file which is to be run
+  \item {[-k1, -knob1]}        enable Pipelining
+  \item {[-k2, -knob2]}        enable Data Forwarding
+  \item {[-k3, -knob3]}        show value in registerFile at end of each cycle
+  \item {[-k4, -knob4]}        show value in Pipeline Registers at end of each cycle
+  \item {[-k5 INS, -knob5 INS]}  show value in Pipeline Registers at end of each cycle for
+                     particular instruction\\
+All the arguments are optional.\\
+If no arguments are given, for example, python main.py 
+then the main.mc file is run
+\end{enumerate}
 \newpage
 \begin{centering}
 \begin{Huge}
@@ -139,7 +178,7 @@ While data forwarding is enabled, there is no use of stalling\\ except for one p
 \vspace{0.6cm}
 \end{centering}
 \noindent
-\Large
+\LARGE
 {\bf Input Format:}\\\\
 0x0 0x00500513\\
 0x4 0x008000EF\\
@@ -148,7 +187,7 @@ While data forwarding is enabled, there is no use of stalling\\ except for one p
 0x10000000 0x64\\\\
 The input is given through GUI if the GUI is run else it is taken from the input file.\\\\
 The section given before the `\$' sign is the text segment of the code and all the lines after it signify the data segment of the code.\\\\
-Output is generated in the `generated' folder. It contains the following things  \\
+Output is generated in the `generated' folder. It contains the following things:  \\
 \begin{enumerate}
     \item `registers.txt' contains the register values
     \item `memory.txt' contains the data part of the memory
@@ -158,6 +197,7 @@ Output is generated in the `generated' folder. It contains the following things 
 
 
 \newpage
+\Large
 \textbf{In \textsl{stats.txt} we have printed the following:}
 
 \begin{enumerate}
@@ -212,20 +252,24 @@ Output is generated in the `generated' folder. It contains the following things 
 \textsf{Graphical User Interface}\\
 \end{Huge}
 \vspace{1cm}
-\includegraphics[width=1.0\textwidth]{pic4.png}\vspace{2cm}
-\includegraphics[width=1.0\textwidth]{pic6.png}
+\includegraphics[width=1.0\textwidth]{a.png}\vspace{2cm}
+\includegraphics[width=1.0\textwidth]{d.png}
 \newpage
 
 \begin{centering}
-\includegraphics[width=1.0\textwidth]{pic5.png}
+\includegraphics[width=1.0\textwidth]{c.png}
 \end{centering}
 \\\\
 \end{centering}
 \vspace{3cm}
 \LARGE
+In the memory we can see the address and the value at each address. \\
+For example if the address is 0x1000000C then the address of each of the right box are 0x1000000C , 0x1000000D, 0x1000000E and 0x1000000F
 Here we can see the jump to register functionality, where we have stored a value in the register 0x10000500, and are jumping to it and seeing the value.\\
 
 For example to jump on the location 0x10000500 write 10000500 in the Jump to box which is in the bottom right in the memory tab.
+
+
 \newpage
 \def\checkmark{\tikz\fill[scale=0.4](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;}
 \LARGE

@@ -23,9 +23,9 @@ class ReadFile:
             file.write("x"+str(index)+" "+i+"\n")
         file.close()
         
-    def printBuffer(self,bufferType, buffer, filename):
+    def printBuffer(self,string, filename):
         file = open(filename, 'a')
-        file.write(bufferType+": "+ str(buffer) + " " + "\n")
+        file.write(string+"\n")
         file.close()
 
     def read_mc(self, filepath, obj):

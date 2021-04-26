@@ -589,17 +589,31 @@ class Processor:
         
     def printBuffer2(self, stage, stageNo):
         filename = os.path.join(self._currFolderPath, "generated", 'buffer.txt')
-        self._fileReader.printBuffer(stage,self.buffer.get(stageNo), filename)
-        
-        
-        
+        numlist = [0,3,11,8,4]
+        namelist = [[],['PC','IR','PC_temp'],['Operation id', 'PC', 'RA', 'RB', 'RM', 'rd', 'rs1', 'rs2', 'imm', 'PC_temp', 'arraylist'],
+                    ['id', 'RZ', 'rd', 'RM', 'rs1', 'rs2', 'PC_temp', 'PC'],['id', 'RY', 'rd','PC']]
+        self._fileReader.printBuffer(stage, filename)
+        for i in range(numlist[stageNo]):
+            self._fileReader.printBuffer(namelist[stageNo][i]+" "+str(self.buffer.get(stageNo)[i]), filename)
+
     def printBuffer(self, cycle = -1):
         filename = os.path.join(self._currFolderPath, "generated","Buffer Snapshot", 'buffer'+str(cycle)+'.txt')
-        
-        self._fileReader.printBuffer("Fetch",self.buffer.get(1), filename)
-        self._fileReader.printBuffer("Decode",self.buffer.get(2), filename)
-        self._fileReader.printBuffer("Execute",self.buffer.get(3), filename)
-        self._fileReader.printBuffer("MemoryAccess",self.buffer.get(4), filename)
+        fetchlist = ['PC','IR','PC_temp']
+        decodelist = ['Operation id', 'PC', 'RA', 'RB', 'RM', 'rd', 'rs1', 'rs2', 'imm', 'PC_temp', 'arraylist']
+        executelist = ['id', 'RZ', 'rd', 'RM', 'rs1', 'rs2', 'PC_temp','PC']
+        malist = ['id', 'RY', 'rd','PC']
+        self._fileReader.printBuffer("Fetch", filename)
+        for i in range(3):
+            self._fileReader.printBuffer(fetchlist[i]+" "+str(self.buffer.get(1)[i]),filename)
+        self._fileReader.printBuffer("Decode", filename)
+        for i in range(11):
+            self._fileReader.printBuffer(decodelist[i]+" "+str(self.buffer.get(2)[i]),filename)
+        self._fileReader.printBuffer("Execute", filename)
+        for i in range(8):
+            self._fileReader.printBuffer(executelist[i]+" "+str(self.buffer.get(3)[i]),filename)
+        self._fileReader.printBuffer("MemoryAccess", filename)
+        for i in range(4):
+            self._fileReader.printBuffer(malist[i]+" "+str(self.buffer.get(4)[i]),filename)
         
         
 

@@ -552,8 +552,13 @@ class Processor:
         
         
     def printCycleInfo(self):
+        filename = os.path.join(self._currFolderPath, "generated", 'outputLog.txt')
+        file = open(filename, 'a')
         out = json.dumps(self.outputD)
-        print(out)
+        file.write(str(out))
+        file.write("\n")
+        file.close()
+
         
     def printData(self):
         memorySnapshot = self._PMI.getMemory(1)

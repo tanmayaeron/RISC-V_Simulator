@@ -18,7 +18,7 @@ class UiComponents():
         button = QPushButton()
         button.setText(name)
         button.setFont(QFont('Times', 30))
-        # button.setPointSize(13)
+        
         button.setFixedHeight(40)
         button.setFixedWidth(40)
         return button
@@ -40,7 +40,7 @@ class UiComponents():
         temp.setFixedHeight(height)
         temp.setFixedWidth(width)
         if (isBorder):
-            temp.setStyleSheet("border :1px solid white; color : red;")
+            temp.setStyleSheet("border :1px solid white;")
         temp.setAlignment(QtCore.Qt.AlignCenter)
         # temp.setStyleSheet("color: black;");
         return temp
@@ -54,7 +54,6 @@ class UiComponents():
         
         temp.setStyleSheet("background-color:" +color+";")
         temp.setAlignment(QtCore.Qt.AlignCenter)
-        # temp.setStyleSheet("color: black;");
         return temp
     def buttonTile2(self, labelName, height, width, color):
         temp = QPushButton()
@@ -62,10 +61,7 @@ class UiComponents():
         temp.setFont(self.fixedfont)
         temp.setFixedHeight(height)
         temp.setFixedWidth(width)
-        
         temp.setStyleSheet("background-color:" +color+";")
-        # temp.setAlignment(QtCore.Qt.AlignCenter)
-        # temp.setStyleSheet("color: black;");
         return temp
 
     def info(self):
@@ -75,10 +71,12 @@ class UiComponents():
         count = 0
         self.infoTable = []
         for i in range(30):
-            temp = self.labelTile("",100,80,False)
+            temp = self.labelTile("",100,120,False)
+            temp.setAlignment(QtCore.Qt.AlignLeft)
             temp.setWordWrap(True)
             self.info_grid.addWidget(temp,count,0)
             tempp = self.labelTile("",100,800,False)
+            tempp.setAlignment(QtCore.Qt.AlignLeft)
             tempp.setWordWrap(True)
             self.info_grid.addWidget(tempp,count, 1)
             self.infoTable.append([temp, tempp])
@@ -100,8 +98,14 @@ class UiComponents():
         main_label_image.setPixmap(main_label_image_pixmap)
         main_label_hBox = QHBoxLayout()
         main_label_hBox.addWidget(main_label_image, 9)
-        main_label_hBox.addWidget(self.runModes, 2)
-       
+        main_label_hBox.addWidget(self.k1, 1)
+        main_label_hBox.addWidget(self.k2, 1)
+        main_label_hBox.addWidget(self.k3, 1)
+        main_label_hBox.addWidget(self.k4, 1)
+        main_label_hBox.addWidget(self.k6, 1)
+        main_label_hBox.addWidget(self.k5, 1)
+        
+
         main_label_hBox.addWidget(self.save_button, 1)
         main_label_hBox.addWidget(self.compile_button, 1)
         main_label_hBox.addWidget(self.theme_button, 1)
@@ -111,11 +115,25 @@ class UiComponents():
         return main_label_hBox
     
     def runMode(self):
-        self.runModes = QComboBox(self)
-        l = ["Non-Pipelined", "Pipelined", "Pipelined+Forwarding"]
-        self.runModes.addItems(l)
+        self.knobBox = QHBoxLayout()
+        
+        self.k1 = QCheckBox("K1")
+        self.k2 = QCheckBox("K2")
+        self.k3 = QCheckBox("K3")
+        self.k4 = QCheckBox("K4")
+        self.k5 = QCheckBox("K5")
+        self.k6 = QLineEdit("")
+        self.k6.setValidator(QIntValidator())
+        self.knobBox.addWidget(self.k1)
+        self.knobBox.addWidget(self.k2)
+        self.knobBox.addWidget(self.k3)
+        self.knobBox.addWidget(self.k4)
+        self.knobBox.addWidget(self.k5)
+        
+        # l = ["Non-Pipelined", "Pipelined", "Pipelined+Forwarding"]
+        # self.runModes.addItems(l)
         # self.runModes.setGeometry(40, 40, 100, 31)
-        self.runModes.resize(200,30)
+        # self.runModes.resize(200,30)
         
 
     def editor(self, filePath):
@@ -164,20 +182,30 @@ class UiComponents():
         tempp = self.operationTile("\U0000002B")
         gridbox.addWidget(tempp, 2, 3)
         self.l1.append(tempp)
-        tempp = self.labelTile("E to E", 40, 80,False)
+        tempp = self.labelTile("EE rs1", 40, 100,False)
         temp = self.labelTile("F", 40, 40,True)
         gridbox.addWidget(tempp, 3, 1)
         gridbox.addWidget(temp, 3, 3)
         self.l1.append(temp)
-        tempp = self.labelTile("M to E", 40, 80,False)
+        tempp = self.labelTile("EE rs2", 40, 100,False)
         temp = self.labelTile("F", 40, 40,True)
         gridbox.addWidget(tempp, 4, 1)
         gridbox.addWidget(temp, 4, 3)
         self.l1.append(temp)
-        tempp = self.labelTile("D to E", 40, 80,False)
+        tempp = self.labelTile("ME rs1", 40, 100,False)
         temp = self.labelTile("F", 40, 40,True)
         gridbox.addWidget(tempp, 5, 1)
         gridbox.addWidget(temp, 5, 3)
+        self.l1.append(temp)
+        tempp = self.labelTile("ME rs2", 40, 100,False)
+        temp = self.labelTile("F", 40, 40,True)
+        gridbox.addWidget(tempp, 6, 1)
+        gridbox.addWidget(temp, 6, 3)
+        self.l1.append(temp)
+        tempp = self.labelTile("MM", 40, 100,False)
+        temp = self.labelTile("F", 40, 40,True)
+        gridbox.addWidget(tempp, 7, 1)
+        gridbox.addWidget(temp, 7, 3)
         self.l1.append(temp)
         
         self.displayWidget2.setLayout(gridbox)
@@ -216,6 +244,7 @@ class UiComponents():
         self.tempLineEdit.setMaxLength(8)
         self.tempLineEdit.setFixedWidth(300)
         self.jump_button =  self.buttonTile("Jump to", 30, 116)
+        self.jump_button.setFont(self.fixedfont)
         self.memoryArray[-1].append(self.tempLineEdit)
         self.memoryArray[-1].append(self.jump_button)
         gridbox.addWidget(self.memoryArray[-1][0], 11, 0, 1, 16)

@@ -23,10 +23,14 @@ from collections import defaultdict
 
 class BTB:
 
-    def __init__(self):
+    def __init__(self,isBTB,muxPC,muxS):
         self.lookup = defaultdict(int)
         #  branch and jal instruction in self.lookup
         self.predicted = defaultdict(lambda: 0)
+        self.isBTB = isBTB
+        self.muxPC = muxPC
+        self.muxS  = muxS
+
         # stores True if taken else False
         # initialized to -1 as it is matched to RZ which has value either 1 or 0
 
@@ -44,9 +48,9 @@ class BTB:
     def isFlush(self, PC, RZ, currOpID):
         # True means Flush
         # False means we do not flush
-        if 18 <= currOpID <= 23:
+        if self.isBTB[currOpID] or self.muxPC[currOpID]:
 
-            if 18 <= currOpID <= 21: #branch
+            if self.muxS[currOpID]: #branch
 
                 if PC not in self.lookup: #if PC was not in lookup, it's assumed not taken
                     #if RZ == 0 then that was correct
@@ -61,7 +65,7 @@ class BTB:
                 
                 return False
             
-            elif currOpID == 22: #jal
+            elif self.isBTB[currOpID] and not self.muxS[currOpID]: #jal
 
                 if PC not in self.lookup:
                     return True
@@ -74,16 +78,16 @@ class BTB:
             return False
 
     def addInstruction(self, PC, PC_temp, imm, target, currOpID):
-        if not 18 <= currOpID <= 22:
+        if not self.isBTB[currOpID]:
             return
         
         if PC not in self.lookup:
-            if 18 <= currOpID <= 21:
+            if self.muxS[currOpID]:
                 self.lookup[PC] = PC_temp if self.isImmediatePositive(imm) else target
                 self.predicted[PC] = False if self.isImmediatePositive(imm) else True
                 # if it is in lookup and positive then we predict it as False and take the next instruction(pc_temp)
                 # else we predict it as true and and take the target
-            elif currOpID == 22:
+            elif self.isBTB[currOpID] and not self.muxS[currOpID]:
                 self.lookup[PC] = target
                 self.predicted[PC] = True
                 # it is jal instruction and so we take the target

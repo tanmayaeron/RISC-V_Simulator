@@ -21,7 +21,11 @@ class ReadFile:
         file = open(filename, 'w')
         for index, i in enumerate(registers):
             file.write("x"+str(index)+" "+i+"\n")
-            
+        file.close()
+        
+    def printBuffer(self,bufferType, buffer, filename):
+        file = open(filename, 'a')
+        file.write(bufferType+": "+ str(buffer) + " " + "\n")
         file.close()
 
     def read_mc(self, filepath, obj):

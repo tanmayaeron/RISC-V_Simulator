@@ -18,6 +18,7 @@ class mainScreen(QWidget, UiComponents):
         
         self.directoryPath = os.getcwd()
         self.countDisplay = 1
+        self.knobsList = [0, 0, 0, 0 ,0, 0]
         self.currFilePath = os.path.join(self.directoryPath, "test", "main.mc")
         self.link = frontBackEndInteraction(self.directoryPath)
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
@@ -39,6 +40,7 @@ class mainScreen(QWidget, UiComponents):
         for i in range(10):
             for j in range(5):
                 self.memoryArray[i][j].setText(l[i][j])
+                
     def updateInfoView(self, stage):
         dictionary = self.datapathO[self.countDisplay-1][str(stage)]
         count = 0
@@ -63,10 +65,23 @@ class mainScreen(QWidget, UiComponents):
         self.compile_button.setText("Compile")
         f.write(text)
 
+    def updateknobsList(self):
+        self.knobsList[0] = self.k1.isChecked()
+        self.knobsList[1] = self.k2.isChecked()
+        self.knobsList[2] = self.k3.isChecked()
+        self.knobsList[3] = self.k4.isChecked()
+        self.knobsList[4] = self.k5.isChecked()
+        if(self.k6.text() == ""):
+            self.knobsList[5] = 0
+        else:
+            self.knobsList[5] = int(self.k6.text())
+        
     def fileCompile(self):
         self.fileSave()
         self.link.reset()
-        self.link.runProgram(self.currFilePath, self.runModes.currentIndex())
+        
+        self.updateknobsList()
+        self.link.runProgram(self.currFilePath, self.knobsList)
         self.compile_button.setText("\U00002705")
         self.updateRegisterView()
         self.updateMemoryView("10000000")
@@ -83,9 +98,11 @@ class mainScreen(QWidget, UiComponents):
         self.countDisplay = max(1, self.countDisplay)
         temp = self.datapathF[self.countDisplay]
         self.l1[6].setText(str(self.countDisplay))
-        self.l1[7].setText(temp["ME"])
-        self.l1[8].setText(temp["DE"])
-        self.l1[9].setText(temp["EE"])
+        self.l1[8].setText(temp["EE1"])
+        self.l1[9].setText(temp["EE2"])
+        self.l1[10].setText(temp["ME1"])
+        self.l1[11].setText(temp["ME2"])
+        self.l1[12].setText(temp["MM"])
     
 
     def jumpAddress(self):
@@ -139,15 +156,10 @@ class mainScreen(QWidget, UiComponents):
         self.connections()
         hbox = QHBoxLayout()
 
-        hbox.addWidget(self.feed, 10)
+        hbox.addWidget(self.feed, 5)
         hbox.addWidget(self.help, 4)
         vbox = QVBoxLayout()
         vbox.addLayout(logo_label)
         vbox.addLayout(hbox)
         self.setLayout(vbox)
         self.showMaximized()
-
-App = QApplication(sys.argv)
-App.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
-window = mainScreen(App)
-sys.exit(App.exec_())

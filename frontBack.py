@@ -9,23 +9,18 @@ class frontBackEndInteraction:
     def __init__(self, directoryPath):
         self.processor = Processor(directoryPath)
         
-    def runProgram(self, filePath, mode):
-        if(mode == 0):
-            while True:
-                self.processor.fetch()
-                if self.processor.getIR() == '0'*8:
-                    break
-                self.processor.decode()
-                self.processor.execute()
-                self.processor.memoryAccess()
-                self.processor.registerUpdate()
-        elif(mode == 1):
+    def runProgram(self, filePath, knobsL):
+        if(not knobsL[0]):
             self.processor.load_mc(filePath)
-            self.processor.runPipelining_False_for_Forwarding(False)
-            self.processor.printRegisters()
-            self.processor.printData()
+            self.processor.nonPipelined(knobsL[2])
+            
+        else:
+            self.processor.load_mc(filePath)
+            self.processor.pipelined(knobsL[1], knobsL[2], knobsL[3], knobsL[4], knobsL[5])
             self.processor.printStat()
-        # return "Compiled"
+            
+        self.processor.printRegisters()
+        self.processor.printData()
         
         
     def getRegisterSnapshot(self):

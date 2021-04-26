@@ -18,11 +18,17 @@ class IAG:
     def getPC_Temp(self):
         return self._PC_Temp
         
-    def muxPC(self,PC_select, RA): 
-        if PC_select == 1 :
-            self.output_muxPC =  RA
-        else:
+    def muxPC(self,PC_select,buffer,BTB="0"*8):
+        if PC_select == 0 :
             self.output_muxPC = self.output_adder
+        elif PC_select == 1:
+            self.output_muxPC = buffer.get(2)[2]              #RA from buffer at the end of decode
+        elif PC_select == 2:
+            self.output_muxPC = self._PC
+        elif PC_select == 3:
+            self.output_muxPC = buffer.get(2)[1]              #PC from buffer at the end of decode
+        elif PC_select ==4:
+            self.output_muxPC = BTB                                #target sent by BTB
             
     def muxINC(self, INC_select, S_select, imm, RZ):
         if(S_select == 1):
@@ -33,9 +39,9 @@ class IAG:
         else:
             self.inputB_adder = imm
 
-    def adder(self, PC, imm = "0"*7+"4"):
-        operandA = int(PC,16)
-        operandB = int(imm,16)
+    def adder(self):
+        operandA = int(self._PC,16)
+        operandB = int(self.inputB_adder,16)
         output = operandA+operandB
         # print("PC, imm :", operandA, operandB, output)
         self.output_adder = '{:08x}'.format(output)[-8:]

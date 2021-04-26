@@ -12,7 +12,7 @@ from BTB import BTB
 import Hazard
 import json
 
-# M_select RM_select to be added
+
 class Processor:
 
     def __init__(self, currFolderPath):
@@ -55,8 +55,6 @@ class Processor:
         self.Stall_Count = 0
         self.Flush = 0 
 
-
-    
     def initialiseTempRegisters(self):
         self._IR = '0'*8
         self._RA = '0'*8
@@ -133,7 +131,6 @@ class Processor:
 
         #print(self._PMI.getMemory(0))
 
-
     def fetch(self):
         outputmuxMA = self.muxMA(1)  # MAR gets value of PC
         self._IAG.updatePC_temp()
@@ -203,11 +200,6 @@ class Processor:
         currALU_select = executeControl["currALU_select"] #ALU
         currMuxB = executeControl["currMuxB"]
         currMuxA = executeControl["currMuxA"]
-
-        currINCSelect = executeControl["currINCSelect"]
-        currSSelect = executeControl["currSSelect"]
-        isBTB = executeControl["isBTB"]
-        isJalr = executeControl["isJalr"]
 
         operand1 = self.muxA(currMuxA)
         operand2 = self.muxB(currMuxB)
@@ -430,10 +422,6 @@ class Processor:
             executeControl["currALU_select"] = self._ALU_select[currOpID]  # ALU
             executeControl["currMuxB"] = self._muxB[currOpID]
             executeControl["currMuxA"] = self._muxA[currOpID]
-            executeControl["currINCSelect"] = self.INC_select[currOpID]
-            executeControl["currSSelect"] = self.S_select[currOpID]
-            executeControl["isBTB"] = self._isBTB[currOpID]
-            executeControl["isJalr"] = self.PC_select[currOpID]
 
             # mem_control
             memControl.clear()
@@ -487,6 +475,54 @@ class Processor:
         #     print("Stalls in only Stalling case with a static branch predictor:", self.Stall_Count)
 
         # print("Total number of branch misses:", self.Miss_Count)
+
+    def nonPipelined(self):
+
+        while True:
+            FetchBufferSignal = self.fetch()
+            if not FetchBufferSignal:
+                break
+            self.bufferUpdate(0)
+
+            self.decode()
+            self.bufferUpdate(1)
+
+            currOpID = self.buffer.get(2)[0]
+
+            executeControl = {}
+            memControl = {}
+            WBControl = {}
+
+            executeControl["currALU_select"] = self._ALU_select[currOpID]  # ALU
+            executeControl["currMuxB"] = self._muxB[currOpID]
+            executeControl["currMuxA"] = self._muxA[currOpID]
+
+            memControl["currMemoryEnable"] = self._memoryEnable[currOpID]
+            memControl["currSizeEnable"] = self.SizeEnable[currOpID]
+            memControl["Y_select"] = self._muxY[currOpID]
+            memControl["M_select"] = 1
+
+            WBControl["currWriteEnable"] = self._writeEnable[currOpID]
+
+            currINCSelect = self.INC_select[currOpID]
+            currSSelect = self.S_select[currOpID]
+
+            self.execute(executeControl)
+
+            self._IAG.muxPC(self.PC_select[currOpID], self.buffer.get(2)[2])
+            self._IAG.updatePC(1)
+            self._IAG.muxINC(currINCSelect, currSSelect, self.buffer.get(2)[8], self._RZ)
+            self._IAG.adder()
+            self._IAG.muxPC(0,self.buffer.get(2)[2])
+            self._IAG.updatePC(1)
+
+            self.bufferUpdate(2)
+
+            self.memoryAccess(memControl)
+            self.bufferUpdate(3)
+
+            self.registerUpdate(WBControl)
+
 
     def printData(self):
         memorySnapshot = self._PMI.getMemory(1)

@@ -15,13 +15,15 @@ class mainScreen(QWidget, UiComponents):
         super().__init__()
         self.App = App
         self.title = "RISC-V Simulator"
-        self.datapathO = ""
+        
         self.directoryPath = os.getcwd()
         self.countDisplay = 1
         self.currFilePath = os.path.join(self.directoryPath, "test", "main.mc")
         self.link = frontBackEndInteraction(self.directoryPath)
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
+        self.datapathO = self.link.parseData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
+        self.datapathF = self.link.parseData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
         QTimer.singleShot(0, self.initWindow)
         self.splash.show()
 
@@ -38,7 +40,7 @@ class mainScreen(QWidget, UiComponents):
             for j in range(5):
                 self.memoryArray[i][j].setText(l[i][j])
     def updateInfoView(self, stage):
-        dictionary = self.datapathO[self.countDisplay][str(stage)]
+        dictionary = self.datapathO[self.countDisplay-1][str(stage)]
         count = 0
         for i in range(30):
             self.infoTable[i][0].setText("")
@@ -64,11 +66,12 @@ class mainScreen(QWidget, UiComponents):
     def fileCompile(self):
         self.fileSave()
         self.link.reset()
-        self.link.runProgram(self.currFilePath)
+        self.link.runProgram(self.currFilePath, self.runModes.currentIndex())
         self.compile_button.setText("\U00002705")
         self.updateRegisterView()
         self.updateMemoryView("10000000")
-        self.datapathO = self.link.parseData()
+        self.datapathO = self.link.parseData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
+        self.datapathF = self.link.parseData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
         loop = QEventLoop()
         QTimer.singleShot(1000,loop.quit)
         loop.exec_()
@@ -78,7 +81,11 @@ class mainScreen(QWidget, UiComponents):
     def datapathhelp(self, flag):
         self.countDisplay +=flag
         self.countDisplay = max(1, self.countDisplay)
+        temp = self.datapathF[self.countDisplay]
         self.l1[6].setText(str(self.countDisplay))
+        self.l1[7].setText(temp["ME"])
+        self.l1[8].setText(temp["DE"])
+        self.l1[9].setText(temp["EE"])
     
 
     def jumpAddress(self):

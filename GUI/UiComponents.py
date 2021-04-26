@@ -75,10 +75,11 @@ class UiComponents():
         count = 0
         self.infoTable = []
         for i in range(30):
-            temp = self.labelTile("",40,80,False)
-            
+            temp = self.labelTile("",100,80,False)
+            temp.setWordWrap(True)
             self.info_grid.addWidget(temp,count,0)
-            tempp = self.labelTile("",40,300,False)
+            tempp = self.labelTile("",100,800,False)
+            tempp.setWordWrap(True)
             self.info_grid.addWidget(tempp,count, 1)
             self.infoTable.append([temp, tempp])
             count+=1
@@ -88,28 +89,34 @@ class UiComponents():
         self.infoScroll.setWidgetResizable(True)
 
     def mainLabel(self):
+        self.runMode()
         self.save_button = self.buttonTile("\U0001F4BE", 50, 40)
         self.compile_button = self.buttonTile("\U00002699", 50, 40)
         self.currentTheme = "Dark Theme"
         self.theme_button = self.buttonTile("\U0001F4A1", 50, 40)
-        self.exit_button = self.buttonTile("\U0001F4A1", 50, 40)
         main_label_image = QLabel()
         main_label_image_pixmap = QPixmap("GUI/Images/logo.png")
         main_label_image_pixmap = main_label_image_pixmap.scaled(300, 80)
         main_label_image.setPixmap(main_label_image_pixmap)
         main_label_hBox = QHBoxLayout()
+        main_label_hBox.addWidget(main_label_image, 9)
+        main_label_hBox.addWidget(self.runModes, 2)
+       
+        main_label_hBox.addWidget(self.save_button, 1)
+        main_label_hBox.addWidget(self.compile_button, 1)
+        main_label_hBox.addWidget(self.theme_button, 1)
         
-        main_label_hBox.addWidget(main_label_image)
-        main_label_hBox.addWidget(self.save_button)
-        main_label_hBox.addWidget(self.compile_button)
-        main_label_hBox.addWidget(self.theme_button)
         main_label_hBox.setContentsMargins(10, 10, 20, 10)
-        mlh = QGroupBox()
-        mlh.setLayout(main_label_hBox)
-        mlh.setStyleSheet("border:none;")
-        mlh2 = QHBoxLayout()
-        mlh2.addWidget(mlh)
-        return mlh2
+        
+        return main_label_hBox
+    
+    def runMode(self):
+        self.runModes = QComboBox(self)
+        l = ["Non-Pipelined", "Pipelined", "Pipelined+Forwarding"]
+        self.runModes.addItems(l)
+        # self.runModes.setGeometry(40, 40, 100, 31)
+        self.runModes.resize(200,30)
+        
 
     def editor(self, filePath):
         self.editorScroll = QScrollArea()
@@ -157,6 +164,22 @@ class UiComponents():
         tempp = self.operationTile("\U0000002B")
         gridbox.addWidget(tempp, 2, 3)
         self.l1.append(tempp)
+        tempp = self.labelTile("E to E", 40, 80,False)
+        temp = self.labelTile("F", 40, 40,True)
+        gridbox.addWidget(tempp, 3, 1)
+        gridbox.addWidget(temp, 3, 3)
+        self.l1.append(temp)
+        tempp = self.labelTile("M to E", 40, 80,False)
+        temp = self.labelTile("F", 40, 40,True)
+        gridbox.addWidget(tempp, 4, 1)
+        gridbox.addWidget(temp, 4, 3)
+        self.l1.append(temp)
+        tempp = self.labelTile("D to E", 40, 80,False)
+        temp = self.labelTile("F", 40, 40,True)
+        gridbox.addWidget(tempp, 5, 1)
+        gridbox.addWidget(temp, 5, 3)
+        self.l1.append(temp)
+        
         self.displayWidget2.setLayout(gridbox)
         
         

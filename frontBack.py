@@ -9,20 +9,22 @@ class frontBackEndInteraction:
     def __init__(self, directoryPath):
         self.processor = Processor(directoryPath)
         
-    def runProgram(self, filePath):
-        self.processor.load_mc(filePath)
-        self.processor.runPipelining_False_for_Forwarding(False)
-        # while True:
-        #     self.processor.fetch()
-        #     if self.processor.getIR() == '0'*8:
-        #         break
-        #     self.processor.decode()
-        #     self.processor.execute()
-        #     self.processor.memoryAccess()
-        #     self.processor.registerUpdate()
-        self.processor.printRegisters()
-        self.processor.printData()
-        self.processor.printStat()
+    def runProgram(self, filePath, mode):
+        if(mode == 0):
+            while True:
+                self.processor.fetch()
+                if self.processor.getIR() == '0'*8:
+                    break
+                self.processor.decode()
+                self.processor.execute()
+                self.processor.memoryAccess()
+                self.processor.registerUpdate()
+        elif(mode == 1):
+            self.processor.load_mc(filePath)
+            self.processor.runPipelining_False_for_Forwarding(False)
+            self.processor.printRegisters()
+            self.processor.printData()
+            self.processor.printStat()
         # return "Compiled"
         
         
@@ -49,7 +51,8 @@ class frontBackEndInteraction:
     def reset(self):
         self.processor.reset()
          
-    def parseData(self):
-        with open('generated/outputLog.txt') as f:
+    def parseData(self, path):
+        with open(path) as f:
             data = [json.loads(line) for line in f]
         return data
+    

@@ -46,11 +46,13 @@ if __name__ == '__main__':
         currFilePath = os.path.join(directoryPath, "test", "main.mc")
         link = frontBackEndInteraction(directoryPath)
         link.runProgram(currFilePath, knobsL)
+        # link.reset()
         
     else:
         directoryPath = os.getcwd()
         currFilePath = os.path.join(directoryPath, "test", fileName)
         link = frontBackEndInteraction(directoryPath)
         link.runProgram(currFilePath, knobsL)
+        # link.reset()
         
 

@@ -80,13 +80,7 @@ class mainScreen(QWidget, UiComponents):
         self.fileSave()
         self.link.reset()
         
-        self.link.clearData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
-        self.link.clearData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
-        self.link.clearData(os.path.join(self.directoryPath, "generated", "memory.txt"))
-        self.link.clearData(os.path.join(self.directoryPath, "generated", "registers.txt"))
-        self.link.clearData(os.path.join(self.directoryPath, "generated", "buffer.txt"))
-        self.link.clearData(os.path.join(self.directoryPath, "generated", "stats.txt"))
-        
+      
         
         self.updateknobsList()
         self.link.runProgram(self.currFilePath, self.knobsList)

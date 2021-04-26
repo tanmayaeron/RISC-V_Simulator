@@ -14,6 +14,7 @@ Libraries Used
     * os: for getting and adding path to certain file locations.
     * defaultdict: to make a hash map for memory.
     * sys: for reading and editing files with ease.
+    * json: for crunching generated data.
 
 # Front-end - Python3
     * PyQT5: for the Graphic User Interface.
@@ -34,10 +35,7 @@ Installation
         python main.py 2 filename.mc
         Note:- file should be present in the test directory
 
-    5. Check the generated folder for details of compilation. It contains:
-        * memory.txt   :  details of memory
-        * register.txt :  details of registers
-        * outputLog.txt:  details of changes in temporary registers for each cycle
+    5. Check the generated folder for details of compilation.
 
 
 Instructions to use GUI:
@@ -68,9 +66,16 @@ Input Format
 
 Output Format
 Check the generated folder for details of compilation. It contains:
-        * memory.txt   :  details of memory
-        * register.txt :  details of registers
-        * outputLog.txt:  details of changes in temporary registers for each cycle
+        * memory.txt        :  details of memory
+        * register.txt      :  details of registers
+        * outputLog.txt     :  details of changes in temporary registers for each cycle
+        * buffer.txt        :  details of buffer in a particular cycle provided in knob5 input box.
+        * forwarding.txt    :  details of data forwarding paths taken in each cycle
+        * stats.txt         :  contains general stats about the code compilation.
+        * Buffer Snapshots  :  contains data of buffers in each cycle if knob4 is on.
+        * Register Snapshots:  contains details of register file in knob3 is on.
+        For more information the output format of files, refer to buffer class in hazard.py
+
 
 Work split among team members:-
 :) Overall it was a very successful team efforts. Each members coordinated others well.

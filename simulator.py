@@ -499,6 +499,7 @@ class Processor:
     def nonPipelined(self, knob3):
 
         while True:
+            self.outputD =  {0:{}, 1:{}, 2:{}, 3:{}, 4:{}}
             FetchBufferSignal = self.fetch()
             if not FetchBufferSignal:
                 break
@@ -542,6 +543,10 @@ class Processor:
             self.bufferUpdate(3)
 
             self.registerUpdate(WBControl)
+            for i in range(5):
+                if("buffer" in self.outputD[i]):
+                    del self.outputD[i]["buffer"]
+            self.printCycleInfo()
 
 
     def checkPC(self, ins_num):

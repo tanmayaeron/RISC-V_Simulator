@@ -5,6 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import json
+import os
 class frontBackEndInteraction:
     def __init__(self, directoryPath):
         self.processor = Processor(directoryPath)
@@ -45,6 +46,13 @@ class frontBackEndInteraction:
         return l
 
     def reset(self):
+        self.clearData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
+        self.clearData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
+        self.clearData(os.path.join(self.directoryPath, "generated", "memory.txt"))
+        self.clearData(os.path.join(self.directoryPath, "generated", "registers.txt"))
+        self.clearData(os.path.join(self.directoryPath, "generated", "buffer.txt"))
+        self.clearData(os.path.join(self.directoryPath, "generated", "stats.txt"))
+        
         self.processor.reset()
         # del self.processor
         # self.processor = Processor(self.directoryPath)
@@ -57,4 +65,5 @@ class frontBackEndInteraction:
     
 
     def clearData(self, path):
-        open(path, 'w').close()
+        file = open(path, 'w')
+        file.close()

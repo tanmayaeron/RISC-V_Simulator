@@ -215,7 +215,7 @@ class Processor:
         target = hexToDec(PC)+hexToDec(imm)
         target = decToHex(target)
         self._BTB.addInstruction(PC, PC_temp, imm, target , currOpID)
-        self.bufferStore[2] = [currOpID, self._RZ, rd, RM, rs1, rs2, PC_temp]
+        self.bufferStore[2] = [currOpID, self._RZ, rd, RM, rs1, rs2, PC_temp,PC]
         self.outputD[2]["buffer"] = self.bufferStore[2]
 
         return True, Miss, resultarray       
@@ -225,7 +225,7 @@ class Processor:
         if not self.buffer.ifPresent(3):
             return False #if no memory buffer value set before it, then don't go further
 
-        currOpID, RZ, rd, RM, rs1, rs2, PC_temp = self.buffer.get(3) #buffer access
+        currOpID, RZ, rd, RM, rs1, rs2, PC_temp,PC = self.buffer.get(3) #buffer access
         currMemoryEnable = memControl["currMemoryEnable"]
         currSizeEnable = memControl["currSizeEnable"]
 
@@ -244,7 +244,7 @@ class Processor:
         self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
 
         self._RY = self.muxY(memControl["Y_select"])
-        self.bufferStore[3] = [currOpID, self._RY, rd]
+        self.bufferStore[3] = [currOpID, self._RY, rd,PC]
         self.outputD[3]["buffer"] = self.bufferStore[3]
         
         return True
@@ -264,8 +264,7 @@ class Processor:
         if not self.buffer.ifPresent(4):
             return #if no memory buffer value set before it, then don't go further
 
-        currOpID, RY, rd = self.buffer.get(4)
-
+        currOpID, RY, rd,PC = self.buffer.get(4)
 
         self.incrementInstructions(currOpID)
         
@@ -477,15 +476,27 @@ class Processor:
                 self.printBuffer(self.Pipeline_cycle)
                   
             if(knob5):
-                
-                fPC = self.buffer.get(1)[1]
-                self.printBuffer(self.Pipeline_cycle) 
+                PC_tocheck = self.checkPC(ins_num)
+                fPC = self.buffer.get(1)[0]
+                dPC = self.buffer.get(2)[1]
+                ePC = self.buffer.get()
+                maPC = self.buffer.get()
+                if str(fPC)==PC_tocheck:
+                    #print_fetch_buffer
+                    pass
+                if str(dPC)==PC_tocheck:
+                    #print_decode_buffer
+                    pass
+                if str(ePC)==PC_tocheck:
+                    #print_execute_buffer
+                    pass
+                if str(maPC)==PC_tocheck:
+                    #print_ma_buffer
+                    pass
                 
         # self.printForwardingInfo()         
-            
-            
-                   
-                
+
+
     def nonPipelined(self, knob3):
 
         while True:
@@ -534,7 +545,6 @@ class Processor:
             self.registerUpdate(WBControl)
 
 
-
     def checkPC(self, ins_num):
         temp = ins_num-1
         temp*=4
@@ -577,9 +587,7 @@ class Processor:
         self._fileReader.printRegisters("Execute",self.buffer.get(1), filename)
         self._fileReader.printRegisters("MemoryAccess",self.buffer.get(1), filename)
         
-    
-        
-   
+
     def getRegisters(self):
         return self._registerFile.get_registerFile()
         

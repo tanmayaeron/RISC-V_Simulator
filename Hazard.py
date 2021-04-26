@@ -17,12 +17,12 @@ class Buffer:
         #RM contains the value of rs2 by default if it's not to be written then ME = 0
         #RA and RB may not be used and rejected by muxes
 
-    def executeB(self, id, RZ, rd, RM, rs1, rs2, PC_temp):
+    def executeB(self, id, RZ, rd, RM, rs1, rs2, PC_temp,PC):
         #included rs1, rs2 in the after execute buffer, this will be needed for X->M forwarding/stalling
-        self.dict[3] = id, RZ, rd, RM, rs1, rs2, PC_temp # RZ is the result
+        self.dict[3] = id, RZ, rd, RM, rs1, rs2, PC_temp,PC # RZ is the result
 
-    def memoryB(self, id, RY, rd):
-        self.dict[4] = id, RY, rd # RY is the result
+    def memoryB(self, id, RY, rd,PC):
+        self.dict[4] = id, RY, rd,PC # RY is the result
 
     def get(self, stage):
         if stage in self.dict:

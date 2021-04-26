@@ -8,6 +8,7 @@ import json
 class frontBackEndInteraction:
     def __init__(self, directoryPath):
         self.processor = Processor(directoryPath)
+        self.directoryPath = directoryPath
         
     def runProgram(self, filePath, knobsL):
         if(not knobsL[0]):
@@ -45,6 +46,9 @@ class frontBackEndInteraction:
 
     def reset(self):
         self.processor.reset()
+        # del self.processor
+        # self.processor = Processor(self.directoryPath)
+        
          
     def parseData(self, path):
         with open(path) as f:

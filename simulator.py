@@ -52,6 +52,7 @@ class Processor:
         self.Data_Hazards = 0
         self.control_Hazards = 0
         self.Miss_Count = 0
+        self.branch_Miss = 0
         self.Stall_Count = 0
         self.Flush = 0 
 
@@ -322,6 +323,8 @@ class Processor:
                     ExecBufferSignal, Miss, hazardlistE = self.execute(executeControl)
                     if Miss:
                         self.Miss_Count += 1
+                        if(self.S_select[self.buffer.get(2)[0]]):
+                            self.branch_Miss+=1
                         break
                 if i == 1:
                     MemBufferSignal = self.memoryAccess(memControl)
@@ -479,20 +482,16 @@ class Processor:
                 PC_tocheck = self.checkPC(ins_num)
                 fPC = self.buffer.get(1)[0]
                 dPC = self.buffer.get(2)[1]
-                ePC = self.buffer.get()
-                maPC = self.buffer.get()
+                ePC = self.buffer.get(3)[7]
+                maPC = self.buffer.get(4)[3]
                 if str(fPC)==PC_tocheck:
-                    #print_fetch_buffer
-                    pass
+                    self.printBuffer2("Fetch", 1)
                 if str(dPC)==PC_tocheck:
-                    #print_decode_buffer
-                    pass
+                    self.printBuffer2("Decode", 2)
                 if str(ePC)==PC_tocheck:
-                    #print_execute_buffer
-                    pass
+                    self.printBuffer2("Execute", 3)
                 if str(maPC)==PC_tocheck:
-                    #print_ma_buffer
-                    pass
+                    self.printBuffer2("MemoryAccess", 4)
                 
         # self.printForwardingInfo()         
 
@@ -578,14 +577,20 @@ class Processor:
             
         self._fileReader.printRegisters(registers, filename)
         
+    def printBuffer2(self, stage, stageNo):
+        filename = os.path.join(self._currFolderPath, "generated", 'buffer.txt')
+        self._fileReader.printBuffer(stage,self.buffer.get(stageNo), filename)
+        
+        
+        
     def printBuffer(self, cycle = -1):
-        registers = self._registerFile.get_registerFile()
         filename = os.path.join(self._currFolderPath, "generated","Buffer Snapshot", 'buffer'+str(cycle)+'.txt')
         
-        self._fileReader.printRegisters("Fetch",self.buffer.get(1), filename)
-        self._fileReader.printRegisters("Decode",self.buffer.get(1), filename)
-        self._fileReader.printRegisters("Execute",self.buffer.get(1), filename)
-        self._fileReader.printRegisters("MemoryAccess",self.buffer.get(1), filename)
+        self._fileReader.printBuffer("Fetch",self.buffer.get(1), filename)
+        self._fileReader.printBuffer("Decode",self.buffer.get(2), filename)
+        self._fileReader.printBuffer("Execute",self.buffer.get(3), filename)
+        self._fileReader.printBuffer("MemoryAccess",self.buffer.get(4), filename)
+        
         
 
     def getRegisters(self):
@@ -622,7 +627,7 @@ class Processor:
         self.control_Hazards = self.Miss_Count
         f.write("Total Control Hazards are :"+ str(self.control_Hazards)+"\n")
         f.write("\n")
-        f.write("Total Branch mispredictions are :"+str(self.Miss_Count)+"\n")
+        f.write("Total Branch mispredictions are :"+str(self.branch_Miss)+"\n")
         f.write("\n")
         f.write("Number of stalls due to data hazards are :"+str(self.Stall_Count)+"\n")
         f.write("\n")
@@ -639,4 +644,6 @@ class Processor:
         self.initialiseTempRegisters()
         self.initialiseControls()
         self.initializeStats()
+        self.bufferStore = [[], [], [], []]
+        self.buffer.flush()
         self.cycle = 0

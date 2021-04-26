@@ -221,7 +221,7 @@ class UiComponents():
         tempA = self.labelTile("Address", 40, 160, 0)
         gridbox.addWidget(tempA, 0, 0)
         for i in range(4):
-            tempB = self.labelTile("+"+str(i+1), 40, 40, 0)
+            tempB = self.labelTile("+"+str(i), 40, 40, 0)
             gridbox.addWidget(tempB, 0, i+1)
         
         
@@ -253,7 +253,10 @@ class UiComponents():
         gridbox.setVerticalSpacing(20)
         gridbox.setHorizontalSpacing(30)
         self.displayWidget.setLayout(gridbox)
+        
         self.scroll.setWidget(self.displayWidget)
+        self.displayWidget.move(self.scroll.rect().center() - self.displayWidget.rect().center())
+        
         self.scroll.setWidgetResizable(True)
         self.scroll.setFrameStyle(QFrame.NoFrame)
         self.displayWidget.setStyleSheet("border:none")

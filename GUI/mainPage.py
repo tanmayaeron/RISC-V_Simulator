@@ -80,6 +80,14 @@ class mainScreen(QWidget, UiComponents):
         self.fileSave()
         self.link.reset()
         
+        self.link.clearData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
+        self.link.clearData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
+        self.link.clearData(os.path.join(self.directoryPath, "generated", "memory.txt"))
+        self.link.clearData(os.path.join(self.directoryPath, "generated", "registers.txt"))
+        self.link.clearData(os.path.join(self.directoryPath, "generated", "buffer.txt"))
+        self.link.clearData(os.path.join(self.directoryPath, "generated", "stats.txt"))
+        
+        
         self.updateknobsList()
         self.link.runProgram(self.currFilePath, self.knobsList)
         self.compile_button.setText("\U00002705")
@@ -87,8 +95,7 @@ class mainScreen(QWidget, UiComponents):
         self.updateMemoryView("10000000")
         self.datapathO = self.link.parseData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
         self.datapathF = self.link.parseData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
-        self.link.clearData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
-        self.link.clearData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
+        
         loop = QEventLoop()
         QTimer.singleShot(1000,loop.quit)
         loop.exec_()

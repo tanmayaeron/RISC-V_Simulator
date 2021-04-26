@@ -41,10 +41,12 @@ Installation
 
 
 Instructions to use GUI:
-1. Write the code you wish to run in the editor window. You may copy it from any other location as wel.
+1. Write the code you wish to run in the editor window. You may copy it from any other location as well.
 2. You may save the file using save button.
-3. To run the file, press compile button. Once the code completes execution, a tick sign will be visible on the button.
-4. You may use the register and memory tabs to see their current state.
+3. Set the required knobs according to the documentation
+4. To run the file, press compile button. Once the code completes execution, a tick sign will be visible on the button.
+5. In case you run the pipelined version the datapath can visualised using the "datapath" and "info" tab
+6. Look for the generated files
 
 Contributors:
 * Aditya Agarwal - 2019CSB1064
@@ -73,8 +75,8 @@ Check the generated folder for details of compilation. It contains:
 Work split among team members:-
 :) Overall it was a very successful team efforts. Each members coordinated others well.
 :) It became really difficult for us to decide each other's contribution.
-* Aditya Agarwal - memory.py, main.py, documentation, simulator.py, testing
-* Aneeket Mangal - ALU.py, mainPage.py, frontBack.py, readme files, simulator.py
-* Fadia Het Rakeshkumar - testing, input.py, helperFunctions.py, simulator.py, documentation
-* Shikhar Soni - documentation, controls.csv, simulator.py, memory.py, ALU.py
-* Tanmay Aeron - decode.py, IAG.py, register.py, instructions.csv, simulator.py
+* Aditya Agarwal - Documentation, simulator.py, readme, testing
+* Aneeket Mangal - FrontBack.py, UiComponents.py, MainPage.py, simulator.py
+* Fadia Het Rakeshkumar - BTB.py, simulator.py, documentation, testing
+* Shikhar Soni - Hazards.py, simulator.py, pipeline buffer, testing
+* Tanmay Aeron - Hazards.py, simulator.py, IAG.py, memory.py

@@ -51,3 +51,6 @@ class frontBackEndInteraction:
             data = [json.loads(line) for line in f]
         return data
     
+
+    def clearData(self, path):
+        open(path, 'w').close()

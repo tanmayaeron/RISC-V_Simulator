@@ -25,17 +25,22 @@ Installation
 
     2. Install required libraries using
         pip install -r requirements.txt
-    3. To run the GUI version enter
-        python main.py
-
-    4. To run the non-GUI version on the default file
-        python main.py 2
-    
-    5. To run the non-GUI version on a specific file
-        python main.py 2 filename.mc
-        Note:- file should be present in the test directory
-
-    5. Check the generated folder for details of compilation.
+    3. To run GUI version:
+        python main.py -g
+        After you run this command in terminal the GUI will pop up.
+        Then you can enable each knob by ticking them.
+        For the fifth knob you can add the instruction number by adding the instruction in the box.
+        
+        
+    4. To run Non GUI version:
+        add -k1 to enable knob1
+        add -k2 to enable knob2
+        add -k3 to enable knob3
+        add -k4 to enable knob4
+        add -k5 instruction_number to enable for that particular instruction
+        If you want to run a particular file, add that file in test folder and add -f filename, otherwise main.mc is run
+        For example if you want to enable k1, k2 and k3 knob and run fib.mc write 
+        python main.py -k1 -k2 -k3 -f fib.mc
 
 
 Instructions to use GUI:

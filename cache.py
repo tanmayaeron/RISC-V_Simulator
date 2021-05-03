@@ -110,13 +110,13 @@ class Cache:
         print(tag,oldindex,BO,address2)
         address2 = binToHex(address2)
         print(address2)
-        memory_obj.store_block( address2, data, size, control)
-        
+        memory_obj.store_block( address, data, size, control)
+        data2=memory_obj.load_block(address2, self.block_size, control)
         if(self.checkCache(index, tag)):
             self.hit+=1
-            self._cache[index][tag] = list(self._cache[index][tag])
-            self._cache[index][tag][2*BO:2*BO+(2**(size+1))] = data
-            self._cache[index][tag] = "".join(self._cache[index][tag])
+            self._cache[index][tag] = data2
+            # self._cache[index][tag][2*BO:2*BO+(2**(size+1))] = data
+            # self._cache[index][tag] = "".join(self._cache[index][tag])
             
             
         else:
@@ -143,7 +143,8 @@ class Cache:
         if(self.checkCache(index, tag)):
             self.hit += 1
             print("cache::::",self._cache[index][tag])
-            return self._cache[index][tag][2*BO:2*BO+(2**(size+1))]
+            # return self._cache[index][tag][2*BO:2*BO+(2**(size+1))]
+            return self.slice(2*BO,2*BO+(2**(size+1)),index,tag)
         else:
             self.miss += 1
             address2 = tag+oldindex+"0"*self.BO
@@ -157,8 +158,19 @@ class Cache:
                 del self._cache[index][isVictim[1]]
                 self._cache[index][tag] = data
             self.printall()
-            return self._cache[index][tag][2*BO:2*BO+(2**(size+1))]
+            # return self._cache[index][tag][2*BO:2*BO+(2**(size+1))]
+            return self.slice(2*BO,2*BO+(2**(size+1)),index,tag)
             
+    def slice(self,start,end,index,tag):
+        """
+        end-start=len(slicing)
+        """
+        string=self._cache[index][tag]
+        new_str=''
+        for i in range(end,start,-2):
+            new_str+=string[i-2:i]
+        return new_str
+
 
     def printall(self):
         print(self._cache)

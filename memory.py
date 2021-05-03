@@ -86,7 +86,7 @@ class Memory:
     def load_block(self, address, blockSize, control = 1):
         address_in_dec = hexToDec(address)
         data = ""
-        for i in reversed(range(blockSize)):
+        for i in range(blockSize):
             address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
             address_in_hex = address_in_hex[-8:]
             data = data + self.load_byte(address_in_hex, control)
@@ -207,9 +207,21 @@ if __name__ == '__main__':
     pmi.setMAR("33334444", 1)
     pmi.setMDR("21436587",1)
     pmi.storeData(2,1)
-    # pmi.setMAR("12345678", 1)
-    # pmi.getData(2, 1)
+    pmi.printMemory(1)
+
+    pmi.setMAR("12345678", 1)
+    pmi.getData(2, 1)
+    
+    pmi.setMAR("33334444", 1)
+    pmi.setMDR("23452345",1)
+    pmi.storeData(2,1)
+    
+    pmi.setMAR("33334444", 1)
+    pmi.getData(2, 1)
+
     print(pmi.getMDR(1))
     print("Bruh")
     pmi.printMemory(1)
+
+
     

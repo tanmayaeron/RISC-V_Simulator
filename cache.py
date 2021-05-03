@@ -34,46 +34,63 @@ class cache:
 
             [[{},{}],[{},{}],[{},{}],[{},{}]]
         """
+        
         for i in range(2**self.index):
             self._cache.append([]) #every list
             for j in range(self.ways):
-                self._cache[i].append({}) #every dict will be a block, and there will be as many dict as ways
+                self._cache[i].append(["0"*8]*((self.block_size)//4)) #every dict will be a block, and there will be as many dict as ways
     
     def initialise_LRU(self):
-        #[1/0, state, tag]
+        # [1/0, state, tag]
         for ind in range(2**self.index):
             self._LRU.append([])
             for blocks in range(self.ways):
                 self._LRU[ind].append([0,0,0])
+                
+    def checkInCache(self ,tag, index):
+        self._LRU
+        
+        
+        
 
     def updateLRU(self, tag, index):
-        #self._LRU[index] the list that needs to be updated
-        #search for the tag
-        counter = 0
-        flag = True
-        toInsert = self.ways - 1
+        
         for i in range(self.ways):
-            if self._LRU[index][i][0] == 0 and flag:
-                flag = False
-                if toInsert > i:
-                    toInsert = i
-            elif flag == True:
-                if toInsert > i:
-                    toInsert = i
             if self._LRU[index][i][0] == 1 and self._LRU[index][i][2] == tag:
-                self._LRU[index][i][1] = self.ways - 1
+                self._LRU[index][i][1] = self.ways
                 for j in range(self.ways):
-                    if i != j:
-                        self._LRU[index][i][1] = max(self._LRU[index][i][1]-1, 0)
+                    self._LRU[index][j][1] = max(self._LRU[index][j][1]-1, 0)
                 return
-        #the tag does not exist in the LRU yet
-        #flag == True implies the LRU is full
-
+            
+        for i in range(self.ways):
+            if self._LRU[index][i][0] == 0:
+                self._LRU[index][i][0] = 1
+                self._LRU[index][i][1] = self.ways
+                self._LRU[index][i][2] = tag
+                for j in range(self.ways):
+                    self._LRU[index][j][1] = max(self._LRU[index][j][1]-1, 0)
+                return
+            
+        minS = 1e9
+        victim = 0
+        for i in range(self.ways):
+            if(minS > self._LRU[index][i][1]):
+                minS = self._LRU[index][i][1]
+                victim = i
+                  
+        self._LRU[index][victim][0] = 1
+        self._LRU[index][victim][1] = self.ways
+        self._LRU[index][victim][2] = tag
+        for j in range(self.ways):
+            self._LRU[index][j][1] = max(self._LRU[index][j][1]-1, 0)
+        return    
 
     def set_associative(self, address, memory_obj, Write = False, toWrite = "00"):
         self.total_accesses += 1
         tag, index, BO = self.address_break(address)
-        
+        #read
+        checkInCache();
+        # read
         # slightly incorrect
         # if not Write: #during read
         #     for block in self._cache[index]:

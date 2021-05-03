@@ -7,9 +7,9 @@ from PyQt5.QtWidgets import *
 import json
 import os
 class frontBackEndInteraction:
-    def __init__(self, directoryPath):
-        self.processor = Processor(directoryPath)
-        self.directoryPath = directoryPath
+    def __init__(self, startDetails):
+        self.processor = Processor(startDetails)
+        self.directoryPath = startDetails[0]
         
     def runProgram(self, filePath, knobsL):
         if(not knobsL[0]):
@@ -45,7 +45,7 @@ class frontBackEndInteraction:
             l[-1].append(mem[address_in_hex])
         return l
 
-    def reset(self):
+    def reset(self, initialiseControls):
         self.clearData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
         self.clearData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
         self.clearData(os.path.join(self.directoryPath, "generated", "memory.txt"))
@@ -53,7 +53,7 @@ class frontBackEndInteraction:
         self.clearData(os.path.join(self.directoryPath, "generated", "buffer.txt"))
         self.clearData(os.path.join(self.directoryPath, "generated", "stats.txt"))
         
-        self.processor.reset()
+        self.processor.reset(initialiseControls)
         # del self.processor
         # self.processor = Processor(self.directoryPath)
         

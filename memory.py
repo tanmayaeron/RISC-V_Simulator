@@ -1,6 +1,6 @@
 from collections import defaultdict
 from helperFunctions import *
-
+from cache import Cache
 def make_length(data, length):
     data = "0"*length+data
     return data[-length:]
@@ -85,6 +85,24 @@ class Memory:
     :param address: byte address str of length 8(without 0x)
            data: data to be stored at address, str of appropriate size(without 0x)
     """
+    
+    def load_block(self, address, blockSize, control = 1):
+        address_in_dec = hexToDec(address)
+        data = ""
+        for i in reversed(range(blockSize)):
+            address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
+            address_in_hex = address_in_hex[-8:]
+            data = data + self.load_byte(address_in_hex, control)
+        return data
+        
+    def store_block(self, address, data, blockSize, control = 1):
+        address = make_length(address, 8)
+        data = make_length(data, 8)
+        address_in_dec = hexToDec(address)
+        for i in range(blockSize):
+            address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
+            address_in_hex = address_in_hex[-8:]
+            self.store_byte(address_in_hex, data[6 - 2 * i:8 - 2 * i], control)
 
     def store_byte(self, address, data, control = 1):
         address = make_length(address, 8)
@@ -111,10 +129,15 @@ class Memory:
 
 
 class PMI:
-    def __init__(self):
+    def __init__(self, cache_size, block_size, ways):
         self.__MDR = ["0"*8, "0"*8]
         self.__MAR = ["0"*8, "0"*8]
+        
+        self.instantiate(cache_size, block_size, ways)
+    def instantiate(self, cache_size, block_size, ways):
         self.__memory = Memory()
+        self._instCache = Cache(cache_size[0], block_size[0], ways[0])
+        self._dataCache = Cache(cache_size[1], block_size[1], ways[1])
 
     def getMDR(self, control = 1):
         return self.__MDR[control]
@@ -151,16 +174,20 @@ class PMI:
                2 - word
         """
 
-        getArray = [self.__memory.load_byte,
-                    self.__memory.load_halfword, self.__memory.load_word]
-        data = getArray[size](self.__MAR[control], control)
+        
+        if(control == 0):
+            data = self._instCache.read(address, self.__memory, size, control)
+        else:
+            data = self._dataCache.read(address, self.__memory, size, control)
+            
         data = make_length(data, 8)
         self.__MDR[control] = data
 
     def storeData(self, size, control = 1):
-        getArray = [self.__memory.store_byte,
-                    self.__memory.store_halfword, self.__memory.store_word]
-        getArray[size](self.__MAR[control], self.__MDR[control], control)
+        if(control == 0):
+            self._instCache.write(self.__MAR[control], self.__memory, self.__MDR[control], size, control)
+        else:
+            self._dataCache.read(self.__MAR[control], self.__memory, self.__MDR[control], size, control)
 
     def accessMemory(self, currMemoryEnable, size, control = 1):
         if currMemoryEnable == 0:

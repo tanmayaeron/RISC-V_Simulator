@@ -2,6 +2,7 @@ from GUI.mainPage import *
 from frontBack import frontBackEndInteraction
 #commented top line and added above for now
 import argparse
+
 import os
 
 if __name__ == '__main__':
@@ -35,6 +36,7 @@ if __name__ == '__main__':
         ins_num = args.k5
 
     knobsL = [knob1, knob2, knob3, knob4, knob5, ins_num]
+    
     if ifGUI:
         App = QApplication(sys.argv)
         App.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
@@ -44,14 +46,15 @@ if __name__ == '__main__':
     elif(fileName is None):
         directoryPath = os.getcwd()
         currFilePath = os.path.join(directoryPath, "test", "main.mc")
-        link = frontBackEndInteraction(directoryPath)
+        startDetails = [directoryPath, [32, 32], [2, 2], [2, 2]]
+        link = frontBackEndInteraction(startDetails)
         link.runProgram(currFilePath, knobsL)
         # link.reset()
         
     else:
         directoryPath = os.getcwd()
         currFilePath = os.path.join(directoryPath, "test", fileName)
-        link = frontBackEndInteraction(directoryPath)
+        link = frontBackEndInteraction(startDetails)
         link.runProgram(currFilePath, knobsL)
         # link.reset()
         

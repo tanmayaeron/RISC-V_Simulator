@@ -15,30 +15,39 @@ import json
 
 class Processor:
 
-    def __init__(self, currFolderPath):
-        self._PMI = memory.PMI()
+    def __init__(self, initialiseDetails):
+        
+        
+        self.initialise(initialiseDetails)
+        self.initialiseTempRegisters()
+        self.initialiseControls()
+        
+        self.initializeStats()
+        self._BTB = BTB(self._isBTB,self.PC_select,self.S_select)
+
+    def initialise(self, initialiseDetails):
+        self._PMI = memory.PMI(*initialiseDetails[1:])
+        self.initialiseDetails = initialiseDetails
         self._ALU = ALU.ALU()
         self._IAG = IAG.IAG()
+        self.buffer = Hazard.Buffer()
         self._fileReader = ReadFile()
         self._registerFile = RegisterFile()
-        self.buffer = Hazard.Buffer()
-        self.outputD = {0:{}, 1:{}, 2:{}, 3:{}, 4:{}}
-        self._currFolderPath = currFolderPath
+        self._currFolderPath = initialiseDetails[0]
+        
         self.df_control = pd.read_csv(os.path.join(self._currFolderPath, 'repository', "controls.csv"))
         self.df_control = self.df_control.dropna(axis=0, how='any')
         self.df_main = pd.read_csv(os.path.join(self._currFolderPath, 'repository', "instructions.csv"))
         
         self.hdu = Hazard.HDU(self.df_control)
         self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
-        self.initialiseTempRegisters()
-        self.initialiseControls()
         self.bufferStore = [[], [], [], []]
-        # self.bufferStore is list of list as it is updated in forwardingE 
-        sys.stdout = self._outputLogFile
+        self.outputD = {0:{}, 1:{}, 2:{}, 3:{}, 4:{}}
         self.cycle = 0
-        self._BTB = BTB(self._isBTB,self.PC_select,self.S_select)
-        self.initializeStats()
-
+        sys.stdout = self._outputLogFile
+        
+        
+        
     def initializeStats(self):
         # Stats to be printed in an output file at the end of the simulation.
     
@@ -645,7 +654,8 @@ class Processor:
         f.write("Number of stalls due to control hazards are :"+str(self.Flush)+"\n")
         f.write("\n")
 
-    def reset(self):
+    def reset(self, intialiseDetails2):
+        self.initialiseDetails[1:] = initialiseDetails2
         self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
         sys.stdout = self._outputLogFile
         self._registerFile.initialise_registers()

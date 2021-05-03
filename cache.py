@@ -100,13 +100,17 @@ class Cache:
     def write(self, address, memory_obj, data, size, control):
         self.total_accesses += 1
         tag, index, BO = self.address_break(address)
+        oldindex=index
         index = int(index, 2)
         BO = int(BO, 2)
         isVictim = self.updateLRU(tag, index)
-        
-        address2 = str(tag)+str(index)+("0"*BO)
+        # print(tag,oldindex,BO,int(tag,2)+index+BO==32)
+        # print(len(tag),len(oldindex),self.BO)
+        address2 = tag+oldindex+"0"*self.BO
+        print(tag,oldindex,BO,address2)
         address2 = binToHex(address2)
-        memory_obj.store_block(self, address2, data, 2**size, control)
+        print(address2)
+        memory_obj.store_block( address2, data, 2**size, control)
         
         if(self.checkCache(index, tag)):
             self.hit+=1
@@ -117,9 +121,9 @@ class Cache:
             
         else:
             self.miss+=1
-            address2 = str(tag)+str(index)+("0"*BO)
+            address2 = tag+oldindex+"0"*self.BO
             address2 = binToHex(address2)
-            data2 = memory_obj.load_block(self, address2, self._block_size, control)
+            data2 = memory_obj.load_block( address2, self.block_size, control)
             if(isVictim == -1):
                 self._cache[index][tag] = data2
             else:
@@ -141,7 +145,7 @@ class Cache:
             return self._cache[index][tag][2*BO:2*BO+(2**(size+1))]
         else:
             self.miss += 1
-            address2 = tag+oldindex+"0"*BO
+            address2 = tag+oldindex+"0"*self.BO
             print("address :", address2)
             address2 = binToHex(address2)
             data = memory_obj.load_block(address2, self.block_size, control)

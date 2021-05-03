@@ -93,8 +93,10 @@ class Memory:
         return data
         
     def store_block(self, address, data, blockSize, control = 1):
+        print(address)
         address = make_length(address, 8)
         data = make_length(data, 8)
+        print(address)
         address_in_dec = hexToDec(address)
         for i in range(blockSize):
             address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
@@ -144,6 +146,9 @@ class PMI:
 
     def getMemoryDisplay(self, control = 1):
         self.__memory.getMemoryDisplay(control)
+    
+    def printMemory(self, control=1):
+        self.__memory.print_memory(control)
 
     def setMDR(self, data, control = 1):
         data = make_length(data, 8)
@@ -184,7 +189,7 @@ class PMI:
         if(control == 0):
             self._instCache.write(self.__MAR[control], self.__memory, self.__MDR[control], size, control)
         else:
-            self._dataCache.read(self.__MAR[control], self.__memory, self.__MDR[control], size, control)
+            self._dataCache.write(self.__MAR[control], self.__memory, self.__MDR[control], size, control)
 
     def accessMemory(self, currMemoryEnable, size, control = 1):
         if currMemoryEnable == 0:
@@ -198,7 +203,13 @@ class PMI:
 if __name__ == '__main__':
     #32 bytes cache_size, 4 byte block_size, 2 way set
     pmi = PMI([32,32],[4,4],[2,2])
+
     pmi.setMAR("12345678", 1)
-    pmi.getData(2, 1)
+    pmi.setMDR("11111111",1)
+    pmi.storeData(2,1)
+    # pmi.setMAR("12345678", 1)
+    # pmi.getData(2, 1)
     print(pmi.getMDR(1))
     print("Bruh")
+    pmi.printMemory(1)
+    

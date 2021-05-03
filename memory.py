@@ -32,9 +32,7 @@ class Memory:
     def getMemoryDisplay(self, address, control = 1):
         l = []
         """
-
         :param address: byte address str of length 8(without 0x)
-
         :return: 10 words in contiguous location, in hex, str of length 8(without 0x)
         """
         address_in_dec = hexToDec(address)
@@ -80,7 +78,6 @@ class Memory:
             data = data + self.load_byte(address_in_hex, control)
         return data
     """
-
     store functions
     :param address: byte address str of length 8(without 0x)
            data: data to be stored at address, str of appropriate size(without 0x)
@@ -176,9 +173,9 @@ class PMI:
 
         
         if(control == 0):
-            data = self._instCache.read(address, self.__memory, size, control)
+            data = self._instCache.read(self.getMAR(0), self.__memory, size, control)
         else:
-            data = self._dataCache.read(address, self.__memory, size, control)
+            data = self._dataCache.read(self.getMAR(1), self.__memory, size, control)
             
         data = make_length(data, 8)
         self.__MDR[control] = data
@@ -197,3 +194,11 @@ class PMI:
             self.getData(size, control)
         elif currMemoryEnable == 2:
             self.storeData(size, control)
+
+if __name__ == '__main__':
+    #32 bytes cache_size, 4 byte block_size, 2 way set
+    pmi = PMI([32,32],[4,4],[2,2])
+    pmi.setMAR("12345678", 1)
+    pmi.getData(2, 1)
+    print(pmi.getMDR(1))
+    print("Bruh")

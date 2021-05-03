@@ -20,7 +20,7 @@ class Cache:
         self.tag = 32 - self.index - self.BO #tage bits
         print("index: ", self.index, " BO :", self.BO, " tag: ", self.tag)
         self.miss = 0
-        self.hits = 0
+        self.hit = 0
         self.total_accesses = 0
         self.createCache()
         self.initialiseLRU()
@@ -110,14 +110,14 @@ class Cache:
         print(tag,oldindex,BO,address2)
         address2 = binToHex(address2)
         print(address2)
-        memory_obj.store_block( address2, data, 2**size, control)
+        memory_obj.store_block( address2, data, size, control)
         
         if(self.checkCache(index, tag)):
             self.hit+=1
             self._cache[index][tag] = list(self._cache[index][tag])
             self._cache[index][tag][2*BO:2*BO+(2**(size+1))] = data
             self._cache[index][tag] = "".join(self._cache[index][tag])
-
+            
             
         else:
             self.miss+=1
@@ -129,7 +129,7 @@ class Cache:
             else:
                 del self._cache[index][isVictim[1]]
                 self._cache[index][tag] = data2
-        
+            self.printall()
         
         
     def read(self, address, memory_obj, size, control):
@@ -142,6 +142,7 @@ class Cache:
         
         if(self.checkCache(index, tag)):
             self.hit += 1
+            print("cache::::",self._cache[index][tag])
             return self._cache[index][tag][2*BO:2*BO+(2**(size+1))]
         else:
             self.miss += 1

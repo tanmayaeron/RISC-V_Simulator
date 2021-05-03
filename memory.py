@@ -92,16 +92,13 @@ class Memory:
             data = data + self.load_byte(address_in_hex, control)
         return data
         
-    def store_block(self, address, data, blockSize, control = 1):
-        print(address)
-        address = make_length(address, 8)
-        data = make_length(data, 8)
-        print(address)
-        address_in_dec = hexToDec(address)
-        for i in range(blockSize):
-            address_in_hex = "0" * 8 + hex(address_in_dec + i)[2:]
-            address_in_hex = address_in_hex[-8:]
-            self.store_byte(address_in_hex, data[6 - 2 * i:8 - 2 * i], control)
+    def store_block(self, address, data, Size, control = 1):
+        if Size==0:
+            self.store_byte(address,data,control)
+        elif Size==1:
+            self.store_halfword(address,data,control)
+        elif Size==2:
+            self.store_word(address,data,control)
 
     def store_byte(self, address, data, control = 1):
         address = make_length(address, 8)
@@ -202,10 +199,13 @@ class PMI:
 
 if __name__ == '__main__':
     #32 bytes cache_size, 4 byte block_size, 2 way set
-    pmi = PMI([32,32],[4,4],[2,2])
+    pmi = PMI([64,64],[8,8],[2,2])
 
     pmi.setMAR("12345678", 1)
-    pmi.setMDR("11111111",1)
+    pmi.setMDR("21432143",1)
+    pmi.storeData(2,1)
+    pmi.setMAR("33334444", 1)
+    pmi.setMDR("21436587",1)
     pmi.storeData(2,1)
     # pmi.setMAR("12345678", 1)
     # pmi.getData(2, 1)

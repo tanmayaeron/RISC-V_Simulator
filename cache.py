@@ -1,5 +1,9 @@
 import math
 from helperFunctions import *
+
+def make_length(data, length):
+    data = "0"*length+data
+    return data[-length:]
 class Cache:
 
     def __init__(self, cache_size, block_size, ways):
@@ -14,6 +18,7 @@ class Cache:
         self.index = int(math.log2(cache_size/block_size)) - int(math.log2(ways)) #index bits
         self.BO = int(math.log2(block_size)) #block offset bits
         self.tag = 32 - self.index - self.BO #tage bits
+        print("index: ", self.index, " BO :", self.BO, " tag: ", self.tag)
         self.miss = 0
         self.hits = 0
         self.total_accesses = 0
@@ -23,9 +28,12 @@ class Cache:
     def address_break(self, address): #takes the hex string
         #should return binary, returns decimal for now
         address = hexToBin(address)
+        address = make_length(address, 32)
+        print("len", len(address))
         tag = address[:self.tag]
         index = address[self.tag:self.tag+self.index]
         BO = address[-self.BO:]
+        print("tag :", tag, " index :", index, " BO :" , BO)
         return tag, index, BO
 
     def createCache(self):
@@ -34,7 +42,6 @@ class Cache:
             let there be a cache of 8 byte size
             and a block is of size 1 byte
             there will be 8 blocks i.e., 8 dicts, one for each block
-
             cache = [{}, {}, {}, {}]
         """
         
@@ -51,13 +58,14 @@ class Cache:
             for blocks in range(self.ways):
                 self._LRU[ind].append([0,0,0])
                 
-    def checkInCache(self ,tag, index):
+    def checkCache(self, index, tag):
+
         if tag in self._cache[index]:
             return True
         return False
         
     def updateLRU(self, tag, index):
-        
+
         for i in range(self.ways):
             if self._LRU[index][i][0] == 1 and self._LRU[index][i][2] == tag:
                 self._LRU[index][i][1] = self.ways
@@ -92,6 +100,7 @@ class Cache:
     def write(self, address, memory_obj, data, size, control):
         self.total_accesses += 1
         tag, index, BO = self.address_break(address)
+        index = int(index, 2)
         BO = int(BO, 2)
         isVictim = self.updateLRU(tag, index)
         
@@ -99,7 +108,7 @@ class Cache:
         address2 = binToHex(address2)
         memory_obj.store_block(self, address2, data, 2**size, control)
         
-        if(checkCache(index, tag)):
+        if(self.checkCache(index, tag)):
             self.hit+=1
             self._cache[index][tag] = list(self._cache[index][tag])
             self._cache[index][tag][2*BO:2*BO+(2**(size+1))] = data
@@ -119,34 +128,33 @@ class Cache:
         
         
         
-    def read(self, address, memory_obj, size,control):
+    def read(self, address, memory_obj, size, control):
         self.total_accesses += 1
         tag, index, BO = self.address_break(address)
-        BO = int(B0, 2)
+        oldindex = index
+        index = int(index, 2)
+        BO = int(BO, 2)
         isVictim = self.updateLRU(tag, index)
         
-        if(checkCache(index, tag)):
-            self.hit+=1
+        if(self.checkCache(index, tag)):
+            self.hit += 1
             return self._cache[index][tag][2*BO:2*BO+(2**(size+1))]
-            
         else:
-            self.miss+=1
-            address2 = str(tag)+str(index)+("0"*BO)
+            self.miss += 1
+            address2 = tag+oldindex+"0"*BO
+            print("address :", address2)
             address2 = binToHex(address2)
-            data = memory_obj.load_block(self, address2, self._block_size, control)
-            
+            data = memory_obj.load_block(address2, self.block_size, control)
 
-            '''
-        
-            data: size = block_size
-            index, tag: hexadecimal format
-            '''
             if(isVictim == -1):
                 self._cache[index][tag] = data  
             else:
                 del self._cache[index][isVictim[1]]
                 self._cache[index][tag] = data
-                
-
-                
+            self.printall()
+            return self._cache[index][tag][2*BO:2*BO+(2**(size+1))]
             
+
+    def printall(self):
+        print(self._cache)
+        print(self._LRU)

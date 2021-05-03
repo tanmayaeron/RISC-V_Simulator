@@ -18,7 +18,6 @@ class Cache:
         self.index = int(math.log2(cache_size/block_size)) - int(math.log2(ways)) #index bits
         self.BO = int(math.log2(block_size)) #block offset bits
         self.tag = 32 - self.index - self.BO #tage bits
-        print("index: ", self.index, " BO :", self.BO, " tag: ", self.tag)
         self.miss = 0
         self.hit = 0
         self.total_accesses = 0
@@ -29,15 +28,12 @@ class Cache:
         #should return binary, returns decimal for now
         address = hexToBin(address)
         address = make_length(address, 32)
-        print("len", len(address))
         tag = address[:self.tag]
         index = address[self.tag:self.tag+self.index]
         BO = address[-self.BO:]
-        print("tag :", tag, " index :", index, " BO :" , BO)
         return tag, index, BO
 
     def createCache(self):
-        #modify the dict for easy access
         """
             let there be a cache of 8 byte size
             and a block is of size 1 byte
@@ -46,20 +42,16 @@ class Cache:
         """
         
         for i in range(2**self.index):
-            self._cache.append({}) #every list
-     #every dict will be a block, and there will be as many dict as ways
-     
+            self._cache.append({})
 
         
     def initialiseLRU(self):
-        # [1/0, state, tag]
         for ind in range(2**self.index):
             self._LRU.append([])
             for blocks in range(self.ways):
                 self._LRU[ind].append([0,0,0])
                 
     def checkCache(self, index, tag):
-
         if tag in self._cache[index]:
             return True
         return False
@@ -104,20 +96,13 @@ class Cache:
         index = int(index, 2)
         BO = int(BO, 2)
         isVictim = self.updateLRU(tag, index)
-        # print(tag,oldindex,BO,int(tag,2)+index+BO==32)
-        # print(len(tag),len(oldindex),self.BO)
         address2 = tag+oldindex+"0"*self.BO
-        print(tag,oldindex,BO,address2)
         address2 = binToHex(address2)
-        print(address2)
         memory_obj.store_block( address, data, size, control)
         data2=memory_obj.load_block(address2, self.block_size, control)
         if(self.checkCache(index, tag)):
             self.hit+=1
             self._cache[index][tag] = data2
-            # self._cache[index][tag][2*BO:2*BO+(2**(size+1))] = data
-            # self._cache[index][tag] = "".join(self._cache[index][tag])
-            
             
         else:
             self.miss+=1
@@ -142,13 +127,10 @@ class Cache:
         
         if(self.checkCache(index, tag)):
             self.hit += 1
-            print("cache::::",self._cache[index][tag])
-            # return self._cache[index][tag][2*BO:2*BO+(2**(size+1))]
             return self.slice(2*BO,2*BO+(2**(size+1)),index,tag)
         else:
             self.miss += 1
             address2 = tag+oldindex+"0"*self.BO
-            print("address :", address2)
             address2 = binToHex(address2)
             data = memory_obj.load_block(address2, self.block_size, control)
 
@@ -158,7 +140,6 @@ class Cache:
                 del self._cache[index][isVictim[1]]
                 self._cache[index][tag] = data
             self.printall()
-            # return self._cache[index][tag][2*BO:2*BO+(2**(size+1))]
             return self.slice(2*BO,2*BO+(2**(size+1)),index,tag)
             
     def slice(self,start,end,index,tag):

@@ -40,5 +40,5 @@ class ReadFile:
             obj.setMAR(requiredMemoryLocation[2:], flag)
             obj.setMDR(instruction[2:], flag)
             obj.storeData(2, flag)
-
-        
+            
+     

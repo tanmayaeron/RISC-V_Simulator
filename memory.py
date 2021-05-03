@@ -196,32 +196,3 @@ class PMI:
             self.getData(size, control)
         elif currMemoryEnable == 2:
             self.storeData(size, control)
-
-if __name__ == '__main__':
-    #32 bytes cache_size, 4 byte block_size, 2 way set
-    pmi = PMI([64,64],[8,8],[2,2])
-
-    pmi.setMAR("12345678", 1)
-    pmi.setMDR("21432143",1)
-    pmi.storeData(2,1)
-    pmi.setMAR("33334444", 1)
-    pmi.setMDR("21436587",1)
-    pmi.storeData(2,1)
-    pmi.printMemory(1)
-
-    pmi.setMAR("12345678", 1)
-    pmi.getData(2, 1)
-    
-    pmi.setMAR("33334444", 1)
-    pmi.setMDR("23452345",1)
-    pmi.storeData(2,1)
-    
-    pmi.setMAR("33334444", 1)
-    pmi.getData(2, 1)
-
-    print(pmi.getMDR(1))
-    print("Bruh")
-    pmi.printMemory(1)
-
-
-    

@@ -141,7 +141,7 @@ class HDU:
                 prev_id, rd = buffer_obj.get(3)[0],buffer_obj.get(3)[2] 
 
                 currWE = self.WE[prev_id]
-                if currWE==1 and rs1==rd:
+                if currWE==1 and rs2==rd:
                    result[1]=[True,"ME",0]
 
         return result

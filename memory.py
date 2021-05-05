@@ -217,3 +217,19 @@ class PMI:
             self.getData(size, control)
         elif currMemoryEnable == 2:
             self.storeData(size, control)
+
+    def getCache(self, control=1):
+
+        if control==0:
+            return self._instCache.getCache()
+        else:
+            return self._dataCache.getCache()
+    
+    def indexReturn(self, control = 1, address = "0"*8):
+
+        if control==0:
+            indexGot=int(self._instCache.address_break(address)[1],2)
+            return indexGot
+        else:
+            indexGot=int(self._dataCache.address_break(address)[1],2)
+            return indexGot

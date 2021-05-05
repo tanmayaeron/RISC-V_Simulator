@@ -86,6 +86,70 @@ class UiComponents():
         self.infoScroll.setWidget(self.displayWidget3)
         self.infoScroll.setWidgetResizable(True)
 
+
+    def lineEditTile(self):
+        temp = QLineEdit("")
+        temp.setValidator(QIntValidator())
+        temp.setFixedHeight(40)
+        temp.setFixedWidth(80)
+        temp.setStyleSheet("border :1px solid white;")
+        temp.setAlignment(QtCore.Qt.AlignCenter)
+        return temp
+        
+    def cacheControl(self):
+        self.cacheScroll = QScrollArea()
+        self.displayWidget4 = QGroupBox()
+        self.cache_grid = QGridLayout()
+        self.cacheTable = []
+        
+        
+        
+        temp = self.labelTile("Cache", 40, 80, 0)
+        self.cache_grid.addWidget(temp, 1, 0)
+        temp = self.labelTile("Block", 40, 80, 0)
+        self.cache_grid.addWidget(temp, 2, 0)
+        temp = self.labelTile("Ways", 40, 80, 0)
+        self.cache_grid.addWidget(temp, 3, 0)
+        temp = self.labelTile("Access", 40, 80, 0)
+        self.cache_grid.addWidget(temp, 4, 0)
+        temp = self.labelTile("Hits", 40, 80, 0)
+        self.cache_grid.addWidget(temp, 5, 0)
+        temp = self.labelTile("Misses", 40, 80, 0)
+        self.cache_grid.addWidget(temp, 6, 0)
+        
+            
+        
+            
+        temp = self.labelTile("I$", 40, 80, 0)
+        self.cache_grid.addWidget(temp, 0, 1)
+        temp = self.labelTile("D$", 40, 80, 0)
+        self.cache_grid.addWidget(temp, 0, 2)
+        for j in range(3):
+            
+            for i in range(2):
+                temp = self.lineEditTile()
+                self.cache_grid.addWidget(temp, j+1 , i+1)
+                self.cacheTable.append(temp)
+                
+        for i in range(3):
+            for j in range(2):
+                temp = self.labelTile("-", 40, 80, 1)
+                self.cache_grid.addWidget(temp, i+4 , j+1)
+                self.cacheTable.append(temp)
+            
+       
+            
+        self.cacheTable[0].setText("512")
+        self.cacheTable[1].setText("512")
+        self.cacheTable[2].setText("32")
+        self.cacheTable[3].setText("32")
+        self.cacheTable[4].setText("2")
+        self.cacheTable[5].setText("2")
+            
+        self.displayWidget4.setLayout(self.cache_grid)
+        self.cacheScroll.setWidget(self.displayWidget4)
+        self.cacheScroll.setWidgetResizable(True)
+        
     def mainLabel(self):
         self.runMode()
         self.save_button = self.buttonTile("\U0001F4BE", 50, 40)
@@ -267,10 +331,12 @@ class UiComponents():
         self.tab1 = self.scroll1
         self.tab2 = self.scroll
         self.tab3 = self.infoScroll
+        self.tab4 = self.cacheScroll
        
         self.tabs1.addTab(self.tab1, "Registers")
         self.tabs1.addTab(self.tab2, "Memory")
         self.tabs1.addTab(self.tab3, "Info")
+        self.tabs1.addTab(self.tab4, "Cache Controls")
 
     def tabbedView2(self):
         self.tabs2 = QTabWidget()
@@ -278,8 +344,10 @@ class UiComponents():
         self.tabMain2 = self.editorScroll
         self.tabMain3 = self.displayWidget2
         
+        
         self.tabs2.addTab(self.tabMain2, "Editor")
         self.tabs2.addTab(self.tabMain3, "Datapath")
+        # self.tabs2.addTab(self.tabMain4, "Cache Control")
 
         
 

@@ -41,6 +41,9 @@ class Processor:
         
         self.hdu = Hazard.HDU(self.df_control)
         self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
+        filenameinit = os.path.join(self._currFolderPath, "generated", 'CacheInfo.txt')
+        fileinit = open(filenameinit, 'w')
+        fileinit.close()
         self.bufferStore = [[], [], [], []]
         self.outputD = {0:{}, 1:{}, 2:{}, 3:{}, 4:{}}
         self.cycle = 0
@@ -50,7 +53,8 @@ class Processor:
         
     def initializeStats(self):
         # Stats to be printed in an output file at the end of the simulation.
-    
+        self.cacheSetInfo={"F":-1,"L":-1,"S":-1}
+
         self.Pipeline_cycle = 0
         self.instructions_executed = 0
         self.CPI = 0
@@ -142,6 +146,8 @@ class Processor:
         #print(self._PMI.getMemory(0))
 
     def fetch(self):
+
+
         outputmuxMA = self.muxMA(1)  # MAR gets value of PC
         self._IAG.updatePC_temp()
         self._PMI.setMAR(outputmuxMA, 0)
@@ -150,8 +156,14 @@ class Processor:
         self.setIR(1)  # IR gets value of MDR
         self.outputD[0]["IR"] = self.getIR()
         self.outputD[0]["PC"] = self._IAG.getPC()
+
+
         if self.getIR() == "0"*8:
             return False
+        
+        CacheFetchInfo=self._PMI.getCache(0)
+        indexGot=self._PMI.indexReturn(0,self.getIR())
+        self.cacheSetInfo['F']=CacheFetchInfo[indexGot]
 
         self.bufferStore[0] = [self._IAG.getPC(), self._IR, self._IAG.getPC_Temp()]
 
@@ -251,6 +263,15 @@ class Processor:
             
             self.outputD[3]["MAR"] =  self._PMI.getMAR()
 
+
+            CacheMemInfo=self._PMI.getCache(1)
+            indexGot=self._PMI.indexReturn(1,self._PMI.getMAR())
+
+            if currMemoryEnable==1:
+                self.cacheSetInfo['L']=CacheMemInfo[indexGot]
+            elif currMemoryEnable==2:
+                self.cacheSetInfo['S']=CacheMemInfo[indexGot]
+
         self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
 
         self._RY = self.muxY(memControl["Y_select"])
@@ -298,6 +319,7 @@ class Processor:
             self.buffer.memoryB(*self.bufferStore[3])
 
 
+
     def pipelined(self, knob2 = False, knob3 = False, knob4 = False, knob5 = False, ins_num = 0):
         #defaults to non-forwarding when knob is unset or False in our code
         self.Pipeline_cycle = 0
@@ -305,6 +327,7 @@ class Processor:
         self.Miss_Count = 0
         isStall = 0
         PrevIsStall = 0
+        
 
         executeControl = {}
         memControl = {}
@@ -339,7 +362,9 @@ class Processor:
                     MemBufferSignal = self.memoryAccess(memControl)
                 if i == 0:
                     self.registerUpdate(WBControl,knob2)
-                
+            
+
+
             self.printCycleInfo()
             if(knob3):
                 self.printRegisters(self.Pipeline_cycle)
@@ -573,6 +598,13 @@ class Processor:
         file.write("\n")
         file.close()
 
+        filename = os.path.join(self._currFolderPath, "generated", 'CacheInfo.txt')
+        file = open(filename, 'a')
+        out = json.dumps(self.cacheSetInfo)
+        file.write(str(out))
+        file.write("\n")
+        file.close()
+        self.cacheSetInfo={"F":-1,"L":-1,"S":-1}
         
     def printData(self):
         memorySnapshot = self._PMI.getMemory(1)

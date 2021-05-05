@@ -29,6 +29,9 @@ class frontBackEndInteraction:
         l = self.processor.getRegisters()
         return l
     
+    def printCaches(self):
+        self.processor.getCaches()
+    
     def getMemorySnapshot(self, address):
         mem = self.processor.getData()
         l=[]

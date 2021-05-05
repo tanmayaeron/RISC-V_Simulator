@@ -15,6 +15,7 @@ class Cache:
         self.ways = ways #number of ways
         self._cache = [] #list for now
         self._LRU = []
+        self._missDetails = []
         self.index = int(math.log2(cache_size/block_size)) - int(math.log2(ways)) #index bits
         self.BO = int(math.log2(block_size)) #block offset bits
         self.tag = 32 - self.index - self.BO #tage bits
@@ -87,6 +88,8 @@ class Cache:
         self._LRU[index][victim][2] = tag
         for j in range(self.ways):
             self._LRU[index][j][1] = max(self._LRU[index][j][1]-1, 0)
+            
+        self._missDetails.append((self.miss+1, self._cache[index][oldTag]))
         return (0, oldTag)
 
     def write(self, address, memory_obj, data, size, control):
@@ -106,6 +109,7 @@ class Cache:
             
         else:
             self.miss+=1
+            
             address2 = tag+oldindex+"0"*self.BO
             address2 = binToHex(address2)
             data2 = memory_obj.load_block( address2, self.block_size, control)
@@ -114,7 +118,7 @@ class Cache:
             else:
                 del self._cache[index][isVictim[1]]
                 self._cache[index][tag] = data2
-            self.printall()
+                
         
         
     def read(self, address, memory_obj, size, control):
@@ -139,7 +143,7 @@ class Cache:
             else:
                 del self._cache[index][isVictim[1]]
                 self._cache[index][tag] = data
-            self.printall()
+            
             return self.slice(2*BO,2*BO+(2**(size+1)),index,tag)
             
     def slice(self,start,end,index,tag):
@@ -153,6 +157,3 @@ class Cache:
         return new_str
 
 
-    def printall(self):
-        print(self._cache)
-        print(self._LRU)

@@ -71,10 +71,13 @@ class mainScreen(QWidget, UiComponents):
         for i in range(3):
             temp.append([])
             for j in range(2):
-                if(self.cacheTable[i*2+j].text() == ""):
+                if(self.controlTable[i*2+j].text() == ""):
                     temp[-1].append(32)
                 else:
-                    temp[-1].append(int(self.cacheTable[(i*2) + j].text()))
+                    temp[-1].append(int(self.controlTable[(i*2) + j].text()))
+                    
+                    
+        return temp
 
     def updateknobsList(self):
         self.knobsList[0] = self.k1.isChecked()
@@ -90,7 +93,7 @@ class mainScreen(QWidget, UiComponents):
     def fileCompile(self):
         self.fileSave()
         cacheDetails = self.getCacheFromInput()
-        self.link.reset([self.directoryPath, cacheDetails])
+        self.link.reset(cacheDetails)
         self.updateknobsList()
         self.link.runProgram(self.currFilePath, self.knobsList)
         self.compile_button.setText("\U00002705")
@@ -98,7 +101,7 @@ class mainScreen(QWidget, UiComponents):
         self.updateMemoryView("10000000")
         self.datapathO = self.link.parseData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
         self.datapathF = self.link.parseData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
-        self.hitMissData = self.link.parseData(os.path.join(self.directoryPath, "miss.txt"))
+        # self.hitMissData = self.link.parseData(os.path.join(self.directoryPath, "miss.txt"))
         self.link.printCaches()
         loop = QEventLoop()
         QTimer.singleShot(1000,loop.quit)   
@@ -155,7 +158,8 @@ class mainScreen(QWidget, UiComponents):
         self.updateRegisterView()
         self.updateMemoryView()
         self.datapath()
-        self.cacheControl()
+        self.controlBox()
+        self.cacheDisplay()
         self.info()
         self.tabbedView2()
         self.tabbedView1()
@@ -171,7 +175,7 @@ class mainScreen(QWidget, UiComponents):
         self.connections()
         hbox = QHBoxLayout()
 
-        hbox.addWidget(self.feed, 1)
+        hbox.addWidget(self.feed, 2)
         hbox.addWidget(self.help, 1)
         vbox = QVBoxLayout()
         vbox.addLayout(logo_label)

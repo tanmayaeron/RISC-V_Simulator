@@ -695,6 +695,8 @@ class Processor:
         sys.stdout = self._outputLogFile
         self._registerFile.initialise_registers()
         self._PMI.clearMemory()
+        del self._PMI
+        self._PMI = memory.PMI(*initialiseDetails2)
         self._IAG.initialiseIAG()
         self.initialiseTempRegisters()
         self.initialiseControls()

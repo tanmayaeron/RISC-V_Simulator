@@ -95,109 +95,85 @@ class UiComponents():
         temp.setStyleSheet("border :1px solid white;")
         temp.setAlignment(QtCore.Qt.AlignCenter)
         return temp
+    
+    def checkBoxTile(self):
+        temp = QCheckBox("")
         
-    def cacheControl(self):
-        self.cacheScroll = QScrollArea()
-        self.displayWidget4 = QGroupBox()
-        self.cache_grid = QGridLayout()
-        self.cacheTable = []
+        temp.setStyleSheet("QCheckBox::indicator"
+                               "{"
+                               "width :40px;"
+                               "height : 40px;"
+                               "}")
         
+        return temp
         
-        
-        temp = self.labelTile("Cache", 40, 80, 0)
-        self.cache_grid.addWidget(temp, 1, 0)
-        temp = self.labelTile("Block", 40, 80, 0)
-        self.cache_grid.addWidget(temp, 2, 0)
-        temp = self.labelTile("Ways", 40, 80, 0)
-        self.cache_grid.addWidget(temp, 3, 0)
-        temp = self.labelTile("Access", 40, 80, 0)
-        self.cache_grid.addWidget(temp, 4, 0)
-        temp = self.labelTile("Hits", 40, 80, 0)
-        self.cache_grid.addWidget(temp, 5, 0)
-        temp = self.labelTile("Misses", 40, 80, 0)
-        self.cache_grid.addWidget(temp, 6, 0)
-        
-            
-        
-            
-        temp = self.labelTile("I$", 40, 80, 0)
-        self.cache_grid.addWidget(temp, 0, 1)
-        temp = self.labelTile("D$", 40, 80, 0)
-        self.cache_grid.addWidget(temp, 0, 2)
-        for j in range(3):
-            
-            for i in range(2):
-                temp = self.lineEditTile()
-                self.cache_grid.addWidget(temp, j+1 , i+1)
-                self.cacheTable.append(temp)
-                
-        for i in range(3):
-            for j in range(2):
-                temp = self.labelTile("-", 40, 80, 1)
-                self.cache_grid.addWidget(temp, i+4 , j+1)
-                self.cacheTable.append(temp)
-            
-       
-            
-        self.cacheTable[0].setText("512")
-        self.cacheTable[1].setText("512")
-        self.cacheTable[2].setText("32")
-        self.cacheTable[3].setText("32")
-        self.cacheTable[4].setText("2")
-        self.cacheTable[5].setText("2")
-            
-        self.displayWidget4.setLayout(self.cache_grid)
-        self.cacheScroll.setWidget(self.displayWidget4)
-        self.cacheScroll.setWidgetResizable(True)
-        
-    def mainLabel(self):
+    def controlBox(self):
         self.runMode()
+        self.controlScroll = QScrollArea()
+        self.displayWidget4 = QGroupBox()
+        self.controlGrid = QGridLayout()
+        self.controlTable = []
+        
+        controlsD = ["Cache(I$)", "Cache(D$)", "Block(I$)", "Block(D$)", "Way(I$)", "Way(D$)", "Compile", "Save","Theme", "K1", "K2", "K3", "K4", "K5", "K6"]
+        for i in range(len(controlsD)):
+            temp = self.labelTile(controlsD[i], 40, 130, 0)
+            self.controlGrid.addWidget(temp, i+1, 0)
+        
+            
+        for i in range(6):
+            temp = self.lineEditTile()
+            self.controlGrid.addWidget(temp, i+1 , 1)
+            self.controlTable.append(temp)
+        
         self.save_button = self.buttonTile("\U0001F4BE", 50, 40)
         self.compile_button = self.buttonTile("\U00002699", 50, 40)
         self.currentTheme = "Dark Theme"
         self.theme_button = self.buttonTile("\U0001F4A1", 50, 40)
+        self.controlGrid.addWidget(self.compile_button, 7, 1)
+        self.controlGrid.addWidget(self.save_button, 8, 1)
+        self.controlGrid.addWidget(self.theme_button, 9, 1)
+        
+        
+        self.controlGrid.addWidget(self.k1, 10, 1)
+        self.controlGrid.addWidget(self.k2, 11, 1)
+        self.controlGrid.addWidget(self.k3, 12, 1)
+        self.controlGrid.addWidget(self.k4, 13, 1)
+        self.controlGrid.addWidget(self.k5, 14, 1)
+        self.controlGrid.addWidget(self.k6, 15, 1)
+            
+        self.controlTable[0].setText("512")
+        self.controlTable[1].setText("512")
+        self.controlTable[2].setText("32")
+        self.controlTable[3].setText("32")
+        self.controlTable[4].setText("2")
+        self.controlTable[5].setText("2")
+            
+        self.displayWidget4.setLayout(self.controlGrid)
+        self.controlScroll.setWidget(self.displayWidget4)
+        self.controlScroll.setWidgetResizable(True)
+        
+    def mainLabel(self):
+        
+        
         main_label_image = QLabel()
         main_label_image_pixmap = QPixmap("GUI/Images/logo.png")
         main_label_image_pixmap = main_label_image_pixmap.scaled(300, 80)
         main_label_image.setPixmap(main_label_image_pixmap)
         main_label_hBox = QHBoxLayout()
         main_label_hBox.addWidget(main_label_image, 9)
-        main_label_hBox.addWidget(self.k1, 1)
-        main_label_hBox.addWidget(self.k2, 1)
-        main_label_hBox.addWidget(self.k3, 1)
-        main_label_hBox.addWidget(self.k4, 1)
-        main_label_hBox.addWidget(self.k6, 1)
-        main_label_hBox.addWidget(self.k5, 1)
-        
-
-        main_label_hBox.addWidget(self.save_button, 1)
-        main_label_hBox.addWidget(self.compile_button, 1)
-        main_label_hBox.addWidget(self.theme_button, 1)
-        
         main_label_hBox.setContentsMargins(10, 10, 20, 10)
         
         return main_label_hBox
     
     def runMode(self):
-        self.knobBox = QHBoxLayout()
-        
-        self.k1 = QCheckBox("K1")
-        self.k2 = QCheckBox("K2")
-        self.k3 = QCheckBox("K3")
-        self.k4 = QCheckBox("K4")
-        self.k5 = QCheckBox("K5")
-        self.k6 = QLineEdit("")
+        self.k1 = self.checkBoxTile()
+        self.k2 = self.checkBoxTile()
+        self.k3 = self.checkBoxTile()
+        self.k4 = self.checkBoxTile()
+        self.k5 = self.checkBoxTile()
+        self.k6 = self.lineEditTile()
         self.k6.setValidator(QIntValidator())
-        self.knobBox.addWidget(self.k1)
-        self.knobBox.addWidget(self.k2)
-        self.knobBox.addWidget(self.k3)
-        self.knobBox.addWidget(self.k4)
-        self.knobBox.addWidget(self.k5)
-        
-        # l = ["Non-Pipelined", "Pipelined", "Pipelined+Forwarding"]
-        # self.runModes.addItems(l)
-        # self.runModes.setGeometry(40, 40, 100, 31)
-        # self.runModes.resize(200,30)
+
         
 
     def editor(self, filePath):
@@ -317,9 +293,8 @@ class UiComponents():
         gridbox.setVerticalSpacing(20)
         gridbox.setHorizontalSpacing(30)
         self.displayWidget.setLayout(gridbox)
-        
         self.scroll.setWidget(self.displayWidget)
-        self.displayWidget.move(self.scroll.rect().center() - self.displayWidget.rect().center())
+        # self.displayWidget.move(self.scroll.rect().center() - self.displayWidget.rect().center())
         
         self.scroll.setWidgetResizable(True)
         self.scroll.setFrameStyle(QFrame.NoFrame)
@@ -331,12 +306,14 @@ class UiComponents():
         self.tab1 = self.scroll1
         self.tab2 = self.scroll
         self.tab3 = self.infoScroll
-        self.tab4 = self.cacheScroll
-       
+        self.tab4 = self.controlScroll
+        self.tab5 = self.scroll5
+        self.tabs1.addTab(self.tab4, "Controls")
         self.tabs1.addTab(self.tab1, "Registers")
         self.tabs1.addTab(self.tab2, "Memory")
         self.tabs1.addTab(self.tab3, "Info")
-        self.tabs1.addTab(self.tab4, "Cache Controls")
+        
+        self.tabs1.addTab(self.tab5, "Cache Details")
 
     def tabbedView2(self):
         self.tabs2 = QTabWidget()
@@ -372,3 +349,33 @@ class UiComponents():
         self.displayWidget.setLayout(gridbox)
         self.scroll1.setWidget(self.displayWidget)
         self.scroll1.setWidgetResizable(True)
+        
+        
+    def cacheDisplay(self):
+        self.scroll5 = QScrollArea()
+        self.displayWidget5 = QGroupBox()
+        gridbox2 = QGridLayout()
+        
+        
+        contents = ["Fetch", "Load", "Store", "IsMiss","Victim", "Access", "Hit", "Miss"]
+        self.cacheArray = [[] for i in range(len(contents))]
+        label2 = self.labelTile("I$", 40, 100, 0)
+        temp = self.labelTile("D$", 40, 100, 0)
+        
+        gridbox2.addWidget(label2, 0, 1)
+        gridbox2.addWidget(temp, 0, 2)
+        
+        for i in range(len(contents)):
+            label1 = self.labelTile(contents[i], 40, 100, 0)
+            label2 = self.labelTile("-", 40, 100, 1)
+            temp = self.labelTile("-", 40, 100, 1)
+            self.cacheArray[i] = [label1, label2, temp]
+            gridbox2.addWidget(self.cacheArray[i][0], i+1, 0)
+            gridbox2.addWidget(self.cacheArray[i][1], i+1, 1)
+            gridbox2.addWidget(self.cacheArray[i][2], i+1, 2)
+
+        
+        # gridbox.setAlignment(QtCore.Qt.AlignCenter)
+        self.displayWidget5.setLayout(gridbox2)
+        self.scroll5.setWidget(self.displayWidget5)
+        self.scroll5.setWidgetResizable(True)

@@ -618,6 +618,9 @@ class Processor:
     def getData(self):
         return self._PMI.getMemory()
         
+    def getCaches(self):
+        self._PMI.printCaches()
+        
     def printStat(self):
         filename = os.path.join(self._currFolderPath, "generated", 'stats.txt')
         f = open(filename,'w')
@@ -654,7 +657,7 @@ class Processor:
         f.write("Number of stalls due to control hazards are :"+str(self.Flush)+"\n")
         f.write("\n")
 
-    def reset(self, intialiseDetails2):
+    def reset(self, initialiseDetails2):
         self.initialiseDetails[1:] = initialiseDetails2
         self._outputLogFile = open(os.path.join(self._currFolderPath, 'generated', "outputLog.txt"), "w")
         sys.stdout = self._outputLogFile

@@ -165,6 +165,27 @@ class PMI:
 
     def clearMemory(self):
         self.__memory.clearMemory()
+        
+    def printCaches(self):
+        file2 = open('cache.txt', 'w')
+        file2.write(str(self._instCache._cache))
+        file2.write("\n")
+        file2.write(str(self._dataCache._cache))
+        file2.close()
+        file2 = open('miss.txt', 'w')
+        file2.write(str(self._instCache._missDetails))
+        file2.write("\n")
+        file2.write(str(self._dataCache._missDetails))
+        file2.write("\n")
+        temp = [self._instCache.total_accesses,self._instCache.miss, self._instCache.hit]
+        file2.write(str(temp))
+        file2.write("\n")
+        temp = [self._dataCache.total_accesses,self._dataCache.miss, self._dataCache.hit]
+        file2.write(str(temp))
+        file2.write("\n")
+        file2.write(str(self._instCache._LRU))
+        file2.close()
+        
 
     def getData(self, size, control = 1):
         """

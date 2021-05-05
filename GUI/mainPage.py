@@ -20,7 +20,7 @@ class mainScreen(QWidget, UiComponents):
         self.countDisplay = 1
         self.knobsList = [0, 0, 0, 0 ,0, 0]
         self.currFilePath = os.path.join(self.directoryPath, "test", "main.mc")
-        self.link = frontBackEndInteraction(self.directoryPath)
+        self.link = frontBackEndInteraction([self.directoryPath, [1024, 1024], [8, 8], [4, 4]])
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
         self.datapathO = self.link.parseData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
@@ -78,7 +78,7 @@ class mainScreen(QWidget, UiComponents):
         
     def fileCompile(self):
         self.fileSave()
-        self.link.reset()
+        self.link.reset([self.directoryPath, [1024, 1024], [8, 8], [4, 4]])
         
       
         
@@ -89,7 +89,7 @@ class mainScreen(QWidget, UiComponents):
         self.updateMemoryView("10000000")
         self.datapathO = self.link.parseData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
         self.datapathF = self.link.parseData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
-        
+        self.link.printCaches()
         loop = QEventLoop()
         QTimer.singleShot(1000,loop.quit)
         loop.exec_()

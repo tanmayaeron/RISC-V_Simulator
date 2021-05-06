@@ -24,7 +24,7 @@ class mainScreen(QWidget, UiComponents):
         self.link = frontBackEndInteraction([self.directoryPath, [1024, 1024], [8, 8], [4, 4]])
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
-        
+        self.callDataPaths()
         QTimer.singleShot(3000, self.initWindow)
         self.splash.show()
 
@@ -157,13 +157,15 @@ class mainScreen(QWidget, UiComponents):
     def cacheViewHelp(self, flag):
         self.countDisplay2+=flag
         self.countDisplay2 = max(1, self.countDisplay2)
+        self.countDisplay2 = min(len(self.datapathC), self.countDisplay2)
         self.cacheArray2[4].setText(str(self.countDisplay2))
         self.updateCacheView("F")
         
     def datapathhelp(self, flag):
         self.countDisplay +=flag
         self.countDisplay = max(1, self.countDisplay)
-        temp = self.datapathF[self.countDisplay]
+        self.countDisplay = min(len(self.datapathF), self.countDisplay)
+        temp = self.datapathF[self.countDisplay-1]
         self.l1[6].setText(str(self.countDisplay))
         self.l1[8].setText(temp["EE1"])
         self.l1[9].setText(temp["EE2"])

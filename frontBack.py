@@ -63,7 +63,8 @@ class frontBackEndInteraction:
         files = glob.glob(os.path.join(self.directoryPath, "generated", "Register Snapshots", "*"))
         for f in files:
             os.remove(f)
-        self.processor.reset(initialiseControls)
+        del self.processor
+        self.processor = Processor([self.directoryPath]+initialiseControls)
         # del self.processor
         # self.processor = Processor(self.directoryPath)
         

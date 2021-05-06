@@ -96,49 +96,7 @@ class UiComponents():
         self.table1.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table2.horizontalHeader().setStretchLastSection(True)
         self.table2.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-
-    # def ICache(self):
-    #     self.scroll6 = QScrollArea()
-    #     self.displayWidget6 = QGroupBox()
-    #     self.ICachegrid = QGridLayout()
-    #     self.ICacheTable = []
-    #     for i in range(4):
-    #         temp = self.labelTile("",100,120,0)
-    #         temp.setAlignment(QtCore.Qt.AlignLeft)
-    #         temp.setWordWrap(True)
-    #         self.ICachegrid.addWidget(temp,i,0)
-    #         tempp = self.labelTile("",100,800,False)
-    #         tempp.setAlignment(QtCore.Qt.AlignLeft)
-    #         tempp.setWordWrap(True)
-    #         self.ICachegrid.addWidget(tempp,i, 1)
-    #         self.ICacheTable.append([temp, tempp])
-            
-    #     self.displayWidget6.setLayout(self.ICachegrid)
-    #     self.scroll6.setWidget(self.displayWidget6)
-    #     self.scroll6.setWidgetResizable(True)
-        
-    # def DCache(self):
-    #     self.scroll7 = QScrollArea()
-    #     self.displayWidget7 = QGroupBox()
-    #     self.DCachegrid = QGridLayout()
-    #     count = 0
-    #     self.DCacheTable = []
-    #     for i in range(4):
-    #         temp = self.labelTile("",100,120,0)
-    #         temp.setAlignment(QtCore.Qt.AlignLeft)
-    #         temp.setWordWrap(True)
-    #         self.DCachegrid.addWidget(temp,i,0)
-    #         tempp = self.labelTile("",100,800,False)
-    #         tempp.setAlignment(QtCore.Qt.AlignLeft)
-    #         tempp.setWordWrap(True)
-    #         self.DCachegrid.addWidget(tempp,i, 1)
-    #         self.DCacheTable.append([temp, tempp])
-    #         count+=1
-            
-    #     self.displayWidget7.setLayout(self.DCachegrid)
-    #     self.scroll7.setWidget(self.displayWidget7)
-    #     self.scroll7.setWidgetResizable(True)
-        
+      
     def lineEditTile(self):
         temp = QLineEdit("")
         temp.setValidator(QIntValidator())

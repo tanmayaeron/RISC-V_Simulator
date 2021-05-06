@@ -16,6 +16,8 @@ if __name__ == '__main__':
     my_parser.add_argument('-k3', '-knob3', action='store_true', help='show value in registerFile at end of each cycle')
     my_parser.add_argument('-k4', '-knob4', action='store_true', help='show value in Pipeline Registers at end of each cycle')
     my_parser.add_argument('-k5', '-knob5', action='store',type=int,required=False, help='show value in Pipeline Registers at end of each cycle for particular instruction')
+    my_parser.add_argument('-ICache', '-instruction cache', action='store',type=int,nargs='+',help='configure input cache in format cache size block size number of ways')
+    my_parser.add_argument('-DCache', '-data cache', action='store', type=int, nargs='+',help='configure data cache in format cache size block size number of ways')
     args = my_parser.parse_args()
 
     ifGUI = args.g
@@ -24,6 +26,11 @@ if __name__ == '__main__':
     knob2 = args.k2
     knob3 = args.k3
     knob4 = args.k4
+    ICache = args.ICache
+    DCache = args.DCache
+
+    #print(ICache)
+    #print(DCache)
 
     print("Compiling!!!!")
     print("Check generated folder for details.")
@@ -55,6 +62,14 @@ if __name__ == '__main__':
         directoryPath = os.getcwd()
         currFilePath = os.path.join(directoryPath, "test", fileName)
         startDetails = [directoryPath, [64, 64], [4, 4], [2, 2]]
+        if ICache is not None:
+            startDetails[1][0] = ICache[0]
+            startDetails[2][0] = ICache[1]
+            startDetails[3][0] = ICache[2]
+        if DCache is not None:
+            startDetails[1][1] = DCache[0]
+            startDetails[2][1] = DCache[1]
+            startDetails[3][1] = DCache[2]
         link = frontBackEndInteraction(startDetails)
         link.runProgram(currFilePath, knobsL)
         # link.reset()

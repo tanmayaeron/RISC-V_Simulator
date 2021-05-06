@@ -87,48 +87,57 @@ class UiComponents():
         self.infoScroll.setWidgetResizable(True)
 
 
+    def IDCache(self):
+        self.table1 = QTableWidget()
+        self.table2 = QTableWidget()
+        self.table1.setFont(self.fixedfont)
+        self.table2.setFont(self.fixedfont)
+        self.table1.horizontalHeader().setStretchLastSection(True)
+        self.table1.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table2.horizontalHeader().setStretchLastSection(True)
+        self.table2.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-    def ICache(self):
-        self.scroll6 = QScrollArea()
-        self.displayWidget6 = QGroupBox()
-        self.ICachegrid = QGridLayout()
-        self.ICacheTable = []
-        for i in range(4):
-            temp = self.labelTile("",100,120,0)
-            temp.setAlignment(QtCore.Qt.AlignLeft)
-            temp.setWordWrap(True)
-            self.ICachegrid.addWidget(temp,i,0)
-            tempp = self.labelTile("",100,800,False)
-            tempp.setAlignment(QtCore.Qt.AlignLeft)
-            tempp.setWordWrap(True)
-            self.ICachegrid.addWidget(tempp,i, 1)
-            self.ICacheTable.append([temp, tempp])
+    # def ICache(self):
+    #     self.scroll6 = QScrollArea()
+    #     self.displayWidget6 = QGroupBox()
+    #     self.ICachegrid = QGridLayout()
+    #     self.ICacheTable = []
+    #     for i in range(4):
+    #         temp = self.labelTile("",100,120,0)
+    #         temp.setAlignment(QtCore.Qt.AlignLeft)
+    #         temp.setWordWrap(True)
+    #         self.ICachegrid.addWidget(temp,i,0)
+    #         tempp = self.labelTile("",100,800,False)
+    #         tempp.setAlignment(QtCore.Qt.AlignLeft)
+    #         tempp.setWordWrap(True)
+    #         self.ICachegrid.addWidget(tempp,i, 1)
+    #         self.ICacheTable.append([temp, tempp])
             
-        self.displayWidget6.setLayout(self.ICachegrid)
-        self.scroll6.setWidget(self.displayWidget6)
-        self.scroll6.setWidgetResizable(True)
+    #     self.displayWidget6.setLayout(self.ICachegrid)
+    #     self.scroll6.setWidget(self.displayWidget6)
+    #     self.scroll6.setWidgetResizable(True)
         
-    def DCache(self):
-        self.scroll7 = QScrollArea()
-        self.displayWidget7 = QGroupBox()
-        self.DCachegrid = QGridLayout()
-        count = 0
-        self.DCacheTable = []
-        for i in range(4):
-            temp = self.labelTile("",100,120,0)
-            temp.setAlignment(QtCore.Qt.AlignLeft)
-            temp.setWordWrap(True)
-            self.DCachegrid.addWidget(temp,i,0)
-            tempp = self.labelTile("",100,800,False)
-            tempp.setAlignment(QtCore.Qt.AlignLeft)
-            tempp.setWordWrap(True)
-            self.DCachegrid.addWidget(tempp,i, 1)
-            self.DCacheTable.append([temp, tempp])
-            count+=1
+    # def DCache(self):
+    #     self.scroll7 = QScrollArea()
+    #     self.displayWidget7 = QGroupBox()
+    #     self.DCachegrid = QGridLayout()
+    #     count = 0
+    #     self.DCacheTable = []
+    #     for i in range(4):
+    #         temp = self.labelTile("",100,120,0)
+    #         temp.setAlignment(QtCore.Qt.AlignLeft)
+    #         temp.setWordWrap(True)
+    #         self.DCachegrid.addWidget(temp,i,0)
+    #         tempp = self.labelTile("",100,800,False)
+    #         tempp.setAlignment(QtCore.Qt.AlignLeft)
+    #         tempp.setWordWrap(True)
+    #         self.DCachegrid.addWidget(tempp,i, 1)
+    #         self.DCacheTable.append([temp, tempp])
+    #         count+=1
             
-        self.displayWidget7.setLayout(self.DCachegrid)
-        self.scroll7.setWidget(self.displayWidget7)
-        self.scroll7.setWidgetResizable(True)
+    #     self.displayWidget7.setLayout(self.DCachegrid)
+    #     self.scroll7.setWidget(self.displayWidget7)
+    #     self.scroll7.setWidgetResizable(True)
         
     def lineEditTile(self):
         temp = QLineEdit("")
@@ -144,7 +153,7 @@ class UiComponents():
         
         temp.setStyleSheet("QCheckBox::indicator"
                                "{"
-                               "width :80px;"
+                               "width :40px;"
                                "height : 40px;"
                                "}")
         
@@ -347,16 +356,16 @@ class UiComponents():
         self.tab3 = self.infoScroll
         self.tab4 = self.controlScroll
         self.tab5 = self.scroll5
-        self.tab6 = self.scroll6
-        self.tab7 = self.scroll7
+        self.tab6 = self.table1
+        self.tab7 = self.table2
         self.tabs1.addTab(self.tab4, "Controls")
         self.tabs1.addTab(self.tab1, "Registers")
         self.tabs1.addTab(self.tab2, "Memory")
         self.tabs1.addTab(self.tab3, "Info")
         
         self.tabs1.addTab(self.tab5, "Cache Details")
-        self.tabs1.addTab(self.tab7, "Data Cache")
-        self.tabs1.addTab(self.tab6, "Instruction Cache")
+        self.tabs1.addTab(self.tab6, "D$ Cache")
+        self.tabs1.addTab(self.tab7, "I$ Cache")
         
 
     def tabbedView2(self):
@@ -419,14 +428,17 @@ class UiComponents():
         
         
         for i in range(len(contents)):
-            label1 = self.labelTile(contents[i], 40, 100, 0)
-            label2 = self.labelTile("-", 40, 100, 0)
-            label2.setAlignment(QtCore.Qt.AlignLeft)
+            label1 = self.labelTile(contents[i], 100, 100, 0)
+            label3  = self.labelTile("", 100, 100, 0)
+            label2 = self.labelTile("-", 100, 600, 0)
+            # label2.setAlignment(QtCore.Qt.AlignLeft)
             label2.setWordWrap(True)
             
             self.cacheArray[i] = [label1, label2]
             gridbox2.addWidget(self.cacheArray[i][0], i+2, 0)
-            gridbox2.addWidget(self.cacheArray[i][1], i+2, 1)
+            gridbox2.addWidget(label3, i+2, 1)
+            
+            gridbox2.addWidget(self.cacheArray[i][1], i+2, 2)
            
         # gridbox.setAlignment(QtCore.Qt.AlignCenter)
         self.displayWidget5.setLayout(gridbox2)

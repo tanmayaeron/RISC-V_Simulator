@@ -53,6 +53,7 @@ class frontBackEndInteraction:
         self.clearData(os.path.join(self.directoryPath, "generated", "registers.txt"))
         self.clearData(os.path.join(self.directoryPath, "generated", "buffer.txt"))
         self.clearData(os.path.join(self.directoryPath, "generated", "stats.txt"))
+        self.clearData(os.path.join(self.directoryPath, "generated", "CacheInfo.txt"))
         
         self.processor.reset(initialiseControls)
         # del self.processor

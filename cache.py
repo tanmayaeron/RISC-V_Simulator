@@ -113,8 +113,7 @@ class Cache:
         isVictim = self.updateLRU(tag, index)
         self.cacheDetails["Index"] = index
         self.cacheDetails["Set"] = self._cache[index]
-        if(isVictim != -1):
-            self.cacheDetails["Victim"] = isVictim[1]
+        
         address2 = tag+oldindex+"0"*self.BO
         address2 = binToHex(address2)
         memory_obj.store_block( address, data, size, control)
@@ -130,6 +129,8 @@ class Cache:
             if(isVictim == -1):
                 self._cache[index][tag] = data2
             else:
+                if(isVictim != -1):
+                    self.cacheDetails["Victim"] = {"tag": isVictim[1] , "data":self._cache[index][isVictim[1]]}
                 del self._cache[index][isVictim[1]]
                 self._cache[index][tag] = data2
         
@@ -143,8 +144,8 @@ class Cache:
         isVictim = self.updateLRU(tag, index)
         self.cacheDetails["Index"] = index
         self.cacheDetails["Set"] = self._cache[index]
-        if(isVictim != -1):
-            self.cacheDetails["Victim"] = isVictim[1]
+        # if(isVictim != -1):
+        #     self.cacheDetails["Victim"] = {"tag": isVictim[1] , "data":self._cache[index][isVictim[1]]}
         
         if(self.checkCache(index, tag)):
             self.cacheDetails["isMiss"] = "F"
@@ -160,6 +161,8 @@ class Cache:
             if(isVictim == -1):
                 self._cache[index][tag] = data  
             else:
+                if(isVictim != -1):
+                    self.cacheDetails["Victim"] = {"tag": isVictim[1] , "data":self._cache[index][isVictim[1]]}
                 del self._cache[index][isVictim[1]]
                 self._cache[index][tag] = data
             return self.slice(2*BO,2*BO+(2**(size+1)),index,tag)

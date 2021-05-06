@@ -64,19 +64,49 @@ class mainScreen(QWidget, UiComponents):
             count+=1
             
     def updateIDCacheView(self):
-        dictionary =self.datapathD[0]
-        c = 0
+        dd = {"Access":{"I$":0, "D$":0} , "Hit":{"I$":0, "D$":0} , "Miss":{"I$":0, "D$":0}}
+        dictionary = self.datapathD
+        dictionary = dictionary[0]
+        dd["Access"]["D$"] = dictionary['Total Access']
+        dd["Hit"]["D$"] = dictionary['Hit']
+        dd["Miss"]["D$"] = dictionary['Miss']
+        dictionary = dictionary['Cache']
+        height = len(dictionary)
+        width = 1
+        self.table1.setRowCount(height) 
+        self.table1.setColumnCount(width)
+        for i in range(height): 
+            self.table1.setItem(i, 0, QTableWidgetItem(str(dictionary[i])))
+            
+        dictionary = self.datapathI
+        dictionary = dictionary[0]
+        dd["Access"]["I$"] = dictionary['Total Access']
+        dd["Hit"]["I$"] = dictionary['Hit']
+        dd["Miss"]["I$"] = dictionary['Miss']
+        dictionary = dictionary['Cache']
         
-        for i in dictionary.keys():
-            self.DCacheTable[c][0].setText(i)
-            self.DCacheTable[c][1].setText(str(dictionary[i]))
-            c+=1
-        c = 0
-        dictionary =self.datapathI[0]
-        for i in dictionary.keys():
-            self.ICacheTable[c][0].setText(i)
-            self.ICacheTable[c][1].setText(str(dictionary[i]))
-            c+=1
+        height = len(dictionary)
+        width = 1
+        self.table2.setRowCount(height) 
+        self.table2.setColumnCount(width)
+        for i in range(height): 
+            self.table2.setItem(i, 0, QTableWidgetItem(str(dictionary[i])))
+        self.cacheArray[4][1].setText(str(dd["Access"]))
+        self.cacheArray[5][1].setText(str(dd["Hit"]))
+        self.cacheArray[6][1].setText(str(dd["Miss"]))
+        # dictionary =self.datapathD[0]
+        # c = 0
+        
+        # for i in dictionary.keys():
+        #     self.DCacheTable[c][0].setText(i)
+        #     self.DCacheTable[c][1].setText(str(dictionary[i]))
+        #     c+=1
+        # c = 0
+        # dictionary =self.datapathI[0]
+        # for i in dictionary.keys():
+        #     self.ICacheTable[c][0].setText(i)
+        #     self.ICacheTable[c][1].setText(str(dictionary[i]))
+        #     c+=1
     def fileOpen(self):
         f = open(self.currFilePath, 'r')
         self.editorScreen.setPlainText(f.read())
@@ -89,7 +119,6 @@ class mainScreen(QWidget, UiComponents):
         
     def getCacheFromInput(self):
         temp = []
-        
         for i in range(3):
             temp.append([])
             for j in range(2):
@@ -131,7 +160,6 @@ class mainScreen(QWidget, UiComponents):
         self.updateRegisterView()
         self.updateIDCacheView()
         self.updateMemoryView("10000000")
-        
         loop = QEventLoop()
         QTimer.singleShot(1000,loop.quit)   
         loop.exec_()
@@ -200,8 +228,9 @@ class mainScreen(QWidget, UiComponents):
         self.datapath()
         self.controlBox()
         self.cacheDisplay()
-        self.DCache()
-        self.ICache()
+        # self.DCache()
+        # self.ICache()
+        self.IDCache()
         self.info()
         self.tabbedView2()
         self.tabbedView1()
@@ -218,7 +247,7 @@ class mainScreen(QWidget, UiComponents):
         hbox = QHBoxLayout()
 
         hbox.addWidget(self.feed, 2)
-        hbox.addWidget(self.help, 1)
+        hbox.addWidget(self.help, 3)
         vbox = QVBoxLayout()
         vbox.addLayout(logo_label)
         vbox.addLayout(hbox)

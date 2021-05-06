@@ -47,9 +47,11 @@ Instructions to use GUI:
 1. Write the code you wish to run in the editor window. You may copy it from any other location as well.
 2. You may save the file using save button.
 3. Set the required knobs according to the documentation
-4. To run the file, press compile button. Once the code completes execution, a tick sign will be visible on the button.
-5. In case you run the pipelined version the datapath can visualised using the "datapath" and "info" tab
-6. Look for the generated files
+4. Set the details of cache in the control box.
+5. To run the file, press compile button. Once the code completes execution, a tick sign will be visible on the button.
+6. In case you run the pipelined version the datapath can visualised using the "datapath" and "info" tab
+7. You can get the info about data cache and instruction cache from respective tabs.
+8. Look for the generated files
 
 Contributors:
 * Aditya Agarwal - 2019CSB1064
@@ -71,22 +73,24 @@ Input Format
 
 Output Format
 Check the generated folder for details of compilation. It contains:
-        * memory.txt        :  details of memory
-        * register.txt      :  details of registers
-        * outputLog.txt     :  details of changes in temporary registers for each cycle
-        * buffer.txt        :  details of buffer in a particular cycle provided in knob5 input box.
-        * forwarding.txt    :  details of data forwarding paths taken in each cycle
-        * stats.txt         :  contains general stats about the code compilation.
-        * Buffer Snapshots  :  contains data of buffers in each cycle if knob4 is on.
-        * Register Snapshots:  contains details of register file in knob3 is on.
-        For more information the output format of files, refer to buffer class in hazard.py
+        * memory.txt            :  details of memory
+        * register.txt          :  details of registers
+        * outputLog.txt         :  details of changes in temporary registers for each cycle
+        * buffer.txt            :  details of buffer in a particular cycle provided in knob5 input box.
+        * forwarding.txt        :  details of data forwarding paths taken in each cycle
+        * stats.txt             :  contains general stats about the code compilation.
+        * DataCache.txt         :  contains info of the data cache
+        * InstructionCache.txt  :  contains info of the data cache
+        * CacheInfo.txt         :  contains information about the cache
+        * Buffer Snapshots      :  contains data of buffers in each cycle if knob4 is on.
+        * Register Snapshots    :  contains details of register file in knob3 is on.
 
 
 Work split among team members:-
 :) Overall it was a very successful team efforts. Each members coordinated others well.
 :) It became really difficult for us to decide each other's contribution.
-* Aditya Agarwal - Documentation, simulator.py, readme, testing
-* Aneeket Mangal - FrontBack.py, UiComponents.py, MainPage.py, simulator.py
-* Fadia Het Rakeshkumar - BTB.py, simulator.py, documentation, testing
-* Shikhar Soni - Hazards.py, simulator.py, pipeline buffer, testing
-* Tanmay Aeron - Hazards.py, simulator.py, IAG.py, memory.py
+* Aditya Agarwal        -   Cache.py, documentation, GUI
+* Aneeket Mangal        -   Cache.py, documentation, GUI
+* Fadia Het Rakeshkumar -   Cache.py, documentation, GUI
+* Shikhar Soni          -   Cache.py, documentation, GUI
+* Tanmay Aeron          -   Cache.py, documentation, GUI

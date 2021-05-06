@@ -44,18 +44,21 @@ if __name__ == '__main__':
         sys.exit(App.exec_())
 
     elif(fileName is None):
+        
         directoryPath = os.getcwd()
         currFilePath = os.path.join(directoryPath, "test", "main.mc")
         startDetails = [directoryPath, [64, 64], [4, 4], [2, 2]]
         link = frontBackEndInteraction(startDetails)
+        link.reset(startDetails[1:])
         link.runProgram(currFilePath, knobsL)
-        # link.reset()
+        
         
     else:
         directoryPath = os.getcwd()
         currFilePath = os.path.join(directoryPath, "test", fileName)
         startDetails = [directoryPath, [64, 64], [4, 4], [2, 2]]
         link = frontBackEndInteraction(startDetails)
+        link.reset(startDetails[1:])
         link.runProgram(currFilePath, knobsL)
         # link.reset()
         

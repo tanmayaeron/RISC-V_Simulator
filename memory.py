@@ -197,10 +197,20 @@ class PMI:
         self.__MDR[control] = data
 
     def storeData(self, size, control = 1):
+
+        
         if(control == 0):
             self._instCache.write(self.__MAR[control], self.__memory, self.__MDR[control], size, control)
-        else:
+        elif(control == 1):
             self._dataCache.write(self.__MAR[control], self.__memory, self.__MDR[control], size, control)
+            
+        elif(control == 2):
+            self.__memory.store_word(self.__MAR[0], self.__MDR[0], 0)
+            
+        else:
+            self._memory.store_word(self.__MAR[1], self.__MDR[1], 1)
+            
+        
 
     def accessMemory(self, currMemoryEnable, size, control = 1):
         if currMemoryEnable == 0:

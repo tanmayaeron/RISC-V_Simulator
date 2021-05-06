@@ -25,7 +25,7 @@ class mainScreen(QWidget, UiComponents):
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
         
-        QTimer.singleShot(0, self.initWindow)
+        QTimer.singleShot(3000, self.initWindow)
         self.splash.show()
 
     def updateRegisterView(self):
@@ -94,19 +94,7 @@ class mainScreen(QWidget, UiComponents):
         self.cacheArray[4][1].setText(str(dd["Access"]))
         self.cacheArray[5][1].setText(str(dd["Hit"]))
         self.cacheArray[6][1].setText(str(dd["Miss"]))
-        # dictionary =self.datapathD[0]
-        # c = 0
-        
-        # for i in dictionary.keys():
-        #     self.DCacheTable[c][0].setText(i)
-        #     self.DCacheTable[c][1].setText(str(dictionary[i]))
-        #     c+=1
-        # c = 0
-        # dictionary =self.datapathI[0]
-        # for i in dictionary.keys():
-        #     self.ICacheTable[c][0].setText(i)
-        #     self.ICacheTable[c][1].setText(str(dictionary[i]))
-        #     c+=1
+
     def fileOpen(self):
         f = open(self.currFilePath, 'r')
         self.editorScreen.setPlainText(f.read())

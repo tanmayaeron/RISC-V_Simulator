@@ -15,7 +15,7 @@ Libraries Used
     * defaultdict: to make a hash map for memory.
     * sys: for reading and editing files with ease.
     * json: for crunching generated data.
-
+    * glob: for file management
 # Front-end - Python3
     * PyQT5: for the Graphic User Interface.
     * qdarkstyle: for dark theme

@@ -18,6 +18,7 @@ class mainScreen(QWidget, UiComponents):
         
         self.directoryPath = os.getcwd()
         self.countDisplay = 1
+        self.countDisplay2 = 1
         self.knobsList = [0, 0, 0, 0 ,0, 0]
         self.currFilePath = os.path.join(self.directoryPath, "test", "main.mc")
         self.link = frontBackEndInteraction([self.directoryPath, [1024, 1024], [8, 8], [4, 4]])
@@ -25,6 +26,7 @@ class mainScreen(QWidget, UiComponents):
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
         self.datapathO = self.link.parseData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
         self.datapathF = self.link.parseData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
+        self.datapathC = self.link.parseData(os.path.join(self.directoryPath, "generated", "CacheInfo.txt"))
         QTimer.singleShot(0, self.initWindow)
         self.splash.show()
 
@@ -40,7 +42,17 @@ class mainScreen(QWidget, UiComponents):
         for i in range(10):
             for j in range(5):
                 self.memoryArray[i][j].setText(l[i][j])
+
                 
+    def updateCacheView(self, stage):
+        dictionary = self.datapathC[self.countDisplay2-1][str(stage)]
+        if(dictionary == -1):
+            for i in range(4):
+                self.cacheArray[i][1].setText("-1")
+        else:
+            for i in range(4):
+                self.cacheArray[i][1].setText(str(dictionary[str(self.cacheArray[i][0].text())]))
+                  
     def updateInfoView(self, stage):
         dictionary = self.datapathO[self.countDisplay-1][str(stage)]
         count = 0
@@ -101,13 +113,20 @@ class mainScreen(QWidget, UiComponents):
         self.updateMemoryView("10000000")
         self.datapathO = self.link.parseData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
         self.datapathF = self.link.parseData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
+        self.datapathC = self.link.parseData(os.path.join(self.directoryPath, "generated", "CacheInfo.txt"))
         # self.hitMissData = self.link.parseData(os.path.join(self.directoryPath, "miss.txt"))
-        self.link.printCaches()
+        # self.link.printCaches()
         loop = QEventLoop()
         QTimer.singleShot(1000,loop.quit)   
         loop.exec_()
         
         self.compile_button.setText("\U00002699")
+        
+    def cacheViewHelp(self, flag):
+        self.countDisplay2+=flag
+        self.countDisplay2 = max(1, self.countDisplay2)
+        self.cacheArray2[4].setText(str(self.countDisplay2))
+        self.updateCacheView("F")
         
     def datapathhelp(self, flag):
         self.countDisplay +=flag
@@ -149,8 +168,13 @@ class mainScreen(QWidget, UiComponents):
         self.l1[4].clicked.connect(lambda: self.updateInfoView(4))
         self.l1[5].clicked.connect(lambda: self.datapathhelp(-1))
         self.l1[7].clicked.connect(lambda: self.datapathhelp(1))
+        self.cacheArray2[0].clicked.connect(lambda: self.updateCacheView(self.cacheArray2[0].text()))
+        self.cacheArray2[1].clicked.connect(lambda: self.updateCacheView(self.cacheArray2[1].text()))
+        self.cacheArray2[2].clicked.connect(lambda: self.updateCacheView(self.cacheArray2[2].text()))
+        self.cacheArray2[3].clicked.connect(lambda: self.cacheViewHelp(-1))
+        self.cacheArray2[5].clicked.connect(lambda: self.cacheViewHelp(1))
         
-            
+        
     def window(self):
         self.editor(self.currFilePath)
         self.memoryDisplay()

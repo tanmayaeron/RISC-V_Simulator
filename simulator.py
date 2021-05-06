@@ -160,10 +160,8 @@ class Processor:
 
         if self.getIR() == "0"*8:
             return False
-        
-        CacheFetchInfo=self._PMI.getCache(0)
-        indexGot=self._PMI.indexReturn(0,self.getIR())
-        self.cacheSetInfo['F']=CacheFetchInfo[indexGot]
+
+        self.cacheSetInfo['F']=self._PMI.getCache(0)
 
         self.bufferStore[0] = [self._IAG.getPC(), self._IR, self._IAG.getPC_Temp()]
 
@@ -263,14 +261,10 @@ class Processor:
             
             self.outputD[3]["MAR"] =  self._PMI.getMAR()
 
-
-            CacheMemInfo=self._PMI.getCache(1)
-            indexGot=self._PMI.indexReturn(1,self._PMI.getMAR())
-
             if currMemoryEnable==1:
-                self.cacheSetInfo['L']=CacheMemInfo[indexGot]
+                self.cacheSetInfo['L']=self._PMI.getCache(1)
             elif currMemoryEnable==2:
-                self.cacheSetInfo['S']=CacheMemInfo[indexGot]
+                self.cacheSetInfo['S']=self._PMI.getCache(1)
 
         self._PMI.accessMemory(currMemoryEnable, currSizeEnable)
 

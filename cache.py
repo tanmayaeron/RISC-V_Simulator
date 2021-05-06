@@ -26,6 +26,7 @@ class Cache:
         self.tag = 32 - self.index - self.BO #tage bits
         self.miss = 0
         self.hit = 0
+        self.cacheDetails = {"Index":-1, "Set":-1, "isMiss":-1, "Victim":-1}
         self.total_accesses = 0
         self.createCache()
         self.initialiseLRU()
@@ -92,13 +93,7 @@ class Cache:
             if(minS > self._LRU[index][i][1]):
                 minS = self._LRU[index][i][1]
                 victim = i
-        
-
-        self.printMissInfo(self._cache[index][self._LRU[index][victim][2]])
-
-
-
-                  
+                 
         self._LRU[index][victim][0] = 1
         self._LRU[index][victim][1] = self.ways
         oldTag = self._LRU[index][victim][2]
@@ -116,15 +111,21 @@ class Cache:
         index = int(index, 2)
         BO = int(BO, 2)
         isVictim = self.updateLRU(tag, index)
+        self.cacheDetails["Index"] = index
+        self.cacheDetails["Set"] = self._cache[index]
+        if(isVictim != -1):
+            self.cacheDetails["Victim"] = isVictim[1]
         address2 = tag+oldindex+"0"*self.BO
         address2 = binToHex(address2)
         memory_obj.store_block( address, data, size, control)
         data2=memory_obj.load_block(address2, self.block_size, control)
         if(self.checkCache(index, tag)):
+            self.cacheDetails["isMiss"] = "F"
             self.hit+=1
             self._cache[index][tag] = data2
             
         else:
+            self.cacheDetails["isMiss"] = "T"
             self.miss+=1
             if(isVictim == -1):
                 self._cache[index][tag] = data2
@@ -140,12 +141,18 @@ class Cache:
         index = int(index, 2)
         BO = int(BO, 2)
         isVictim = self.updateLRU(tag, index)
+        self.cacheDetails["Index"] = index
+        self.cacheDetails["Set"] = self._cache[index]
+        if(isVictim != -1):
+            self.cacheDetails["Victim"] = isVictim[1]
         
         if(self.checkCache(index, tag)):
+            self.cacheDetails["isMiss"] = "F"
             self.hit += 1
             return self.slice(2*BO,2*BO+(2**(size+1)),index,tag)
         else:
             self.miss += 1
+            self.cacheDetails["isMiss"] = "T"
             address2 = tag+oldindex+"0"*self.BO
             address2 = binToHex(address2)
             data = memory_obj.load_block(address2, self.block_size, control)
@@ -167,19 +174,11 @@ class Cache:
             new_str+=string[i-2:i]
         return new_str
     
-    def getCache(self):
-        return self._cache
+    def getDetails(self):
+        temp = self.cacheDetails
+        self.cacheDetails = {"Index":-1, "Set":-1, "isMiss":-1, "Victim":-1}
+        return temp
     
-    def printMissInfo(self, VictimBlock):
-
-        dict={self.miss+1:VictimBlock}
-        filename = os.path.join( "generated", 'MissInfo.txt')
-        file = open(filename, 'a')
-        out = json.dumps(dict)
-        file.write(str(out))
-        file.write("\n")
-        file.close()
-
 
         
 

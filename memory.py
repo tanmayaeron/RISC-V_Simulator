@@ -219,17 +219,8 @@ class PMI:
             self.storeData(size, control)
 
     def getCache(self, control=1):
-
         if control==0:
-            return self._instCache.getCache()
+            return self._instCache.getDetails()
         else:
-            return self._dataCache.getCache()
+            return self._dataCache.getDetails()
     
-    def indexReturn(self, control = 1, address = "0"*8):
-
-        if control==0:
-            indexGot=int(self._instCache.address_break(address)[1],2)
-            return indexGot
-        else:
-            indexGot=int(self._dataCache.address_break(address)[1],2)
-            return indexGot

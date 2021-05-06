@@ -101,7 +101,7 @@ class UiComponents():
         
         temp.setStyleSheet("QCheckBox::indicator"
                                "{"
-                               "width :40px;"
+                               "width :80px;"
                                "height : 40px;"
                                "}")
         
@@ -141,10 +141,10 @@ class UiComponents():
         self.controlGrid.addWidget(self.k5, 14, 1)
         self.controlGrid.addWidget(self.k6, 15, 1)
             
-        self.controlTable[0].setText("512")
-        self.controlTable[1].setText("512")
-        self.controlTable[2].setText("32")
-        self.controlTable[3].setText("32")
+        self.controlTable[0].setText("64")
+        self.controlTable[1].setText("64")
+        self.controlTable[2].setText("4")
+        self.controlTable[3].setText("4")
         self.controlTable[4].setText("2")
         self.controlTable[5].setText("2")
             
@@ -247,12 +247,8 @@ class UiComponents():
         gridbox.addWidget(tempp, 7, 1)
         gridbox.addWidget(temp, 7, 3)
         self.l1.append(temp)
-        
         self.displayWidget2.setLayout(gridbox)
-        
-        
-                
-            
+             
     def memoryDisplay(self):
         self.scroll = QScrollArea()
         self.displayWidget = QGroupBox()
@@ -357,24 +353,33 @@ class UiComponents():
         gridbox2 = QGridLayout()
         
         
-        contents = ["Fetch", "Load", "Store", "IsMiss","Victim", "Access", "Hit", "Miss"]
-        self.cacheArray = [[] for i in range(len(contents))]
-        label2 = self.labelTile("I$", 40, 100, 0)
-        temp = self.labelTile("D$", 40, 100, 0)
+        contents = ["Index", "Set", "isMiss", "Victim", "Access", "Hit", "Miss"]
+        self.cacheArray = [[] for i in range(len(contents))]  
+        self.cacheArray2 = []
+        name = ["F", "L", "S"]
+        color = ["Red", "Blue", "Green"]
+        for i in range(3):
+            temp = self.buttonTile2(name[i], 40, 40, color[i])
+            gridbox2.addWidget(temp, 0, i) 
+            self.cacheArray2.append(temp) 
+                
+        name = ["-", "1", "+"]
+        for i in range(3):
+            temp = self.buttonTile(name[i], 40, 40)
+            gridbox2.addWidget(temp, 1, i)  
+            self.cacheArray2.append(temp)     
         
-        gridbox2.addWidget(label2, 0, 1)
-        gridbox2.addWidget(temp, 0, 2)
         
         for i in range(len(contents)):
             label1 = self.labelTile(contents[i], 40, 100, 0)
-            label2 = self.labelTile("-", 40, 100, 1)
-            temp = self.labelTile("-", 40, 100, 1)
-            self.cacheArray[i] = [label1, label2, temp]
-            gridbox2.addWidget(self.cacheArray[i][0], i+1, 0)
-            gridbox2.addWidget(self.cacheArray[i][1], i+1, 1)
-            gridbox2.addWidget(self.cacheArray[i][2], i+1, 2)
-
-        
+            label2 = self.labelTile("-", 40, 100, 0)
+            label2.setAlignment(QtCore.Qt.AlignLeft)
+            label2.setWordWrap(True)
+            
+            self.cacheArray[i] = [label1, label2]
+            gridbox2.addWidget(self.cacheArray[i][0], i+2, 0)
+            gridbox2.addWidget(self.cacheArray[i][1], i+2, 1)
+           
         # gridbox.setAlignment(QtCore.Qt.AlignCenter)
         self.displayWidget5.setLayout(gridbox2)
         self.scroll5.setWidget(self.displayWidget5)

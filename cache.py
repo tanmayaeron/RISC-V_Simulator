@@ -31,12 +31,6 @@ class Cache:
         self.createCache()
         self.initialiseLRU()
 
-
-        filename = os.path.join("generated", 'MissInfo.txt')
-        file = open(filename, 'w')
-        file.close()
-        
-
     def address_break(self, address): #takes the hex string
         #should return binary, returns decimal for now
         address = hexToBin(address)

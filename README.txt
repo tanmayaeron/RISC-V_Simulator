@@ -33,14 +33,18 @@ Installation
         
         
     4. To run Non GUI version:
-        add -k1 to enable knob1
-        add -k2 to enable knob2
-        add -k3 to enable knob3
-        add -k4 to enable knob4
-        add -k5 instruction_number to enable for that particular instruction
-        If you want to run a particular file, add that file in test folder and add -f filename, otherwise main.mc is run
-        For example if you want to enable k1, k2 and k3 knob and run fib.mc write 
-        python main.py -k1 -k2 -k3 -f fib.mc
+        python3 main.py
+        add following knobs accordingly
+        -h, --help            show this help message and exit
+        -g, -gui              enable GUI
+        -f F, -filename F     specify file which is to be run for non-GUI version
+        -k1, -knob1           enable Pipelining
+        -k2, -knob2           enable Data Forwarding
+        -k3, -knob3           show value in registerFile at end of each cycle
+        -k4, -knob4           show value in Pipeline Registers at end of each cycle
+        -k5 K5, -knob5 K5     show value in Pipeline Registers at end of each cycle for particular instruction
+        -ICache cacheSize blockSize noOfWays :- configure input cache in format cache size block size number of ways
+        -DCache cacheSize blockSize noOfWays :- configure data cache in format cache size block size number of ways
 
 
 Instructions to use GUI:

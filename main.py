@@ -54,6 +54,7 @@ if __name__ == '__main__':
     else:
         directoryPath = os.getcwd()
         currFilePath = os.path.join(directoryPath, "test", fileName)
+        startDetails = [directoryPath, [64, 64], [4, 4], [2, 2]]
         link = frontBackEndInteraction(startDetails)
         link.runProgram(currFilePath, knobsL)
         # link.reset()

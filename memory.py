@@ -1,6 +1,7 @@
 from collections import defaultdict
 from helperFunctions import *
 from cache import Cache
+import os
 def make_length(data, length):
     data = "0"*length+data
     return data[-length:]
@@ -166,24 +167,16 @@ class PMI:
     def clearMemory(self):
         self.__memory.clearMemory()
         
-    def printCaches(self):
-        file2 = open('cache.txt', 'w')
-        file2.write(str(self._instCache._cache))
-        file2.write("\n")
-        file2.write(str(self._dataCache._cache))
+    def printCaches(self, datapath):
+        file2 = os.path.join(datapath, "generated", 'InstructionCache.txt')
+        file2 = open(file2, 'w')
+        d = {"Cache":self._instCache._cache, "Total Access":self._instCache.total_accesses, "Miss":self._instCache.miss, "Hit":self._instCache.hit}
+        file2.write(str(d))
         file2.close()
-        file2 = open('miss.txt', 'w')
-        file2.write(str(self._instCache._missDetails))
-        file2.write("\n")
-        file2.write(str(self._dataCache._missDetails))
-        file2.write("\n")
-        temp = [self._instCache.total_accesses,self._instCache.miss, self._instCache.hit]
-        file2.write(str(temp))
-        file2.write("\n")
-        temp = [self._dataCache.total_accesses,self._dataCache.miss, self._dataCache.hit]
-        file2.write(str(temp))
-        file2.write("\n")
-        file2.write(str(self._instCache._LRU))
+        file2 = os.path.join(datapath, "generated", 'DataCache.txt')
+        file2 = open(file2, 'w')
+        d = {"Cache":self._dataCache._cache, "Total Access":self._dataCache.total_accesses, "Miss":self._dataCache.miss, "Hit":self._dataCache.hit}
+        file2.write(str(d))
         file2.close()
         
 

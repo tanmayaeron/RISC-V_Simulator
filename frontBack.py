@@ -23,15 +23,13 @@ class frontBackEndInteraction:
             
         self.processor.printRegisters()
         self.processor.printData()
+        self.processor.getCaches()
         
         
     def getRegisterSnapshot(self):
         l = self.processor.getRegisters()
         return l
-    
-    def printCaches(self):
-        self.processor.getCaches()
-    
+
     def getMemorySnapshot(self, address):
         mem = self.processor.getData()
         l=[]
@@ -63,7 +61,7 @@ class frontBackEndInteraction:
          
     def parseData(self, path):
         with open(path) as f:
-            data = [json.loads(line) for line in f]
+            data = [json.loads(line.replace("'", "\"")) for line in f]
         return data
     
 

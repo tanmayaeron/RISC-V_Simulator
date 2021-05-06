@@ -645,7 +645,7 @@ class Processor:
         return self._PMI.getMemory()
         
     def getCaches(self):
-        self._PMI.printCaches()
+        self._PMI.printCaches(self._currFolderPath)
         
     def printStat(self):
         filename = os.path.join(self._currFolderPath, "generated", 'stats.txt')
@@ -682,6 +682,7 @@ class Processor:
         self.Flush = self.Miss_Count*2
         f.write("Number of stalls due to control hazards are :"+str(self.Flush)+"\n")
         f.write("\n")
+        f.close()
 
     def reset(self, initialiseDetails2):
         self.initialiseDetails[1:] = initialiseDetails2

@@ -24,9 +24,7 @@ class mainScreen(QWidget, UiComponents):
         self.link = frontBackEndInteraction([self.directoryPath, [1024, 1024], [8, 8], [4, 4]])
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
-        self.datapathO = self.link.parseData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
-        self.datapathF = self.link.parseData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
-        self.datapathC = self.link.parseData(os.path.join(self.directoryPath, "generated", "CacheInfo.txt"))
+        
         QTimer.singleShot(0, self.initWindow)
         self.splash.show()
 
@@ -64,9 +62,21 @@ class mainScreen(QWidget, UiComponents):
             self.infoTable[count][0].setText(i)
             self.infoTable[count][1].setText(str(dictionary[i]))
             count+=1
-            # self.memoryArray[i][j].setText(l[i][j])
-
+            
+    def updateIDCacheView(self):
+        dictionary =self.datapathD[0]
+        c = 0
         
+        for i in dictionary.keys():
+            self.DCacheTable[c][0].setText(i)
+            self.DCacheTable[c][1].setText(str(dictionary[i]))
+            c+=1
+        c = 0
+        dictionary =self.datapathI[0]
+        for i in dictionary.keys():
+            self.ICacheTable[c][0].setText(i)
+            self.ICacheTable[c][1].setText(str(dictionary[i]))
+            c+=1
     def fileOpen(self):
         f = open(self.currFilePath, 'r')
         self.editorScreen.setPlainText(f.read())
@@ -101,6 +111,14 @@ class mainScreen(QWidget, UiComponents):
             self.knobsList[5] = 0
         else:
             self.knobsList[5] = int(self.k6.text())
+            
+    def callDataPaths(self):
+        self.datapathO = self.link.parseData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
+        self.datapathF = self.link.parseData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
+        self.datapathC = self.link.parseData(os.path.join(self.directoryPath, "generated", "CacheInfo.txt"))
+        self.datapathI = self.link.parseData(os.path.join(self.directoryPath, "generated", "InstructionCache.txt"))
+        self.datapathD = self.link.parseData(os.path.join(self.directoryPath, "generated", "DataCache.txt"))
+        
         
     def fileCompile(self):
         self.fileSave()
@@ -108,14 +126,12 @@ class mainScreen(QWidget, UiComponents):
         self.link.reset(cacheDetails)
         self.updateknobsList()
         self.link.runProgram(self.currFilePath, self.knobsList)
+        self.callDataPaths()
         self.compile_button.setText("\U00002705")
         self.updateRegisterView()
+        self.updateIDCacheView()
         self.updateMemoryView("10000000")
-        self.datapathO = self.link.parseData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
-        self.datapathF = self.link.parseData(os.path.join(self.directoryPath, "generated", "forwarding.txt"))
-        self.datapathC = self.link.parseData(os.path.join(self.directoryPath, "generated", "CacheInfo.txt"))
-        # self.hitMissData = self.link.parseData(os.path.join(self.directoryPath, "miss.txt"))
-        # self.link.printCaches()
+        
         loop = QEventLoop()
         QTimer.singleShot(1000,loop.quit)   
         loop.exec_()
@@ -184,6 +200,8 @@ class mainScreen(QWidget, UiComponents):
         self.datapath()
         self.controlBox()
         self.cacheDisplay()
+        self.DCache()
+        self.ICache()
         self.info()
         self.tabbedView2()
         self.tabbedView1()

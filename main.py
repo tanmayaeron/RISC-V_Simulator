@@ -51,12 +51,14 @@ if __name__ == '__main__':
         sys.exit(App.exec_())
 
     elif(fileName is None):
+        
         directoryPath = os.getcwd()
         currFilePath = os.path.join(directoryPath, "test", "main.mc")
         startDetails = [directoryPath, [64, 64], [4, 4], [2, 2]]
         link = frontBackEndInteraction(startDetails)
+        link.reset(startDetails[1:])
         link.runProgram(currFilePath, knobsL)
-        # link.reset()
+        
         
     else:
         directoryPath = os.getcwd()
@@ -71,6 +73,7 @@ if __name__ == '__main__':
             startDetails[2][1] = DCache[1]
             startDetails[3][1] = DCache[2]
         link = frontBackEndInteraction(startDetails)
+        link.reset(startDetails[1:])
         link.runProgram(currFilePath, knobsL)
         # link.reset()
         

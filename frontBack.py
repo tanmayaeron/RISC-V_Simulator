@@ -6,6 +6,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import json
 import os
+import glob
 class frontBackEndInteraction:
     def __init__(self, startDetails):
         self.processor = Processor(startDetails)
@@ -53,8 +54,15 @@ class frontBackEndInteraction:
         self.clearData(os.path.join(self.directoryPath, "generated", "registers.txt"))
         self.clearData(os.path.join(self.directoryPath, "generated", "buffer.txt"))
         self.clearData(os.path.join(self.directoryPath, "generated", "stats.txt"))
+        self.clearData(os.path.join(self.directoryPath, "generated", "InstructionCache.txt"))
+        self.clearData(os.path.join(self.directoryPath, "generated", "DataCache.txt"))
         self.clearData(os.path.join(self.directoryPath, "generated", "CacheInfo.txt"))
-        
+        files = glob.glob(os.path.join(self.directoryPath, "generated", "Buffer Snapshot", "*"))
+        for f in files:
+            os.remove(f)
+        files = glob.glob(os.path.join(self.directoryPath, "generated", "Register Snapshots", "*"))
+        for f in files:
+            os.remove(f)
         self.processor.reset(initialiseControls)
         # del self.processor
         # self.processor = Processor(self.directoryPath)

@@ -43,6 +43,17 @@ if __name__ == '__main__':
         ins_num = args.k5
 
     knobsL = [knob1, knob2, knob3, knob4, knob5, ins_num]
+
+    directoryPath = os.getcwd()
+    startDetails = [directoryPath, [64, 64], [4, 4], [2, 2]]
+    if ICache is not None:
+        startDetails[1][0] = ICache[0]
+        startDetails[2][0] = ICache[1]
+        startDetails[3][0] = ICache[2]
+    if DCache is not None:
+        startDetails[1][1] = DCache[0]
+        startDetails[2][1] = DCache[1]
+        startDetails[3][1] = DCache[2]
     
     if ifGUI:
         App = QApplication(sys.argv)
@@ -51,27 +62,14 @@ if __name__ == '__main__':
         sys.exit(App.exec_())
 
     elif(fileName is None):
-        
-        directoryPath = os.getcwd()
         currFilePath = os.path.join(directoryPath, "test", "main.mc")
-        startDetails = [directoryPath, [64, 64], [4, 4], [2, 2]]
         link = frontBackEndInteraction(startDetails)
         link.reset(startDetails[1:])
         link.runProgram(currFilePath, knobsL)
         
         
     else:
-        directoryPath = os.getcwd()
         currFilePath = os.path.join(directoryPath, "test", fileName)
-        startDetails = [directoryPath, [64, 64], [4, 4], [2, 2]]
-        if ICache is not None:
-            startDetails[1][0] = ICache[0]
-            startDetails[2][0] = ICache[1]
-            startDetails[3][0] = ICache[2]
-        if DCache is not None:
-            startDetails[1][1] = DCache[0]
-            startDetails[2][1] = DCache[1]
-            startDetails[3][1] = DCache[2]
         link = frontBackEndInteraction(startDetails)
         link.reset(startDetails[1:])
         link.runProgram(currFilePath, knobsL)

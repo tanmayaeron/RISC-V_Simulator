@@ -208,7 +208,7 @@ class PMI:
             self.__memory.store_word(self.__MAR[0], self.__MDR[0], 0)
             
         else:
-            self._memory.store_word(self.__MAR[1], self.__MDR[1], 1)
+            self.__memory.store_word(self.__MAR[1], self.__MDR[1], 1)
             
         
 

@@ -10,17 +10,22 @@ def stringsplit(string):
     return l;
 
 
-def stringsplit2(string):
+def stringsplit2(string,splitarray=" ,\n"):
     # this function splits the string and arguments are all the elements in the splitarray
     l=[]
-    splitarray=[" ",","]
+    
     for i in string:
         if i in splitarray:
-            if len(l)==0 or l[-1]!=[]:
+            if len(l)==0 or l[-1]!="":
                 # we have to split here
-                l.append([])
+                l.append("")
         else:
-            l[-1]+=i
+            if len(l)==0:
+                l.append(i)
+            else:
+                l[-1]+=i
+    if l and l[-1]=="":
+        l.pop()
     return l;
 
 if __name__=='__main__':
@@ -29,9 +34,14 @@ if __name__=='__main__':
     print(string)
 
     
-    string =stringsplit(my_string)
+    string =stringsplit2(my_string)
     print(string)
 
-    my_string="lw x11,12(x11)"
-    string =stringsplit(my_string)
+    my_string="lw x11,12(x11)\n"
+    string =stringsplit2(my_string)
     print(string)
+
+    my_string="lw x11,12(x11)\n"
+    string =stringsplit2(my_string," ,()\n")
+    print(string)
+    

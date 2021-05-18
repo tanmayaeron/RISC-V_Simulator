@@ -204,12 +204,12 @@ class Cache:
         # we store the oldTag for cache use
         oldTag = self._Random[index][victim][2]
 
-        self._Random[index].pop(victim)
-        # now we append the new block using append 
-        # [1,0,tag] is appended
-        self._Random[index].append([1,0,tag])
+        # self._Random[index].pop(victim)
+        # # now we append the new block using append 
+        # # [1,0,tag] is appended
+        # self._Random[index].append([1,0,tag])
         
-        
+        self._Random[index][victim]=[1,0,tag]#the randomly selected victim blocked is replaced by new tag
     
         self._missDetails.append((self.miss+1, self._cache[index][oldTag]))
         return (0, oldTag)  

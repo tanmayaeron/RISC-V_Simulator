@@ -22,6 +22,7 @@ class Cache:
         self._LRU = []
         self._FIFO = []
         self._Random = []
+        self._NRU=[]
         self._missDetails = []
         self.index = int(math.log2(cache_size/block_size)) - int(math.log2(ways)) #index bits
         self.BO = int(math.log2(block_size)) #block offset bits
@@ -34,6 +35,7 @@ class Cache:
         self.initialiseLRU()
         self.initialiseFIFO()
         self.initialiseRandom()
+        self.initialiseNRU()
 
     def address_break(self, address): #takes the hex string
         #should return binary, returns decimal for now
@@ -84,6 +86,19 @@ class Cache:
         self._FIFO[i] contains [0,0,0]
         in [0,0,0] the first element represents if the element is present or not
         the middle element is useless.
+        the last element contains tag
+        """
+    
+    def initialiseNRU(self):
+        for ind in range(2**self.index):
+            self._FIFO.append([])
+            for blocks in range(self.ways):
+                self._FIFO[ind].append([0,0,0]) 
+
+        """
+        self._FIFO[i] contains [0,0,0]
+        in [0,0,0] the first element represents if the element is present or not
+        
         the last element contains tag
         """
     def checkCache(self, index, tag):
@@ -173,7 +188,7 @@ class Cache:
                 return -1
     
         # then we find if there is empty space in the Random or not
-        
+
         for i in range(self.ways):
             if self._Random[index][i][0] == 0:
                 self._Random[index][i][0] = 1
@@ -187,12 +202,12 @@ class Cache:
         # equivalent to randint(self.ways-1)
 
         # we store the oldTag for cache use
-        oldTag = self._FIFO[index][victim][2]
+        oldTag = self._Random[index][victim][2]
 
-        self._FIFO[index].pop(victim)
+        self._Random[index].pop(victim)
         # now we append the new block using append 
         # [1,0,tag] is appended
-        self._FIFO[index].append([1,0,tag])
+        self._Random[index].append([1,0,tag])
         
         
     

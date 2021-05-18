@@ -1,3 +1,4 @@
+import re
 
 def stringsplit(string):
     # this function splits according to space and comma only
@@ -28,6 +29,11 @@ def stringsplit2(string,splitarray=" ,\n"):
         l.pop()
     return l;
 
+def splitstringregex(string):
+    # splits the string at commas and spaces(spaces tabs and \n)
+    l=re.findall(r'[^,\s]+',string)
+    return l;
+
 if __name__=='__main__':
     my_string="addi x11,x12, x13"
     string=stringsplit(my_string)
@@ -44,4 +50,7 @@ if __name__=='__main__':
     my_string="lw x11,12(x11)\n"
     string =stringsplit2(my_string," ,()\n")
     print(string)
-    
+
+    my_string="lw            x11,12(x11)\n"
+    string =splitstringregex(my_string)
+    print("regex output",string)

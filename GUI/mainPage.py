@@ -10,7 +10,8 @@ from helperFunctions import *
 from frontBack import *
 from GUI.UiComponents import UiComponents
 
-class mainScreen(QWidget, UiComponents):
+from GUI.temp import PythonHighlighter
+class mainScreen(QMainWindow, UiComponents):
     def __init__(self, App):
         super().__init__()
         self.App = App
@@ -25,8 +26,9 @@ class mainScreen(QWidget, UiComponents):
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
         self.callDataPaths()
-        QTimer.singleShot(3000, self.initWindow)
-        self.splash.show()
+        self.initWindow()
+        # QTimer.singleShot(3000, self.initWindow)
+        # self.splash.show()
 
     def updateRegisterView(self):
         alt = getAltNameOfRegister()
@@ -102,7 +104,6 @@ class mainScreen(QWidget, UiComponents):
     def fileSave(self):
         text = self.editorScreen.toPlainText()
         f = open(self.currFilePath, 'w')
-        self.compile_button.setText("Compile")
         f.write(text)
         
     def getCacheFromInput(self):
@@ -192,7 +193,7 @@ class mainScreen(QWidget, UiComponents):
     def connections(self):
         self.save_button.clicked.connect(lambda: self.fileSave())
         self.compile_button.clicked.connect(lambda: self.fileCompile())
-        self.theme_button.clicked.connect(lambda: self.changeTheme())
+        # self.theme_button.sclicked.connect(lambda: self.changeTheme())
         self.jump_button.clicked.connect(lambda: self.jumpAddress())
         
         self.l1[0].clicked.connect(lambda: self.updateInfoView(0))
@@ -218,28 +219,39 @@ class mainScreen(QWidget, UiComponents):
         self.datapath()
         self.controlBox()
         self.cacheDisplay()
+        self.createMenuBar()
         # self.DCache()
         # self.ICache()
         self.IDCache()
         self.info()
-        self.tabbedView2()
+
         self.tabbedView1()
+        self.tabbedView2()
         
         self.help = self.tabs1
         self.feed = self.tabs2
-   
     def initWindow(self):
         self.splash.close()
         logo_label = self.mainLabel()
         
         self.window()
         self.connections()
+        
+        self.setMenuBar(self.menuBar)
         hbox = QHBoxLayout()
-
-        hbox.addWidget(self.feed, 2)
-        hbox.addWidget(self.help, 3)
+        splitter1 = QSplitter(Qt.Horizontal)
+        textedit = QTextEdit()
+        splitter1.addWidget(self.help)
+        splitter1.addWidget(self.feed)
+        splitter1.setSizes([200,500])
+        splitter1.setStyleSheet("background-color: transparent")
+        hbox.addWidget(splitter1)
+        
         vbox = QVBoxLayout()
-        vbox.addLayout(logo_label)
-        vbox.addLayout(hbox)
-        self.setLayout(vbox)
+        vbox.addLayout(logo_label, 1)
+        vbox.addLayout(hbox, 8)
+        temp = QWidget()
+        temp.setLayout(vbox)
+        self.setCentralWidget(temp)
+
         self.showMaximized()

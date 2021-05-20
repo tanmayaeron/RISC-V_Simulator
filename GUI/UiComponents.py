@@ -8,11 +8,17 @@ from qdarkstyle.dark.palette import DarkPalette
 import os
 from helperFunctions import *
 from frontBack import *
+from GUI.temp import PythonHighlighter
+import qtawesome as qta
 
+import syntax
 class UiComponents():
     def __init__(self):
         self.fixedfont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
         self.fixedfont.setPointSize(16)
+        self.fixedfont2 = QFontDatabase.systemFont(QFontDatabase.FixedFont)
+        self.fixedfont2.setPointSize(14)
+        
 
     def operationTile(self, name):
         button = QPushButton()
@@ -27,7 +33,6 @@ class UiComponents():
         button = QPushButton()
         button.setText(name)
         button.setFont(QFont('Times', 30))
-        # bto.setStyleSheet("background-color :red;")
         button.setFixedHeight(height)
         button.setFixedWidth(width)
         return button
@@ -42,7 +47,6 @@ class UiComponents():
         if (isBorder):
             temp.setStyleSheet("border :1px solid white;")
         temp.setAlignment(QtCore.Qt.AlignCenter)
-        # temp.setStyleSheet("color: black;");
         return temp
     
     def labelTile2(self, labelName, height, width, color):
@@ -124,7 +128,7 @@ class UiComponents():
         self.controlGrid = QGridLayout()
         self.controlTable = []
         
-        controlsD = ["Cache(I$)", "Cache(D$)", "Block(I$)", "Block(D$)", "Way(I$)", "Way(D$)", "Compile", "Save","Theme", "K1", "K2", "K3", "K4", "K5", "K6"]
+        controlsD = ["Cache(I$)", "Cache(D$)", "Block(I$)", "Block(D$)", "Way(I$)", "Way(D$)", "Compile", "Save", "Pipelined", "Forwarding"]
         for i in range(len(controlsD)):
             temp = self.labelTile(controlsD[i], 40, 130, 0)
             self.controlGrid.addWidget(temp, i+1, 0)
@@ -138,18 +142,15 @@ class UiComponents():
         self.save_button = self.buttonTile("\U0001F4BE", 50, 40)
         self.compile_button = self.buttonTile("\U00002699", 50, 40)
         self.currentTheme = "Dark Theme"
-        self.theme_button = self.buttonTile("\U0001F4A1", 50, 40)
+        # self.theme_button = self.buttonTile("\U0001F4A1", 50, 40)
         self.controlGrid.addWidget(self.compile_button, 7, 1)
         self.controlGrid.addWidget(self.save_button, 8, 1)
-        self.controlGrid.addWidget(self.theme_button, 9, 1)
+        # self.controlGrid.addWidget(self.theme_button, 9, 1)
         
         
-        self.controlGrid.addWidget(self.k1, 10, 1)
-        self.controlGrid.addWidget(self.k2, 11, 1)
-        self.controlGrid.addWidget(self.k3, 12, 1)
-        self.controlGrid.addWidget(self.k4, 13, 1)
-        self.controlGrid.addWidget(self.k5, 14, 1)
-        self.controlGrid.addWidget(self.k6, 15, 1)
+        self.controlGrid.addWidget(self.k1, 9, 1)
+        self.controlGrid.addWidget(self.k2, 10, 1)
+        
             
         self.controlTable[0].setText("64")
         self.controlTable[1].setText("64")
@@ -162,17 +163,14 @@ class UiComponents():
         self.controlScroll.setWidget(self.displayWidget4)
         self.controlScroll.setWidgetResizable(True)
         
-    def mainLabel(self):
-        
-        
+    def mainLabel(self):        
         main_label_image = QLabel()
         main_label_image_pixmap = QPixmap("GUI/Images/logo.png")
-        main_label_image_pixmap = main_label_image_pixmap.scaled(300, 80)
+        main_label_image_pixmap = main_label_image_pixmap.scaled(450, 140)
         main_label_image.setPixmap(main_label_image_pixmap)
         main_label_hBox = QHBoxLayout()
-        main_label_hBox.addWidget(main_label_image, 9)
-        main_label_hBox.setContentsMargins(10, 10, 20, 10)
-        
+        main_label_hBox.addWidget(main_label_image)
+        main_label_hBox.setAlignment(QtCore.Qt.AlignCenter)
         return main_label_hBox
     
     def runMode(self):
@@ -185,13 +183,22 @@ class UiComponents():
         self.k6.setValidator(QIntValidator())
 
         
+    def createMenuBar(self):
+        self.menuBar =  QMenuBar(self)
+        
+        fileMenu = QMenu("&File", self)
+        self.menuBar.addMenu(fileMenu)
+        editMenu = self.menuBar.addMenu("&Edit")
+        helpMenu = self.menuBar.addMenu("&Help")
+        
 
     def editor(self, filePath):
         self.editorScroll = QScrollArea()
         self.editorlayout = QVBoxLayout()
         self.editorScreen = QPlainTextEdit()
-        
-        self.editorScreen.setFont(self.fixedfont)
+        self.editorScreen.setStyleSheet("background-color: '#00171F'")
+        self.editorScreen.setFont(self.fixedfont2)
+        # self.editorScreen.setFont()s
         self.path = filePath
         self.editorlayout.addWidget(self.editorScreen)
         self.container = QGroupBox()
@@ -204,6 +211,7 @@ class UiComponents():
         self.editorScroll.setFrameStyle(QFrame.NoFrame)
         self.container.setStyleSheet("border:none")
         self.editorScreen.setFrameStyle(QFrame.NoFrame)
+        
         # self.container.setFrameStyle(QFrame.NoFrame)
 
     def datapath(self):
@@ -308,6 +316,8 @@ class UiComponents():
         
     def tabbedView1(self):
         self.tabs1 = QTabWidget()
+        self.tabs1.setTabPosition(QtWidgets.QTabWidget.West)
+        self.tabs1.setIconSize(QtCore.QSize(60, 60))
         self.tabs1.setStyleSheet("border:none")
         self.tab1 = self.scroll1
         self.tab2 = self.scroll
@@ -316,29 +326,31 @@ class UiComponents():
         self.tab5 = self.scroll5
         self.tab6 = self.table1
         self.tab7 = self.table2
-        self.tabs1.addTab(self.tab4, "Controls")
-        self.tabs1.addTab(self.tab1, "Registers")
-        self.tabs1.addTab(self.tab2, "Memory")
-        self.tabs1.addTab(self.tab3, "Info")
         
-        self.tabs1.addTab(self.tab5, "Cache Details")
+        self.tabs1.addTab(self.tab4, QIcon("GUI/Images/controls.png"), "")
+        self.tabs1.addTab(self.tab1, QIcon("GUI/Images/registers.png"), "")
+        self.tabs1.addTab(self.tab2, QIcon("GUI/Images/memory.png"), "")
+        self.tabs1.addTab(self.tab3, QIcon("GUI/Images/cache.png"), "")
+        
+        # self.tabs1.addTab(self.tab5, "Cache Details")
         self.tabs1.addTab(self.tab6, "D$ Cache")
-        self.tabs1.addTab(self.tab7, "I$ Cache")
-        
+        # self.tabs1.addTab(self.tab7, "I$ Cache")
+
 
     def tabbedView2(self):
         self.tabs2 = QTabWidget()
+
+        # self.tabs1.setIconSize(QtCore.QSize(0, 0))
         self.tabs2.setStyleSheet("border:none")
+        
         self.tabMain2 = self.editorScroll
         self.tabMain3 = self.displayWidget2
-        
-        
-        self.tabs2.addTab(self.tabMain2, "Editor")
-        self.tabs2.addTab(self.tabMain3, "Datapath")
-        # self.tabs2.addTab(self.tabMain4, "Cache Control")
+      
+        self.tabs2.addTab(self.tabMain2, "Code")
+        self.tabs2.addTab(self.tabMain3, "Visualise")
+
 
         
-
 
     def registerDisplay(self):
         self.scroll1 = QScrollArea()

@@ -1,4 +1,5 @@
 from GUI.mainPage import *
+from GUI.temp import PythonHighlighter
 from frontBack import frontBackEndInteraction
 #commented top line and added above for now
 import argparse
@@ -59,6 +60,7 @@ if __name__ == '__main__':
         App = QApplication(sys.argv)
         App.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         window = mainScreen(App)
+        highlight = PythonHighlighter(window.editorScreen.document())
         sys.exit(App.exec_())
 
     elif(fileName is None):

@@ -1,8 +1,12 @@
 import re
 import pandas as pd
+import os
+from collections import defaultdict
+from helperFunctions import  *
 
-df_control = pd.read_csv(os.path.join(currFolderPath, 'repository', "controls.csv"))
-def_neu = list(df_control['neumonic'].astype(int))
+# df_control = pd.read_csv(os.path.join(currFolderPath, 'repository', "instructions.csv"))
+df_control = pd.read_csv(os.path.join( 'repository', "instructions.csv"))
+def_neu = list(df_control['neumonic'].astype(str))
 df      = list(df_control['parts'].astype(int))
 df_1    = list(df_control['part1'].astype(int))
 df_2    = list(df_control['part2'].astype(int))
@@ -13,53 +17,136 @@ def dump(file):
     f = f.readlines()
     for i in f:
         processInstruction(i)
+class parseInstruction:
+    def __init__(self):
 
-def processInstruction(instruction):
-    l = split(instruction)
-    instructionIndex = 0
-    try:
-        instructionIndex = df_neu.index(l[0])
-    except:
-        return "Unknown instruction"
-    if(len(l) != df[instructionIndex]):
-        return "Insufficient/Excess parameters"
-    
-    else:
-        if(check(l[1], df_1[instructionIndex]) == None):
-            return "Incorrect syntax"
-        if(check(l[2], df_2[instructionIndex]) == None):
-            return "Incorrect syntax"
+        self.dotDataOccured=0;
+        self.dotTextOccured=0;
+
+        self.labels=defaultdict(str)
+
+        # labels contains label name and its pc for eg {"exit":"3C","if":"28"}
+    def printDetails(self):
+        if self.dotTextOccured:
+            print("Text instructions parsing ahead")
         else:
-            l[2] = int(string, 2)
+            print("Data Instructions Parsing ahead")
+        print(self.labels)
+    
+    def getDetails(self):
+        return labels
+    
+    def CheckInstruction(self,string,PC="0"*8):
+        # the instruction may be header or label or datainstruction(.word : 24) or 
+        # the real instruction
+        if self.checkIfHeader(string):
+            return "Header";
+
+            
+        elif self.checkifLabel(string,PC):
+            return "Label";
+
+        elif self.dotTextOccured==0 and self.dotDataOccured==0:
+            # .data and .text has not occured and it is not label
+            # so it must be .text instructions
+            self.dotTextOccured=1
+        
+        if self.dotDataOccured==1:
+            # process data instruction;
+            pass;
+        elif self.dotTextOccured==1:
+            return self.processInstruction(string)
+
+    def checkIfHeader(self,string):
+        # check if it is .data or .text
+        if string==".text":
+            self.dotTextOccured=1;
+            self.dotDataOccured=0
+            return 1;
+        elif string==".data":
+            self.dotDataOccured=1
+            self.dotTextOccured=0
+            return 1;
+        return 0;
+
+    def checkifLabel(self,string, PC="0"*8):
+        """
+        checks if the string is label or not
+        for eg:
+        label:
+        exit:
+        if label is present it returns label with the PC
+        """
+        if string.endswith(":"):
+            labels[string]=PC # stores the PC to calculate the difference in the future
+            return 1;
+        return 0;
+
+    def processInstruction(self, instruction):
+        l = split(instruction)
+        instructionIndex = 0
         try:
-            if(check(l[3], df_3[instructionIndex]) == None):
+            instructionIndex = df_neu.index(l[0])
+        except:
+            return "Unknown instruction"
+        if(len(l) != df[instructionIndex]):
+            return "Insufficient/Excess parameters"
+        
+        else:
+            if(self.check(l[1], df_1[instructionIndex]) == None):
                 return "Incorrect syntax"
-        except:
-            pass
-        '''
-        l = [neumonic, part1, part2, part3]
-        '''
+            if(self.check(l[2], df_2[instructionIndex]) == None):
+                return "Incorrect syntax"
+            else:
+                l[2] = int(string, 2)
+            try:
+                if(self.check(l[3], df_3[instructionIndex]) == None):
+                    return "Incorrect syntax"
+            except:
+                pass
+            '''
+            l = [neumonic, part1, part2, part3]
+            '''
+            
+            
+            
+            
         
         
-        
-        
-    
-    
-def check(string, type):
-    if(type == 0):
-        if(re.search(r'^x(([0-9])|([1-2][0-9])|(3[0-1]))$', string)):
+    def check(self,string, type):
+        if(type == 0):
+            if(re.search(r'^x(([0-9])|([1-2][0-9])|(3[0-1]))$', string)):
+                return 1
+            else:
+                return None
+        elif(type == 1):
+            try:
+                number = int(string, 0)
+                return number
+            except:
+                return None
+            
+        elif(type == -1):
             return 1
-        else:
-            return None
-    elif(type == 1):
-        try:
-            number = int(string, 0)
-            return number
-        except:
-            return None
-        
-    elif(type == -1):
-        return 1
+def getLabelPC(string):
+    # the label must have occured earlier to get the PC 
+    # should be run after adding all the labels into the labels dict
+    if string in labels:
+        return labels[string]
+    else:
+        return "ERROR: Label never defined in the code"
+
+def getLabelDiff(labelName,PC):
+    labelUsed=PC;
+    labelDefined=getLabelPC(labelName)
+    if labelDefined.startswith("ERROR"):
+        return "ERROR: Label never defined in the code";
+    labelUsedInDec=hexToDec(PC)
+    labelDefinedInDec=hexToDec(labelName)
+    return labelDefinedInDec-labelUsedInDec
+
+
+
         
 
 
@@ -71,10 +158,23 @@ def split(string):
     return l;
 
 if __name__=='__main__':
-    print(int("21", 0))
-    print(int("0x21", 0))
-    print(int("0b11", 0))
-    print(int("0b21", 0))
+    # print(int("21", 0))
+    # print(int("0x21", 0))
+    # print(int("0b11", 0))
+    # print(int("0b01", 0))
+    # output=parseInstruction.processInstruction(".data")
+    # print(output)
+
+    print("\nparse instruction class\n")
+
+    a=parseInstruction()
+    output=a.CheckInstruction(".data")
+    print(output)
+    a.printDetails()
+
+    print(a.CheckInstruction(".text"))
+    a.printDetails()
+
     # string = "x21"
     # if(re.search(r'^x(([0-9])|([1-2][0-9])|(3[0-1]))$', string)):
     #     print(2)

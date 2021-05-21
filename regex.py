@@ -5,13 +5,8 @@ from collections import defaultdict
 from helperFunctions import  *
 
 # df_control = pd.read_csv(os.path.join(currFolderPath, 'repository', "instructions.csv"))
-df_control = pd.read_csv(os.path.join( 'repository', "instructions.csv"))
-def_neu = list(df_control['neumonic'].astype(str))
-df      = list(df_control['parts'].astype(int))
-df_1    = list(df_control['part1'].astype(int))
-df_2    = list(df_control['part2'].astype(int))
-df_3    = list(df_control['part3'].astype(int))
-            
+
+
 def dump(file):
     f = open(file, 'r')
     f = f.readlines()
@@ -19,6 +14,12 @@ def dump(file):
         processInstruction(i)
 class parseInstruction:
     def __init__(self):
+        self.df_control = pd.read_csv(os.path.join( 'repository', "instructions.csv"))
+        self.df_neu = list(self.df_control['neumonic'].astype(str))
+        self.df      = list(self.df_control['parts'].astype(int))
+        self.df_1    = list(self.df_control['part1'].astype(int))
+        self.df_2    = list(self.df_control['part2'].astype(int))
+        self.df_3    = list(self.df_control['part3'].astype(int))
 
         self.dotDataOccured=0;
         self.dotTextOccured=0;
@@ -34,7 +35,14 @@ class parseInstruction:
         print(self.labels)
     
     def getDetails(self):
-        return labels
+        return self.labels
+    
+    def split(self,string):
+        # splits the string at commas,spaces(tabs and \n), (,)
+        # used to extract 12 and x16 from 12(x16)
+        # also extracts lw x11 12 x12 from lw x11,12(x12)
+        l=re.findall(r'[^,\s()]+',string)
+        return l;
     
     def CheckInstruction(self,string,PC="0"*8):
         # the instruction may be header or label or datainstruction(.word : 24) or 
@@ -83,24 +91,27 @@ class parseInstruction:
         return 0;
 
     def processInstruction(self, instruction):
-        l = split(instruction)
+        lWithNeumonic = self.split(instruction)
+        
         instructionIndex = 0
         try:
-            instructionIndex = df_neu.index(l[0])
+            instructionIndex = self.df_neu.index(lWithNeumonic[0])
         except:
-            return "Unknown instruction"
-        if(len(l) != df[instructionIndex]):
-            return "Insufficient/Excess parameters"
+            return "Unknown instruction as %s is not recognized" %lWithNeumonic[0]
+        
+        l=lWithNeumonic[1:]
+        if(len(l) != self.df[instructionIndex]):
+            return "Insufficient/Excess parameters as the instruction has %d instead of %d"%(len(l),self.df[instructionIndex] )
         
         else:
-            if(self.check(l[1], df_1[instructionIndex]) == None):
+            if(self.check(l[1], self.df_1[instructionIndex]) == None):
                 return "Incorrect syntax"
-            if(self.check(l[2], df_2[instructionIndex]) == None):
+            if(self.check(l[2], self.df_2[instructionIndex]) == None):
                 return "Incorrect syntax"
             else:
                 l[2] = int(string, 2)
             try:
-                if(self.check(l[3], df_3[instructionIndex]) == None):
+                if(self.check(l[3], self.df_3[instructionIndex]) == None):
                     return "Incorrect syntax"
             except:
                 pass
@@ -150,12 +161,7 @@ def getLabelDiff(labelName,PC):
         
 
 
-def split(string):
-    # splits the string at commas,spaces(tabs and \n), (,)
-    # used to extract 12 and x16 from 12(x16)
-    # also extracts lw x11 12 x12 from lw x11,12(x12)
-    l=re.findall(r'[^,\s()]+',string)
-    return l;
+
 
 if __name__=='__main__':
     # print(int("21", 0))
@@ -175,6 +181,7 @@ if __name__=='__main__':
     print(a.CheckInstruction(".text"))
     a.printDetails()
 
+    print(a.CheckInstruction("add x0 x0 x0"))
     # string = "x21"
     # if(re.search(r'^x(([0-9])|([1-2][0-9])|(3[0-1]))$', string)):
     #     print(2)

@@ -7,11 +7,7 @@ from helperFunctions import  *
 # df_control = pd.read_csv(os.path.join(currFolderPath, 'repository', "instructions.csv"))
 
 
-def dump(file):
-    f = open(file, 'r')
-    f = f.readlines()
-    for i in f:
-        processInstruction(i)
+
 class parseInstruction:
     def __init__(self):
         self.df_control = pd.read_csv(os.path.join( 'repository', "instructions.csv"))
@@ -48,11 +44,11 @@ class parseInstruction:
         # the instruction may be header or label or datainstruction(.word : 24) or 
         # the real instruction
         if self.checkIfHeader(string):
-            return "Header";
+            return "Header "+".data" if self.dotDataOccured else ".text";
 
             
         elif self.checkifLabel(string,PC):
-            return "Label";
+            return "Label %s added at PC %s"%(string[:-1],PC);
 
         elif self.dotTextOccured==0 and self.dotDataOccured==0:
             # .data and .text has not occured and it is not label
@@ -86,22 +82,22 @@ class parseInstruction:
         if label is present it returns label with the PC
         """
         if string.endswith(":"):
-            labels[string]=PC # stores the PC to calculate the difference in the future
+            self.labels[string]=PC # stores the PC to calculate the difference in the future
             return 1;
         return 0;
 
     def processInstruction(self, instruction):
-        lWithNeumonic = self.split(instruction)
+        l = self.split(instruction)
         
-        instructionIndex = 0
+        
         try:
-            instructionIndex = self.df_neu.index(lWithNeumonic[0])
+            instructionIndex = self.df_neu.index(l[0])
         except:
-            return "Unknown instruction as %s is not recognized" %lWithNeumonic[0]
+            return "Unknown instruction as %s is not recognized" %l[0]
         
-        l=lWithNeumonic[1:]
-        if(len(l) != self.df[instructionIndex]):
-            return "Insufficient/Excess parameters as the instruction has %d instead of %d"%(len(l),self.df[instructionIndex] )
+        
+        if(len(l)-1 != self.df[instructionIndex]):
+            return "Insufficient/Excess parameters as the instruction has %d instead of %d"%(len(l)-1,self.df[instructionIndex] )
         
         else:
             if(self.check(l[1], self.df_1[instructionIndex]) == None):
@@ -109,7 +105,8 @@ class parseInstruction:
             if(self.check(l[2], self.df_2[instructionIndex]) == None):
                 return "Incorrect syntax"
             else:
-                l[2] = int(string, 2)
+                pass
+                # l[2] = int(string, 2)
             try:
                 if(self.check(l[3], self.df_3[instructionIndex]) == None):
                     return "Incorrect syntax"
@@ -119,7 +116,7 @@ class parseInstruction:
             l = [neumonic, part1, part2, part3]
             '''
             
-            
+        return "instruction %s has no error "%l
             
             
         
@@ -139,25 +136,30 @@ class parseInstruction:
             
         elif(type == -1):
             return 1
-def getLabelPC(string):
-    # the label must have occured earlier to get the PC 
-    # should be run after adding all the labels into the labels dict
-    if string in labels:
-        return labels[string]
-    else:
-        return "ERROR: Label never defined in the code"
+    
+    def getLabelPC(self,string):
+        # the label must have occured earlier to get the PC 
+        # should be run after adding all the labels into the labels dict
+        if string in self.labels:
+            return self.labels[string]
+        else:
+            return "ERROR: Label never defined in the code"
 
-def getLabelDiff(labelName,PC):
-    labelUsed=PC;
-    labelDefined=getLabelPC(labelName)
-    if labelDefined.startswith("ERROR"):
-        return "ERROR: Label never defined in the code";
-    labelUsedInDec=hexToDec(PC)
-    labelDefinedInDec=hexToDec(labelName)
-    return labelDefinedInDec-labelUsedInDec
+    def getLabelDiff(self,labelName,PC):
+        labelUsed=PC;
+        labelDefined=self.getLabelPC(labelName)
+        if labelDefined.startswith("ERROR"):
+            return "ERROR: Label never defined in the code";
+        labelUsedInDec=hexToDec(PC)
+        labelDefinedInDec=hexToDec(labelName)
+        return labelDefinedInDec-labelUsedInDec
 
 
-
+    def dump(self,file):
+        f = open(file, 'r')
+        f = f.readlines()
+        for i in f:
+            processInstruction(i)
         
 
 
@@ -182,6 +184,13 @@ if __name__=='__main__':
     a.printDetails()
 
     print(a.CheckInstruction("add x0 x0 x0"))
+    a.printDetails()
+
+    print(a.CheckInstruction("exit:","0x4"))
+    a.printDetails()
+
+    print(a.CheckInstruction("if:","0x8"))
+    a.printDetails()
     # string = "x21"
     # if(re.search(r'^x(([0-9])|([1-2][0-9])|(3[0-1]))$', string)):
     #     print(2)

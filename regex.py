@@ -6,7 +6,70 @@ from helperFunctions import  *
 
 # df_control = pd.read_csv(os.path.join(currFolderPath, 'repository', "instructions.csv"))
 
+class cleanFile:
+    def __init__(self, filePath):
+        self.cleanFile = open("clean.s", 'w')
+        self.file = open(filePath, 'r')
+        self.file = self.file.readlines()
+        self.PC = 0
+        self.state = 2
+        self.dataTable = {}
+        self.textTable = {}
+        self.dataPC = 0x10000000
+        self.df_control = pd.read_csv(os.path.join( 'repository', "instructions.csv"))
+        self.df_neu = list(self.df_control['neumonic'].astype(str))
 
+
+    
+    def addToTable(self, s):
+        self.textTable[s] = self.PC
+        
+    def isInstruction(self, s):    
+        for i in self.df_neu:
+            if(i in s):
+                return 1
+        return 0            
+    
+    def clear(self):
+        for line in self.file:
+            if(line != "\n"):
+                j = line.strip()
+                j = re.sub(re.compile("#.*?\n" ) ,"\n" ,line)
+                if(j == "\n"):
+                    continue
+                if(".data" in j):
+                    self.state = 1
+                if(".text" in j):
+                    self.state = 2
+                if(self.state == 1):
+                    pass  
+                elif(self.state == 2):
+                    isLabel = re.search("[^\n]+:", j)
+                    if(isLabel is not None):
+                        cornerCase = list(j.split(":"))
+                        self.addToTable(cornerCase[0])
+                        if(self.isInstruction(cornerCase[1])):
+                            self.PC+=4
+                    else:
+                        if(self.isInstruction(j)):
+                            self.PC+=4
+                    self.cleanFile.write(j)
+                    
+                    
+        self.cleanFile.close()
+        # self.cleanerFile = open("cleaner.s", 'w')
+        # self.cleanFile = open("clean.s", "r")
+        # self.PC = 0
+        # for line in self.cleanFile.readlines():
+        #     pass
+            
+        
+           
+        
+            
+        
+        
+        
 
 class parseInstruction:
     def __init__(self):
@@ -17,10 +80,13 @@ class parseInstruction:
         self.df_1    = list(self.df_control['part1'].astype(int))
         self.df_2    = list(self.df_control['part2'].astype(int))
         self.df_3    = list(self.df_control['part3'].astype(int))
-
-        self.dotDataOccured=0
-        self.dotTextOccured=0
-
+        self.cleaner = cleanFile(os.path.join("test", "bubble_sort.s"))
+        self.cleaner.clear()
+        self.textTable = self.cleaner.textTable
+        self.state = 2
+        self.PC = 0
+        self.openFile = open(os.path.join("clean.s"), 'r')
+        self.finalmc = open(os.path.join("main.mc"), 'w')
         self.labels = defaultdict(str)
 
         # labels contains label name and its pc for eg {"exit":"3C","if":"28"}
@@ -42,56 +108,40 @@ class parseInstruction:
         l=re.findall(r'[^,\s()]+',string)
         return l
 
-    def CheckInstruction(self,string,PC="0"*8):
+
+
+    def isHeader(self,line):
+        if(".text" in line):
+            return 2
+        if(".data" in line):
+            return 1
+        return self.state
+    
+    
+    def checkifLabel(self,string):
+        if string[-1] == ":":
+            return 1
+        return 0;
+    
+    def CheckInstruction(self):
         # the instruction may be header or label or datainstruction(.word : 24) or
         # the real instruction
-        if self.checkIfHeader(string):
-            return "Header "+".data" if self.dotDataOccured else ".text";
+        for line in self.openFile.readlines():
+            self.state = self.isHeader(line)
+            # print(self.state)
+            if self.checkifLabel(line):
+                continue
+            
+            if self.state==2:
+                mc = self.processInstruction(line)
+                # self.finalmc.write(line)
+                self.finalmc.write(str(self.PC)+" "+mc+"\n\n")
+                self.PC+=4
 
 
-        elif self.checkifLabel(string,PC):
-            return "Label %s added at PC %s"%(string[:-1],PC);
-
-        elif self.dotTextOccured==0 and self.dotDataOccured==0:
-            # .data and .text has not occured and it is not label
-            # so it must be .text instructions
-            self.dotTextOccured=1
-
-        if self.dotDataOccured==1:
-            # process data instruction
-            pass
-        elif self.dotTextOccured==1:
-            return self.processInstruction(string)
-
-    def checkIfHeader(self,string):
-        # check if it is .data or .text
-        if string==".text":
-            self.dotTextOccured=1
-            self.dotDataOccured=0
-            return 1
-        elif string==".data":
-            self.dotDataOccured=1
-            self.dotTextOccured=0
-            return 1
-        return 0
-
-    def checkifLabel(self,string, PC="0"*8):
-        """
-        checks if the string is label or not
-        for eg:
-        label:
-        exit:
-        if label is present it returns label with the PC
-        """
-        if string.endswith(":"):
-            self.labels[string]=PC # stores the PC to calculate the difference in the future
-            return 1;
-        return 0;
 
     def processInstruction(self, instruction):
         l = self.split(instruction)
-
-
         try:
             instructionIndex = self.df_neu.index(l[0])
         except:
@@ -102,19 +152,24 @@ class parseInstruction:
             return "Insufficient/Excess parameters as the instruction has %d instead of %d"%(len(l)-1,self.df[instructionIndex] )
 
         else:
-            if(self.check(l[0], self.df_1[instructionIndex]) == None):
-                return "Incorrect syntax"
-            if(self.check(l[1], self.df_2[instructionIndex]) == None):
-                return "Incorrect syntax"
+            # self.finalmc.write(str(l)+"\n")
+            if(self.check(l[1], self.df_1[instructionIndex]) == None):
+                return "Incorrect syntax1"
+            if(self.check(l[2], self.df_2[instructionIndex]) == None):
+                return "Incorrect syntax2"
             try:
-                if(self.check(l[2], self.df_3[instructionIndex]) == None):
-                    return "Incorrect syntax"
+                if(self.check(l[3], self.df_3[instructionIndex]) == None):
+                    return "Incorrect syntax3"
+                else:
+                    l[3] = self.check(l[3], self.df_3[instructionIndex])
             except:
                 pass
             '''
             l = [neumonic, part1, part2, part3]
             '''
 
+            mc = self.assmToMC(l)
+            return mc
         return "instruction %s has no error "%l
 
 
@@ -128,31 +183,23 @@ class parseInstruction:
                 return None
 
         elif(type == 1):
+
             try:
                 number = int(string, 0)
                 return number
             except:
-                return None
-
+                # ttt = str(self.getLabelDiff(string))
+                # self.finalmc.write("\n\n\n\n\n\n"+ str(ttt)+"\n\n\n\n\n\n")
+                # ttt = str(self.getLabelDiff(self, string))
+                return self.getLabelDiff(string)
         elif(type == -1):
             return 1
 
-    def getLabelPC(self,string):
-        # the label must have occured earlier to get the PC
-        # should be run after adding all the labels into the labels dict
-        if string in self.labels:
-            return self.labels[string]
-        else:
-            return "ERROR: Label never defined in the code"
-
-    def getLabelDiff(self,labelName,PC):
-        labelUsed=PC
-        labelDefined=self.getLabelPC(labelName)
-        if labelDefined.startswith("ERROR"):
-            return "ERROR: Label never defined in the code"
-        labelUsedInDec = hexToDec(labelUsed)
-        labelDefinedInDec = hexToDec(labelName)
-        return labelDefinedInDec-labelUsedInDec
+    def getLabelDiff(self,labelName):
+        labelUsed = self.PC
+        labelDefined = self.textTable[labelName]
+        # self.finalmc.write(str(labelUsed) + str(type(labelUsed))+"\n\n\n\n\n")
+        return labelDefined-labelUsed
 
     def assmToMC(self,l):
         mapTomethods = {"R":self.Rconvert,"I":self.Iconvert,"S":self.Sconvert,
@@ -195,7 +242,7 @@ class parseInstruction:
 
         machine_code = ""
         imm = int(l[3],0)
-        imm = decToBin(imm,12) #2's complement conversion
+        imm = decToBin(imm)[-12:] #2's complement conversion
         machine_code +=imm
         rs1 = bin(int(l[2][1:]))[2:]
         rs1 = ("0" * 5 + rs1)[-5:]
@@ -219,7 +266,7 @@ class parseInstruction:
         machine_code = ""
 
         imm = int(l[2], 0)
-        imm = decToBin(imm, 12)  # 2's complement conversion
+        imm = decToBin(imm)[-12:] # 2's complement conversion
         machine_code += imm[:7]
 
         rs2 = bin(int(l[1][1:]))[2:]
@@ -247,7 +294,7 @@ class parseInstruction:
         machine_code = ""
 
         imm = int(l[3], 0)
-        imm = decToBin(imm, 13)  # 2's complement conversion
+        imm = decToBin(imm)[-13:]  # 2's complement conversion
         machine_code += imm[0]
         machine_code+=imm[2:8]
 
@@ -279,7 +326,7 @@ class parseInstruction:
         machine_code = ""
 
         imm = int(l[3], 0)
-        imm = decToBin(imm, 21)  # 2's complement conversion
+        imm = decToBin(imm)[-21:] # 2's complement conversion
         machine_code += imm[0]
         machine_code += imm[-11:-1]
         machine_code += imm[-12]
@@ -301,7 +348,7 @@ class parseInstruction:
         #since user entered value is shifted
         #it is added as it is
         imm = int(l[2], 0)
-        imm = decToBin(imm, 20)  # 2's complement conversion
+        imm = decToBin(imm)[-20:] # 2's complement conversion
         machine_code += imm
 
         rd = bin(int(l[1][1:]))[2:]
@@ -329,63 +376,20 @@ if __name__=='__main__':
     # output=parseInstruction.processInstruction(".data")
     # print(output)
 
-    print("\nparse instruction class\n")
+
+    # a = cleanFile(os.path.join( 'test', "bubble_sort.s"))
+    # a.clear()
+    # print(a.textTable)
+    # # print("\nparse instruction class\n")
 
     a=parseInstruction()
-    output=a.CheckInstruction(".data")
-    print(output)
-    a.printDetails()
-
-    print(a.CheckInstruction(".text"))
-    a.printDetails()
-
-    b= a.CheckInstruction("add x4 x5 x6")
-    print(b)
-    c = a.assmToMC(b)
-    print(c)
-
-    # string = "x21"
-    # if(re.search(r'^x(([0-9])|([1-2][0-9])|(3[0-1]))$', string)):
-    #     print(2)
-    # string = "x211"
-    # print(re.search(r'^x(([0-9])|([1-2][0-9])|(3[0-1]))$', string))
-    # string = "1x21"
-    # print(re.search(r'^x(([0-9])|([1-2][0-9])|(3[0-1]))$', string))
+    a.CheckInstruction()
+    string = "exit"
+    ttt = str(a.getLabelDiff(string))
+                # self.finalmc.write("\n\n\n\n\n\n"+ str(ttt)+"\n\n\n\n\n\n")
+    print(ttt)   
 
 
 
-
-#     def stringsplit(string):
-#         # this function splits according to space and comma only
-#     l=[]
-#     for i in string.split():
-#         j=i.split(",")
-#         l+=[k for k in j if k!=""]
-
-
-#     return l
-
-
-# def stringsplit2(string,splitarray=" ,\n"):
-#     # this function splits the string and arguments are all the elements in the splitarray
-#     l=[]
-#     splitarray=frozenset(splitarray)
-#     # as the query is search frozenset performs faster over list
-#     for i in string:
-#         if i in splitarray:
-#             if len(l)==0 or l[-1]!="":
-#                 # we have to split here
-#                 l.append("")
-#         else:
-#             if len(l)==0:
-#                 l.append(i)
-#             else:
-#                 l[-1]+=i
-#     if l and l[-1]=="":
-#         l.pop()
-#     return l
-
-# def splitstringregex(string):
-#     # splits the string at commas and spaces(spaces tabs and \n)
-#     l=re.findall(r'[^,\s]+',string)
-#     return l
+# # s = "label:"
+# # print(list(s.split(":")))

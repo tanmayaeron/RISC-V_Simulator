@@ -11,9 +11,9 @@ id,neumonic,name,format,opcode,funct3,funct7,parts,part1,part2,part3
 9,addi,ADD Immediate,I,0b0010011,0b000,,3,0,0,1
 10,ori,OR Immediate,I,0b0010011,0b110,,3,0,0,1
 11,andi,AND Immediate,I,0b0010011,0b111,,3,0,0,1
-12,lb,Load Byte,I,0b0000011,0b000,,3,0,1,0
-13,lh,Load Halfword,I,0b0000011,0b001,,3,0,1,0
-14,lw,Load Word,I,0b0000011,0b010,,3,0,1,0
+12,lb,Load Byte,I,0b0000011,0b000,,3,0,0,1
+13,lh,Load Halfword,I,0b0000011,0b001,,3,0,0,1
+14,lw,Load Word,I,0b0000011,0b010,,3,0,0,1
 15,sb,Store Byte,S,0b0100011,0b000,,3,0,1,0
 16,sh,Store Halfword,S,0b0100011,0b001,,3,0,1,0
 17,sw,Store Word,S,0b0100011,0b010,,3,0,1,0

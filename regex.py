@@ -7,12 +7,6 @@ from helperFunctions import  *
 # df_control = pd.read_csv(os.path.join(currFolderPath, 'repository', "instructions.csv"))
 
 
-def dump(file):
-    f = open(file, 'r')
-    f = f.readlines()
-    for i in f:
-        #processInstruction(i)
-        pass
 
 class parseInstruction:
     def __init__(self):
@@ -37,32 +31,32 @@ class parseInstruction:
         else:
             print("Data Instructions Parsing ahead")
         print(self.labels)
-    
+
     def getDetails(self):
         return self.labels
-    
+
     def split(self,string):
         # splits the string at commas,spaces(tabs and \n), (,)
         # used to extract 12 and x16 from 12(x16)
         # also extracts lw x11 12 x12 from lw x11,12(x12)
         l=re.findall(r'[^,\s()]+',string)
         return l
-    
+
     def CheckInstruction(self,string,PC="0"*8):
         # the instruction may be header or label or datainstruction(.word : 24) or
         # the real instruction
         if self.checkIfHeader(string):
-            return "Header"
+            return "Header "+".data" if self.dotDataOccured else ".text";
 
-            
+
         elif self.checkifLabel(string,PC):
-            return "Label"
+            return "Label %s added at PC %s"%(string[:-1],PC);
 
         elif self.dotTextOccured==0 and self.dotDataOccured==0:
             # .data and .text has not occured and it is not label
             # so it must be .text instructions
             self.dotTextOccured=1
-        
+
         if self.dotDataOccured==1:
             # process data instruction
             pass
@@ -91,21 +85,22 @@ class parseInstruction:
         """
         if string.endswith(":"):
             self.labels[string]=PC # stores the PC to calculate the difference in the future
-            return 1
-        return 0
+            return 1;
+        return 0;
 
     def processInstruction(self, instruction):
-        lWithNeumonic = self.split(instruction)
+        l = self.split(instruction)
+
 
         try:
-            instructionIndex = self.df_neu.index(lWithNeumonic[0])
+            instructionIndex = self.df_neu.index(l[0])
         except:
-            return "Unknown instruction as %s is not recognized" %lWithNeumonic[0]
-        
-        l=lWithNeumonic[1:]
-        if(len(l) != self.df[instructionIndex]):
-            return "got %d parameters but expected %d"%(len(l),self.df[instructionIndex])
-        
+            return "Unknown instruction as %s is not recognized" %l[0]
+
+
+        if(len(l)-1 != self.df[instructionIndex]):
+            return "Insufficient/Excess parameters as the instruction has %d instead of %d"%(len(l)-1,self.df[instructionIndex] )
+
         else:
             if(self.check(l[0], self.df_1[instructionIndex]) == None):
                 return "Incorrect syntax"
@@ -119,7 +114,11 @@ class parseInstruction:
             '''
             l = [neumonic, part1, part2, part3]
             '''
-            return lWithNeumonic
+
+        return "instruction %s has no error "%l
+
+
+
 
     def check(self,string, type):
         if(type == 0):
@@ -134,7 +133,7 @@ class parseInstruction:
                 return number
             except:
                 return None
-            
+
         elif(type == -1):
             return 1
 
@@ -153,7 +152,7 @@ class parseInstruction:
             return "ERROR: Label never defined in the code"
         labelUsedInDec = hexToDec(labelUsed)
         labelDefinedInDec = hexToDec(labelName)
-        return labelUsedInDec-labelDefinedInDec
+        return labelDefinedInDec-labelUsedInDec
 
     def assmToMC(self,l):
         mapTomethods = {"R":self.Rconvert,"I":self.Iconvert,"S":self.Sconvert,
@@ -212,6 +211,8 @@ class parseInstruction:
         machine_code = "0" * 8 + machine_code
         machine_code = machine_code[-8:]
         return "0x" + machine_code
+
+
 
 
     def Sconvert(self,l,instructionIndex):
@@ -313,6 +314,12 @@ class parseInstruction:
         machine_code = machine_code[-8:]
         return "0x" + machine_code
 
+    def dump(self,file):
+        f = open(file, 'r')
+        f = f.readlines()
+        for i in f:
+            processInstruction(i)
+
 
 if __name__=='__main__':
     # print(int("21", 0))
@@ -344,10 +351,10 @@ if __name__=='__main__':
     # print(re.search(r'^x(([0-9])|([1-2][0-9])|(3[0-1]))$', string))
     # string = "1x21"
     # print(re.search(r'^x(([0-9])|([1-2][0-9])|(3[0-1]))$', string))
-  
-    
-    
-    
+
+
+
+
 #     def stringsplit(string):
 #         # this function splits according to space and comma only
 #     l=[]

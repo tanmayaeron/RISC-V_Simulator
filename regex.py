@@ -80,7 +80,7 @@ class parseInstruction:
         self.df_1    = list(self.df_control['part1'].astype(int))
         self.df_2    = list(self.df_control['part2'].astype(int))
         self.df_3    = list(self.df_control['part3'].astype(int))
-        self.cleaner = cleanFile(os.path.join("test", "bubble_sort.s"))
+        self.cleaner = cleanFile(os.path.join("test", "fact.s"))
         self.cleaner.clear()
         self.textTable = self.cleaner.textTable
         self.state = 2
@@ -119,7 +119,8 @@ class parseInstruction:
     
     
     def checkifLabel(self,string):
-        if string[-1] == ":":
+        l = list(string.split(":"))
+        if(len(l)>=2):
             return 1
         return 0;
     
@@ -135,7 +136,7 @@ class parseInstruction:
             if self.state==2:
                 mc = self.processInstruction(line)
                 # self.finalmc.write(line)
-                self.finalmc.write(str(self.PC)+" "+mc+"\n\n")
+                self.finalmc.write(str(hex(self.PC))+" "+mc+"\n")
                 self.PC+=4
 
 
@@ -152,22 +153,35 @@ class parseInstruction:
             return "Insufficient/Excess parameters as the instruction has %d instead of %d"%(len(l)-1,self.df[instructionIndex] )
 
         else:
+            if(l[0] == "lw" or l[0] == "lh" or l[0] == "lb"):
+                # self.finalmc.write("\n\n\n\n"+str(l)+"\n\n\n\n\n")
+                l[2], l[3] = l[3], l[2]
+                # self.finalmc.write("\n\n\n\n"+str(l)+"\n\n\n\n\n")
+            
             # self.finalmc.write(str(l)+"\n")
             if(self.check(l[1], self.df_1[instructionIndex]) == None):
                 return "Incorrect syntax1"
-            if(self.check(l[2], self.df_2[instructionIndex]) == None):
-                return "Incorrect syntax2"
+            try:
+                if(self.check(l[2], self.df_2[instructionIndex]) == None):
+                    
+                    return "Incorrect syntax2"
+                else:
+                    if(self.df_2[instructionIndex] == 1):
+                        l[2] = self.check(l[2], self.df_2[instructionIndex])
+            except:
+                pass
             try:
                 if(self.check(l[3], self.df_3[instructionIndex]) == None):
+                    self.finalmc.write("\n\n\n"+str(l)+"\n\n\n")
                     return "Incorrect syntax3"
                 else:
-                    l[3] = self.check(l[3], self.df_3[instructionIndex])
+                    if(self.df_3[instructionIndex] == 1):
+                        l[3] = self.check(l[3], self.df_3[instructionIndex])
             except:
                 pass
             '''
             l = [neumonic, part1, part2, part3]
             '''
-
             mc = self.assmToMC(l)
             return mc
         return "instruction %s has no error "%l
@@ -185,13 +199,13 @@ class parseInstruction:
         elif(type == 1):
 
             try:
-                number = int(string, 0)
+                number = str(int(string, 0))
                 return number
             except:
                 # ttt = str(self.getLabelDiff(string))
                 # self.finalmc.write("\n\n\n\n\n\n"+ str(ttt)+"\n\n\n\n\n\n")
                 # ttt = str(self.getLabelDiff(self, string))
-                return self.getLabelDiff(string)
+                return str(self.getLabelDiff(string))
         elif(type == -1):
             return 1
 
@@ -325,8 +339,9 @@ class parseInstruction:
     def UJconvert(self,l,instructionIndex):
         machine_code = ""
 
-        imm = int(l[3], 0)
+        imm = int(l[2], 0)
         imm = decToBin(imm)[-21:] # 2's complement conversion
+        # self.finalmc.write("\n\n\n\n"+str(imm))
         machine_code += imm[0]
         machine_code += imm[-11:-1]
         machine_code += imm[-12]
@@ -384,11 +399,6 @@ if __name__=='__main__':
 
     a=parseInstruction()
     a.CheckInstruction()
-    string = "exit"
-    ttt = str(a.getLabelDiff(string))
-                # self.finalmc.write("\n\n\n\n\n\n"+ str(ttt)+"\n\n\n\n\n\n")
-    print(ttt)   
-
 
 
 # # s = "label:"

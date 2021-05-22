@@ -14,8 +14,11 @@ def decToHex(operand):
         return '{:08x}'.format(operand)[-8:]
     
 def decToBin(operand):
-    # operand = str(operand)
-    return hexToBin(decToHex(operand))
+    if(operand >= 0):
+        return '{:032b}'.format(operand)[-32:]
+    else:
+        operand = (1 << 32) - (abs(operand))
+        return '{:032b}'.format(operand)[-32:]
 
 def extendImmediate(immediate,isSignExtended = True):
 

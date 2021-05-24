@@ -42,7 +42,7 @@ class cleanFile:
                 if(".text" in j):
                     self.state = 2
                 if(self.state == 1):
-                    pass  
+                    pass
                 elif(self.state == 2):
                     isLabel = re.search("[^\n]+:", j)
                     if(isLabel is not None):
@@ -87,19 +87,15 @@ class parseInstruction:
         self.PC = 0
         self.openFile = open(os.path.join("clean.s"), 'r')
         self.finalmc = open(os.path.join("main.mc"), 'w')
-        self.labels = defaultdict(str)
 
-        # labels contains label name and its pc for eg {"exit":"3C","if":"28"}
+
+        # textTable contains textTable name and its pc for eg {"exit":"3C","if":"28"}
 
     def printDetails(self):
-        if self.dotTextOccured:
-            print("Text instructions parsing ahead")
-        else:
-            print("Data Instructions Parsing ahead")
-        print(self.labels)
+        print(self.textTable)
 
     def getDetails(self):
-        return self.labels
+        return self.textTable
 
     def split(self,string):
         # splits the string at commas,spaces(tabs and \n), (,)

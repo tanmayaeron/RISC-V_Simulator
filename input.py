@@ -31,14 +31,16 @@ class ReadFile:
     def read_mc(self, filepath, obj):
         file = open(filepath, 'r')
         flag = 0
+        size = 2
         for lines in file:
             if(lines == "$" or lines == "$\n"):
                 flag = 1
+                size = 0
                 continue
             
             requiredMemoryLocation, instruction = map(str, lines.split())
             obj.setMAR(requiredMemoryLocation[2:], flag)
             obj.setMDR(instruction[2:], flag)
-            obj.storeData(2, flag+2)
+            obj.storeData(size, flag+2)
             
      

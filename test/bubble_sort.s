@@ -1,7 +1,7 @@
-# .data
-# array: .word 1 2 10 9 3 8 4 7 5 6
+.data
+array: .word 1 2 10 9 3 8 4 7 5 6
 
-# .text
+.text
 auipc x11,0x10000 # x11=array.begin()
 addi x11 x11 0
 addi x12 x0,10 # x12=array.size()

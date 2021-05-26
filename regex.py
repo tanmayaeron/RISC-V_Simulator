@@ -31,32 +31,61 @@ class cleanFile:
         for i in self.df_neu:
             if(i in s):
                 return 1
-        return 0            
+        return 0   
+    
+    def handleDir(self, s, di):
+        
+        if(di == ".word"):
+            self.dataPC +=4
+        elif(di == ".byte"):
+            self.dataPC +=1
+        elif(di == ".half"):
+            self.dataPC +=2
+        elif(di == ".asciiz"):
+            self.dataPC += len(s[1:-1])+1
 
-
+    def dirStatement(self, s):
+        dirT = [".asciiz", ".word",".byte", ".half"]
+        dirC = ""
+        s = re.findall(r'[^,\s]+',s)
+        for i in range(len(s)):
+            if(s[i] in dirT):
+                dirC = s[i]
+            else:
+                self.handleDir(s[i], dirC)
+                
 
     def clear(self):
         for line in self.file:
             if(line != "\n"):
                 j = line.strip()
-                j = re.sub(re.compile("#.*?\n" ) ,"\n" ,j)
+                if("#" in j):
+                    jj = line.find("#")
+                    j = j[:jj]
+                # j = re.sub(re.compile("#.*\n") ,"\n" ,j)
                 if(j == "\n"):
                     continue
                 if(".data" in j):
                     self.state = 1
                     j = j.split()[1:]
                     j = " ".join(j)
+                    self.cleanFile.write(".data")
                 if(".text" in j):
                     self.state = 2
                     j = j.split()[1:]
                     j = " ".join(j)
+                    self.cleanFile.write(".text")
                 if(self.state == 1):
-                    line = re.findall(r'[^,\s]+',line)
-                    isLabel = re.search("[^\n]+:", line[0])
+                    isLabel = re.search("[^\n]+:", j)
                     if(isLabel is not None):
-                        self.addToDataTable([line[0][:-1]])
+                        cornerCase = list(j.split(":"))
+                        self.addToDataTable(cornerCase[0])
+                        self.dirStatement(cornerCase[1])
+                        if(cornerCase[1]!=""):
+                                self.cleanFile.write(cornerCase[1].strip()+"\n")
                     else:
-                        pass
+                        self.dirStatement(j)
+                        self.cleanFile.write(j+"\n")
                 elif(self.state == 2):
                     isLabel = re.search("[^\n]+:", j)
                     if(isLabel is not None):
@@ -64,10 +93,13 @@ class cleanFile:
                         self.addToTextTable(cornerCase[0])
                         if(self.isInstruction(cornerCase[1])):
                             self.PC+=4
+                        if(cornerCase[1]!=""):
+                            self.cleanFile.write(cornerCase[1].strip()+"\n")
+                        
                     else:
                         if(self.isInstruction(j)):
                             self.PC+=4
-                    self.cleanFile.write(j)
+                        self.cleanFile.write(j+"\n")
                     
                     
         self.cleanFile.close()
@@ -99,6 +131,7 @@ class parseInstruction:
         self.textTable = self.cleaner.textTable
         self.state = 2
         self.PC = 0
+        self.dataPC = 0x10000000
         self.openFile = open(os.path.join("clean.s"), 'r')
         self.finalmc = open(os.path.join("main.mc"), 'w')
 
@@ -143,13 +176,44 @@ class parseInstruction:
             if self.checkifLabel(line):
                 continue
             
-            if self.state==2:
+            if self.state == 1:
+                mc = self.processDataInstruction(line)
+                self.finalmc.write(str(hex(self.PC))+" "+mc+"\n")
+                
+                
+                
+                
+            
+            if self.state == 2:
                 mc = self.processInstruction(line)
                 # self.finalmc.write(line)
                 self.finalmc.write(str(hex(self.PC))+" "+mc+"\n")
                 self.PC+=4
 
 
+
+    def handleDir(self, s, di):
+        if(di == ".word"):
+            # str(int(string, 0))
+            self.dataPC +=4
+        elif(di == ".byte"):
+            self.dataPC +=1
+        elif(di == ".half"):
+            self.dataPC +=2
+        elif(di == ".asciiz"):
+            self.dataPC += len(s[1:-1])+1
+
+    def processDataInstruction(self, s):
+        dirT = [".asciiz", ".word",".byte", ".half"]
+        dirC = ""
+        s = re.findall(r'[^,\s]+',s)
+        for i in range(len(s)):
+            if(s[i] in dirT):
+                dirC = s[i]
+            else:
+                self.handleDir(s[i], dirC)
+                
+                
 
     def processInstruction(self, instruction):
         l = self.split(instruction)
@@ -402,14 +466,18 @@ if __name__=='__main__':
     # print(output)
 
 
-    # a = cleanFile(os.path.join( 'test', "bubble_sort.s"))
+    a = cleanFile(os.path.join( 'test', "bubble_sort.s"))
+    a.clear()
+    
     # a.clear()
     # print(a.textTable)
     # # print("\nparse instruction class\n")
 
-    a=parseInstruction()
-    a.CheckInstruction()
+    # a=parseInstruction()
+    # a.CheckInstruction()
 
 
 # # s = "label:"
 # # print(list(s.split(":")))
+
+

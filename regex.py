@@ -21,33 +21,47 @@ class cleanFile:
 
 
     
-    def addToTable(self, s):
+    def addToTextTable(self, s):
         self.textTable[s] = self.PC
+
+    def addToDataTable(self,s):
+        self.dataTable[s]=self.dataPC
         
     def isInstruction(self, s):    
         for i in self.df_neu:
             if(i in s):
                 return 1
         return 0            
-    
+
+
+
     def clear(self):
         for line in self.file:
             if(line != "\n"):
                 j = line.strip()
-                j = re.sub(re.compile("#.*?\n" ) ,"\n" ,line)
+                j = re.sub(re.compile("#.*?\n" ) ,"\n" ,j)
                 if(j == "\n"):
                     continue
                 if(".data" in j):
                     self.state = 1
+                    j = j.split()[1:]
+                    j = " ".join(j)
                 if(".text" in j):
                     self.state = 2
+                    j = j.split()[1:]
+                    j = " ".join(j)
                 if(self.state == 1):
-                    pass
+                    line = re.findall(r'[^,\s]+',line)
+                    isLabel = re.search("[^\n]+:", line[0])
+                    if(isLabel is not None):
+                        self.addToDataTable([line[0][:-1]])
+                    else:
+                        pass
                 elif(self.state == 2):
                     isLabel = re.search("[^\n]+:", j)
                     if(isLabel is not None):
                         cornerCase = list(j.split(":"))
-                        self.addToTable(cornerCase[0])
+                        self.addToTextTable(cornerCase[0])
                         if(self.isInstruction(cornerCase[1])):
                             self.PC+=4
                     else:

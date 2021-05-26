@@ -4,8 +4,6 @@ import os
 from collections import defaultdict
 from helperFunctions import  *
 
-# df_control = pd.read_csv(os.path.join(currFolderPath, 'repository', "instructions.csv"))
-
 class cleanFile:
     def __init__(self, filePath):
         self.cleanFile = open("clean.s", 'w')
@@ -19,8 +17,6 @@ class cleanFile:
         self.df_control = pd.read_csv(os.path.join( 'repository', "instructions.csv"))
         self.df_neu = list(self.df_control['neumonic'].astype(str))
 
-
-    
     def addToTextTable(self, s):
         self.textTable[s] = self.PC
 
@@ -62,7 +58,6 @@ class cleanFile:
                 if("#" in j):
                     jj = line.find("#")
                     j = j[:jj]
-                # j = re.sub(re.compile("#.*\n") ,"\n" ,j)
                 if(j == "\n"):
                     continue
                 if(".data" in j):
@@ -103,18 +98,6 @@ class cleanFile:
                     
                     
         self.cleanFile.close()
-        # self.cleanerFile = open("cleaner.s", 'w')
-        # self.cleanFile = open("clean.s", "r")
-        # self.PC = 0
-        # for line in self.cleanFile.readlines():
-        #     pass
-            
-        
-           
-        
-            
-        
-        
         
 
 class parseInstruction:
@@ -126,7 +109,7 @@ class parseInstruction:
         self.df_1    = list(self.df_control['part1'].astype(int))
         self.df_2    = list(self.df_control['part2'].astype(int))
         self.df_3    = list(self.df_control['part3'].astype(int))
-        self.cleaner = cleanFile(os.path.join("test", "fact.s"))
+        self.cleaner = cleanFile(os.path.join("test", "bubble_sort.s"))
         self.cleaner.clear()
         self.textTable = self.cleaner.textTable
         self.state = 2
@@ -134,9 +117,7 @@ class parseInstruction:
         self.dataPC = 0x10000000
         self.openFile = open(os.path.join("clean.s"), 'r')
         self.finalmc = open(os.path.join("main.mc"), 'w')
-
-
-        # textTable contains textTable name and its pc for eg {"exit":"3C","if":"28"}
+        self.dataSegment = []
 
     def printDetails(self):
         print(self.textTable)
@@ -151,21 +132,18 @@ class parseInstruction:
         l=re.findall(r'[^,\s()]+',string)
         return l
 
-
-
     def isHeader(self,line):
         if(".text" in line):
             return 2
         if(".data" in line):
             return 1
         return self.state
-    
-    
-    def checkifLabel(self,string):
+        
+    def checkifLabel(self, string):
         l = list(string.split(":"))
-        if(len(l)>=2):
+        if(len(l) >= 2):
             return 1
-        return 0;
+        return 0
     
     def CheckInstruction(self):
         # the instruction may be header or label or datainstruction(.word : 24) or
@@ -177,42 +155,68 @@ class parseInstruction:
                 continue
             
             if self.state == 1:
-                mc = self.processDataInstruction(line)
-                self.finalmc.write(str(hex(self.PC))+" "+mc+"\n")
-                
-                
-                
-                
+                if(".data" in line):
+                    continue
+                self.processDataInstruction(line)
             
             if self.state == 2:
+                if(".text" in line):
+                    continue
                 mc = self.processInstruction(line)
-                # self.finalmc.write(line)
                 self.finalmc.write(str(hex(self.PC))+" "+mc+"\n")
                 self.PC+=4
+        if(len(self.dataSegment) > 0):
+            self.finalmc.write("$\n")
+        for element in self.dataSegment:
+            self.finalmc.write(element[0] + element[1] + "\n")
+    
+    def BytebyByte(self, s, dirC):
+        """
+        assuming s is a hex string.
+        or a string (without double quotes) in case of asciiz
+        """
+        if(dirC == ".word"):
+            s = "0"*8 + s
+            for i in range(4):
+                self.dataSegment.append((str(hex(self.dataPC)), " 0x"+ s[len(s)-2*(i+1):len(s)-2*i]))
+                self.dataPC += 1
+        elif(dirC == ".half"):
+            s = "0"*4 + s
+            for i in range(2):
+                self.dataSegment.append((str(hex(self.dataPC)), " 0x"+ s[len(s)-2*(i+1):len(s)-2*i]))
+                self.dataPC += 1
+        elif(dirC == ".byte"):
+            s = "0"*2 + s
+            self.dataSegment.append((str(hex(self.dataPC)), " 0x"+ s[-2:]))
+            self.dataPC += 1
+        elif(dirC == ".asciiz"):
+            for i in range(len(s)):
+                self.dataSegment.append((str(hex(self.dataPC)), " "+ str(hex(ord(s[i])))))
+                self.dataPC += 1
+            self.dataSegment.append((str(hex(self.dataPC)), " 0x00"))
+            self.dataPC += 1
 
-
-
-    def handleDir(self, s, di):
-        if(di == ".word"):
-            # str(int(string, 0))
-            self.dataPC +=4
-        elif(di == ".byte"):
-            self.dataPC +=1
-        elif(di == ".half"):
-            self.dataPC +=2
-        elif(di == ".asciiz"):
-            self.dataPC += len(s[1:-1])+1
+    def convertThis(self, s, dirC):
+        if dirC in [".word", ".half", ".byte"]:
+            n = int(s, 0)
+            return decToHex(n)
+        else:
+            n = s[1:-1]
+            return n
+            
 
     def processDataInstruction(self, s):
-        dirT = [".asciiz", ".word",".byte", ".half"]
+        dirT = [".asciiz", ".word", ".byte", ".half"]
         dirC = ""
         s = re.findall(r'[^,\s]+',s)
         for i in range(len(s)):
             if(s[i] in dirT):
                 dirC = s[i]
             else:
-                self.handleDir(s[i], dirC)
-                
+                if(len(dirC) == 0):
+                    print("ERROR :")
+                s[i] = self.convertThis(s[i], dirC)
+                self.BytebyByte(s[i], dirC)
                 
 
     def processInstruction(self, instruction):
@@ -228,11 +232,8 @@ class parseInstruction:
 
         else:
             if(l[0] == "lw" or l[0] == "lh" or l[0] == "lb"):
-                # self.finalmc.write("\n\n\n\n"+str(l)+"\n\n\n\n\n")
                 l[2], l[3] = l[3], l[2]
-                # self.finalmc.write("\n\n\n\n"+str(l)+"\n\n\n\n\n")
             
-            # self.finalmc.write(str(l)+"\n")
             if(self.check(l[1], self.df_1[instructionIndex]) == None):
                 return "Incorrect syntax1"
             try:
@@ -260,10 +261,7 @@ class parseInstruction:
             return mc
         return "instruction %s has no error "%l
 
-
-
-
-    def check(self,string, type):
+    def check(self, string, type):
         if(type == 0):
             if(re.search(r'^x(([0-9])|([1-2][0-9])|(3[0-1]))$', string)):
                 return 1
@@ -276,9 +274,6 @@ class parseInstruction:
                 number = str(int(string, 0))
                 return number
             except:
-                # ttt = str(self.getLabelDiff(string))
-                # self.finalmc.write("\n\n\n\n\n\n"+ str(ttt)+"\n\n\n\n\n\n")
-                # ttt = str(self.getLabelDiff(self, string))
                 return str(self.getLabelDiff(string))
         elif(type == -1):
             return 1
@@ -286,14 +281,12 @@ class parseInstruction:
     def getLabelDiff(self,labelName):
         labelUsed = self.PC
         labelDefined = self.textTable[labelName]
-        # self.finalmc.write(str(labelUsed) + str(type(labelUsed))+"\n\n\n\n\n")
         return labelDefined-labelUsed
 
     def assmToMC(self,l):
         mapTomethods = {"R":self.Rconvert,"I":self.Iconvert,"S":self.Sconvert,
                         "SB":self.SBconvert,"UJ":self.UJconvert,"U":self.Uconvert}
 
-        #assumption instruction is correct
         try:
             instructionIndex = self.df_neu.index(l[0])
         except:
@@ -346,9 +339,6 @@ class parseInstruction:
         machine_code = "0" * 8 + machine_code
         machine_code = machine_code[-8:]
         return "0x" + machine_code
-
-
-
 
     def Sconvert(self,l,instructionIndex):
         machine_code = ""
@@ -408,8 +398,6 @@ class parseInstruction:
         machine_code = machine_code[-8:]
         return "0x" + machine_code
 
-
-
     def UJconvert(self,l,instructionIndex):
         machine_code = ""
 
@@ -466,15 +454,15 @@ if __name__=='__main__':
     # print(output)
 
 
-    a = cleanFile(os.path.join( 'test', "bubble_sort.s"))
-    a.clear()
-    
+    # a = cleanFile(os.path.join( 'test', "bubble_sort.s"))
     # a.clear()
+    
+    # # a.clear()
     # print(a.textTable)
-    # # print("\nparse instruction class\n")
+    # print("\nparse instruction class\n")
 
-    # a=parseInstruction()
-    # a.CheckInstruction()
+    a=parseInstruction()
+    a.CheckInstruction()
 
 
 # # s = "label:"

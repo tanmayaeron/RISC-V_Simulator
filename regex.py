@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from collections import defaultdict
 from helperFunctions import  *
-from string import hexdigits
+from string import hexdigits,digits,octdigits
 
 class cleanFile:
     def __init__(self, filePath):
@@ -470,9 +470,75 @@ class SyntaxCheck:
         self.dataStatesList = ['.asciiz','.word','.half','.byte']
         self.dataState = -1
         self.Errors=[]
-        self.hexDigits=set(hexdigits)
+        self.hexDigits=set("0x"+hexdigits)
+        self.octDigits=set("0o"+octdigits)
+        self.binDigits=set("0b"+"01")
+        self.decDigits=set("0d"+digits)
         self.linenumber=0
+        self.df_neu_set=set(self.df_neu)
     
+    def split(self,string):
+        l=re.findall(r'[^,\s()]+',string)
+        return l
+
+    def checkBasedOnType(self,words,type):
+        if type==-1:
+            return;
+        elif type==0:
+            if len(words)>=2 and words[0]=='x' and 0<=int(words[1:])<=31:
+                return;
+            else:
+                self.Errors.append("In %d line %s is not a register"%(self.linenumber,self.words))
+        elif type==1:
+            if self.isImmOrLabel(words):
+                return 1;
+            else:
+                self.Errors.append("%s is not a label or immidiate"%words)
+            
+
+
+
+
+    def checkTextSyntax(self, line):
+        
+        if line=="" or line=="\n":
+            return;
+        line=self.split(line)
+
+        if line[0]=='.text':
+            if len(line)==1:
+                return;
+            line.pop(0)
+
+        if len(line)==1:
+            # means it should be label
+            if len(line[0])>=1 and line[0][-1]==':':
+                pass;
+            else:
+                self.Errors.append("Error in line no %d as %s is not label"%(self.linenumber,line[0]))
+            return;
+
+        
+        if line[0] in self.df_neu_set:
+            pass;
+        else:
+            self.Errors.append("Error in line no %d as %s is not neumonic"%(self.linenumber,line[0]))
+            return;
+        
+        ind=self.df_neu.index(line[0])
+
+        if len(line)-1!=self.df[ind]:
+            self.Errors.append("%s line is not correct as length of the line should be equal %d"%(self.linenumber,self.df[ind]))
+        
+        for j in range(1,len(line)):
+            if j==1:
+                type=self.df_1[ind]
+                if type==-1:
+                    break;
+                self.checkBasedOnType(line[j],type)
+                
+        
+
     def isHeader(self,line):
         if(".text" in line):
             return 2
@@ -489,20 +555,61 @@ class SyntaxCheck:
         else:
             print(self.Errors)
     
-    def isHexDigit(self,words):
+    def isHexDigits(self,words):
+
         for j in words:
             if j not in self.hexDigits:
                 return 0;
                 break;
         else:
             return 1;
+    
+    def isOctDigits(self,words):
+        for j in words:
+            if j not in self.octDigits:
+                return 0;
+                break;
+        else:
+            return 1;
+    
+    def isBinDigits(self,words):
+        for j in words:
+            if j not in self.binDigits:
+                return 0;
+                break
+        else:
+            return 1;
+    
+    def isDecDigits(self,words):
+        for j in words:
+            if j not in self.decDigits:
+                return 0;
+                break
+        else:
+            return 1;
+
+    def isLabelDefined(self,words):
+        return words in self.dataTable or words in self.textTable
+
+    def isImmOrLabel(self,words):
+        if self.isBinDigits(words):
+            return 1;
+        elif self.isDecDigits(words):
+            return 1;
+        elif self.isOctDigits(words):
+            return 1;
+        elif self.isHecDigits(words):
+            return 1;
+        elif self.isLabelDefined(words):
+            return 1;
+        return 0;
 
     def checkDataSyntax(self,line):
         for words in line.split():
 
             if words in self.dataStatesList:
                 self.dataState=self.dataStatesList.index(words)
-            elif words in ['.data','.text']:
+            elif words =='.data':
                 continue
             elif words[0]=='.':
                 self.Errors.append("Error in %s line as %s is not recognised"%(line.strip(),words))
@@ -516,17 +623,13 @@ class SyntaxCheck:
                 else:
                     if self.isString(words):
                         self.Errors.append("Error in %s line as %s is a string"%(line,words))
-                    elif words.isdigit():
-                        continue;
+                    elif self.isImmOrLabel(words):
+                        return;
                     else:
-                        if words in self.textTable:
-                            continue;
-                        elif words in self.dataTable:
-                            continue;
-                        else:
-                            self.Errors.append("Error in %s line as %s is not a digit and not a label"%(line,words))
+                        self.Errors.append("Error in %s line as %s is not a digit and not a label"%(line,words))
                         
-                
+    
+
 
 
     def main(self):
@@ -535,6 +638,8 @@ class SyntaxCheck:
             self.state=self.isHeader(line)
             if self.state==1:
                 self.checkDataSyntax(line)
+            else:
+                self.checkTextSyntax(line)
 
         self.cleanedFile.close()
 

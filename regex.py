@@ -3,6 +3,7 @@ import pandas as pd
 import os
 from collections import defaultdict
 from helperFunctions import  *
+from string import hexdigits
 
 class cleanFile:
     def __init__(self, filePath):
@@ -112,6 +113,7 @@ class parseInstruction:
         self.cleaner = cleanFile(os.path.join("test", "bubble_sort.s"))
         self.cleaner.clear()
         self.textTable = self.cleaner.textTable
+        self.dataTable = self.cleaner.dataTable
         self.state = 2
         self.PC = 0
         self.dataPC = 0x10000000
@@ -121,9 +123,16 @@ class parseInstruction:
 
     def printDetails(self):
         print(self.textTable)
+        print(self.dataTable)
+
+    def getTextTable(self):
+        return self.textTable
+    
+    def getDataTable(self):
+        return self.dataTable
 
     def getDetails(self):
-        return self.textTable
+        return [self.dataTable,self.textTable]
 
     def split(self,string):
         # splits the string at commas,spaces(tabs and \n), (,)
@@ -444,6 +453,90 @@ class parseInstruction:
         for i in f:
             processInstruction(i)
 
+class SyntaxCheck:
+    def __init__(self, dataTable, textTable):
+        self.df_control = pd.read_csv(os.path.join( 'repository', "instructions.csv"))
+        self.df_neu = list(self.df_control['neumonic'].astype(str))
+        self.df_format = list(self.df_control['format'])
+        self.df      = list(self.df_control['parts'].astype(int))
+        self.df_1    = list(self.df_control['part1'].astype(int))
+        self.df_2    = list(self.df_control['part2'].astype(int))
+        self.df_3    = list(self.df_control['part3'].astype(int))
+        self.cleanedFile=open('clean.s','r')
+        
+        self.dataTable=dataTable
+        self.textTable=textTable
+        self.state=2
+        self.dataStatesList = ['.asciiz','.word','.half','.byte']
+        self.dataState = -1
+        self.Errors=[]
+        self.hexDigits=set(hexdigits)
+        self.linenumber=0
+    
+    def isHeader(self,line):
+        if(".text" in line):
+            return 2
+        if(".data" in line):
+            return 1
+        return self.state
+    
+    def isString(self,words):
+        return len(words)>=2 and words[0]==words[-1]=='"'
+    
+    def printErrors(self):
+        if len(self.Errors)==0:
+            print("No errors in the file")
+        else:
+            print(self.Errors)
+    
+    def isHexDigit(self,words):
+        for j in words:
+            if j not in self.hexDigits:
+                return 0;
+                break;
+        else:
+            return 1;
+
+    def checkDataSyntax(self,line):
+        for words in line.split():
+
+            if words in self.dataStatesList:
+                self.dataState=self.dataStatesList.index(words)
+            elif words in ['.data','.text']:
+                continue
+            elif words[0]=='.':
+                self.Errors.append("Error in %s line as %s is not recognised"%(line.strip(),words))
+            else:
+                if self.dataState==0:
+                    if self.isString(words):
+                        # should be of the form "ABC"
+                        continue;
+                    else:
+                        self.Errors.append("Error in %s line as %s is not a string"%(self.linenumber,words))
+                else:
+                    if self.isString(words):
+                        self.Errors.append("Error in %s line as %s is a string"%(line,words))
+                    elif words.isdigit():
+                        continue;
+                    else:
+                        if words in self.textTable:
+                            continue;
+                        elif words in self.dataTable:
+                            continue;
+                        else:
+                            self.Errors.append("Error in %s line as %s is not a digit and not a label"%(line,words))
+                        
+                
+
+
+    def main(self):
+        for line in self.cleanedFile.readlines():
+            self.linenumber+=1
+            self.state=self.isHeader(line)
+            if self.state==1:
+                self.checkDataSyntax(line)
+
+        self.cleanedFile.close()
 
 if __name__=='__main__':
     # print(int("21", 0))
@@ -463,6 +556,13 @@ if __name__=='__main__':
 
     a=parseInstruction()
     a.CheckInstruction()
+    tables=a.getDetails()
+    print(tables)
+
+    b=SyntaxCheck(tables[0],tables[1])
+    b.main()
+    b.printErrors()
+
 
 
 # # s = "label:"

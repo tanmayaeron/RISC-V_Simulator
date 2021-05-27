@@ -1,5 +1,6 @@
 .data
 .word 1 2 10 9 3 8 4 7 5 6
+.asciiz Error
 .text
 auipc x11,0x10000 
 addi x11 x11 0

@@ -470,12 +470,13 @@ class SyntaxCheck:
         self.dataStatesList = ['.asciiz','.word','.half','.byte']
         self.dataState = -1
         self.Errors=[]
-        self.hexDigits=set("0x"+hexdigits)
-        self.octDigits=set("0o"+octdigits)
-        self.binDigits=set("0b"+"01")
-        self.decDigits=set("0d"+digits)
+        self.hexDigitsSet=set("-0x"+hexdigits)
+        self.octDigitsSet=set("-0o"+octdigits)
+        self.binDigitsSet=set("-0b"+"01")
+        self.decDigitsSet=set("-0d"+digits)
         self.linenumber=0
         self.df_neu_set=set(self.df_neu)
+        self.swapInstructionSet=set(["lw","lh","lb"])
     
     def split(self,string):
         l=re.findall(r'[^,\s()]+',string)
@@ -483,17 +484,17 @@ class SyntaxCheck:
 
     def checkBasedOnType(self,words,type):
         if type==-1:
-            return;
+            return 0
         elif type==0:
             if len(words)>=2 and words[0]=='x' and 0<=int(words[1:])<=31:
                 return;
             else:
-                self.Errors.append("In %d line %s is not a register"%(self.linenumber,self.words))
+                self.Errors.append("In %d line %s is not a register"%(self.linenumber,words))
         elif type==1:
             if self.isImmOrLabel(words):
                 return 1;
             else:
-                self.Errors.append("%s is not a label or immidiate"%words)
+                self.Errors.append("Error in line %d as %s is not a label or immidiate"%(self.linenumber,words))
             
 
 
@@ -524,7 +525,8 @@ class SyntaxCheck:
         else:
             self.Errors.append("Error in line no %d as %s is not neumonic"%(self.linenumber,line[0]))
             return;
-        
+        if(line[0] in self.swapInstructionSet):
+            line[2], line[3] = line[3], line[2]
         ind=self.df_neu.index(line[0])
 
         if len(line)-1!=self.df[ind]:
@@ -533,9 +535,15 @@ class SyntaxCheck:
         for j in range(1,len(line)):
             if j==1:
                 type=self.df_1[ind]
-                if type==-1:
-                    break;
-                self.checkBasedOnType(line[j],type)
+            elif j==2:
+                type=self.df_2[ind]
+            elif j==3:
+                type=self.df_3[ind]
+            
+            if type==-1:
+                break;
+            self.checkBasedOnType(line[j],type)
+
                 
         
 
@@ -558,7 +566,7 @@ class SyntaxCheck:
     def isHexDigits(self,words):
 
         for j in words:
-            if j not in self.hexDigits:
+            if j not in self.hexDigitsSet:
                 return 0;
                 break;
         else:
@@ -566,7 +574,7 @@ class SyntaxCheck:
     
     def isOctDigits(self,words):
         for j in words:
-            if j not in self.octDigits:
+            if j not in self.octDigitsSet:
                 return 0;
                 break;
         else:
@@ -574,7 +582,7 @@ class SyntaxCheck:
     
     def isBinDigits(self,words):
         for j in words:
-            if j not in self.binDigits:
+            if j not in self.binDigitsSet:
                 return 0;
                 break
         else:
@@ -582,7 +590,7 @@ class SyntaxCheck:
     
     def isDecDigits(self,words):
         for j in words:
-            if j not in self.decDigits:
+            if j not in self.decDigitsSet:
                 return 0;
                 break
         else:
@@ -598,7 +606,7 @@ class SyntaxCheck:
             return 1;
         elif self.isOctDigits(words):
             return 1;
-        elif self.isHecDigits(words):
+        elif self.isHexDigits(words):
             return 1;
         elif self.isLabelDefined(words):
             return 1;

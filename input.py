@@ -32,7 +32,6 @@ class ReadFile:
 
     def read_mc(self, filepath, obj,currFolderPath, isMC = 1):
         
-        
         file = 0
         if(isMC == 0):
             assembler = parseInstruction(currFolderPath, filepath)
@@ -40,7 +39,7 @@ class ReadFile:
             file = open(os.path.join(currFolderPath,'test', "main.mc"), 'r')
         else:
             file = open(filepath, 'r')
-        sys.stderr.write("dfsadf\n")
+        # sys.stderr.write("dfsadf\n")
         flag = 0
         size = 2
         sys.stderr.write(str(isMC))

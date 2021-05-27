@@ -6,16 +6,22 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import json
 import os
-import glob
+import glob, sys
 class frontBackEndInteraction:
     def __init__(self, startDetails):
         self.processor = Processor(startDetails)
         self.directoryPath = startDetails[0]
         
+    def load(self, filePath, isMC = 0):
+        sys.stderr.write("loaded")
+        self.processor.load(filePath,isMC)
+        
     def runProgram(self, filePath, knobsL, isMC = 1):
+        
         if(not knobsL[0]):
             self.processor.load(filePath,isMC)
-            self.processor.nonPipelined(knobsL[2])
+            while(self.processor.nonPipelined(knobsL[2])):
+                continue
             
         else:
             self.processor.load_mc(filePath)
@@ -25,6 +31,13 @@ class frontBackEndInteraction:
         self.processor.printRegisters()
         self.processor.printData()
         self.processor.getCaches()
+        
+    def step(self):
+        a = self.processor.nonPipelined(0)
+        if(a == 0):
+            return 
+                
+        
         
         
     def getRegisterSnapshot(self):

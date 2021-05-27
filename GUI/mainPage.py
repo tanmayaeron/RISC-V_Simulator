@@ -174,6 +174,14 @@ class mainScreen(QMainWindow, UiComponents):
         self.l1[10].setText(temp["ME1"])
         self.l1[11].setText(temp["ME2"])
         self.l1[12].setText(temp["MM"])
+        
+    def load(self):
+        self.link.load(self.currFilePath, 0)
+    def step(self):
+        self.link.step()
+        self.updateRegisterView()
+        self.updateIDCacheView()
+        self.updateMemoryView("10000000")
     
 
     def jumpAddress(self):
@@ -196,6 +204,8 @@ class mainScreen(QMainWindow, UiComponents):
         self.compile_button.clicked.connect(lambda: self.fileCompile())
         # self.theme_button.sclicked.connect(lambda: self.changeTheme())
         self.jump_button.clicked.connect(lambda: self.jumpAddress())
+        self.load_button.clicked.connect(lambda: self.load())
+        self.step_button.clicked.connect(lambda: self.step())
         
         self.l1[0].clicked.connect(lambda: self.updateInfoView(0))
         self.l1[1].clicked.connect(lambda: self.updateInfoView(1))

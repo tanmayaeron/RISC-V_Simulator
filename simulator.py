@@ -321,8 +321,6 @@ class Processor:
         self.Miss_Count = 0
         isStall = 0
         PrevIsStall = 0
-        
-
         executeControl = {}
         memControl = {}
         WBControl = {}
@@ -524,57 +522,56 @@ class Processor:
         # self.printForwardingInfo()         
 
 
-    def nonPipelined(self, knob3):
+    def nonPipelined(self, knob3):        
+        self.outputD =  {0:{}, 1:{}, 2:{}, 3:{}, 4:{}}
+        FetchBufferSignal = self.fetch()
+        if not FetchBufferSignal:
+            return 0
+        self.bufferUpdate(0)
 
-        while True:
-            self.outputD =  {0:{}, 1:{}, 2:{}, 3:{}, 4:{}}
-            FetchBufferSignal = self.fetch()
-            if not FetchBufferSignal:
-                break
-            self.bufferUpdate(0)
+        self.decode()
+        self.bufferUpdate(1)
 
-            self.decode()
-            self.bufferUpdate(1)
+        currOpID = self.buffer.get(2)[0]
 
-            currOpID = self.buffer.get(2)[0]
+        executeControl = {}
+        memControl = {}
+        WBControl = {}
 
-            executeControl = {}
-            memControl = {}
-            WBControl = {}
+        executeControl["currALU_select"] = self._ALU_select[currOpID]  # ALU
+        executeControl["currMuxB"] = self._muxB[currOpID]
+        executeControl["currMuxA"] = self._muxA[currOpID]
 
-            executeControl["currALU_select"] = self._ALU_select[currOpID]  # ALU
-            executeControl["currMuxB"] = self._muxB[currOpID]
-            executeControl["currMuxA"] = self._muxA[currOpID]
+        memControl["currMemoryEnable"] = self._memoryEnable[currOpID]
+        memControl["currSizeEnable"] = self.SizeEnable[currOpID]
+        memControl["Y_select"] = self._muxY[currOpID]
+        memControl["M_select"] = 1
 
-            memControl["currMemoryEnable"] = self._memoryEnable[currOpID]
-            memControl["currSizeEnable"] = self.SizeEnable[currOpID]
-            memControl["Y_select"] = self._muxY[currOpID]
-            memControl["M_select"] = 1
+        WBControl["currWriteEnable"] = self._writeEnable[currOpID]
 
-            WBControl["currWriteEnable"] = self._writeEnable[currOpID]
+        currINCSelect = self.INC_select[currOpID]
+        currSSelect = self.S_select[currOpID]
 
-            currINCSelect = self.INC_select[currOpID]
-            currSSelect = self.S_select[currOpID]
+        self.execute(executeControl)
 
-            self.execute(executeControl)
+        self._IAG.muxPC(self.PC_select[currOpID], self.buffer)
+        self._IAG.updatePC(1)
+        self._IAG.muxINC(currINCSelect, currSSelect, self.buffer.get(2)[8], self._RZ)
+        self._IAG.adder()
+        self._IAG.muxPC(0,self.buffer.get(2)[2])
+        self._IAG.updatePC(1)
 
-            self._IAG.muxPC(self.PC_select[currOpID], self.buffer)
-            self._IAG.updatePC(1)
-            self._IAG.muxINC(currINCSelect, currSSelect, self.buffer.get(2)[8], self._RZ)
-            self._IAG.adder()
-            self._IAG.muxPC(0,self.buffer.get(2)[2])
-            self._IAG.updatePC(1)
+        self.bufferUpdate(2)
 
-            self.bufferUpdate(2)
+        self.memoryAccess(memControl)
+        self.bufferUpdate(3)
 
-            self.memoryAccess(memControl)
-            self.bufferUpdate(3)
-
-            self.registerUpdate(WBControl)
-            for i in range(5):
-                if("buffer" in self.outputD[i]):
-                    del self.outputD[i]["buffer"]
-            self.printCycleInfo()
+        self.registerUpdate(WBControl)
+        for i in range(5):
+            if("buffer" in self.outputD[i]):
+                del self.outputD[i]["buffer"]
+        self.printCycleInfo()
+        return 1
 
 
     def checkPC(self, ins_num):

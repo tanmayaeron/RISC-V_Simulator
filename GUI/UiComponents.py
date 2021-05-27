@@ -17,7 +17,7 @@ class UiComponents():
         self.fixedfont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
         self.fixedfont.setPointSize(16)
         self.fixedfont2 = QFontDatabase.systemFont(QFontDatabase.FixedFont)
-        self.fixedfont2.setPointSize(14)
+        self.fixedfont2.setPointSize(16)
         
 
     def operationTile(self, name):

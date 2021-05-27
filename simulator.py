@@ -139,9 +139,9 @@ class Processor:
         else:
             return self.buffer.get(3)[6] #PC_temp
 
-    def load_mc(self, currFileName):
+    def load(self, currFileName, isMC):
         filepath = os.path.join(self._currFolderPath,'test', currFileName)
-        self._fileReader.read_mc(filepath, self._PMI)
+        self._fileReader.read_mc(filepath, self._PMI, self._currFolderPath,isMC)
 
         #print(self._PMI.getMemory(0))
 

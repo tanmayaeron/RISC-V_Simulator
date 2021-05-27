@@ -1,3 +1,5 @@
+from regex import parseInstruction
+import os, sys
 class ReadFile:
 
     def __init__(self):
@@ -28,11 +30,23 @@ class ReadFile:
         file.write(bufferType+": "+ str(buffer) + " " + "\n")
         file.close()
 
-    def read_mc(self, filepath, obj):
-        file = open(filepath, 'r')
+    def read_mc(self, filepath, obj,currFolderPath, isMC = 1):
+        
+        
+        file = 0
+        if(isMC == 0):
+            assembler = parseInstruction(currFolderPath, filepath)
+            assembler.CheckInstruction()
+            file = open(os.path.join(currFolderPath,'test', "main.mc"), 'r')
+        else:
+            file = open(filepath, 'r')
+        sys.stderr.write("dfsadf\n")
         flag = 0
         size = 2
-        for lines in file:
+        sys.stderr.write(str(isMC))
+        for lines in file.readlines():
+            sys.stderr.write(lines)
+            
             if(lines == "$" or lines == "$\n"):
                 flag = 1
                 size = 0
@@ -42,5 +56,7 @@ class ReadFile:
             obj.setMAR(requiredMemoryLocation[2:], flag)
             obj.setMDR(instruction[2:], flag)
             obj.storeData(size, flag+2)
-            
+        sys.stderr.write(str(flag))
+        sys.stderr.write("dfsadf\n")
+        file.close()
      

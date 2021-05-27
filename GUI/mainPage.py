@@ -12,16 +12,17 @@ from GUI.UiComponents import UiComponents
 
 from GUI.temp import PythonHighlighter
 class mainScreen(QMainWindow, UiComponents):
-    def __init__(self, App):
+    def __init__(self, App, directoryPath):
+
         super().__init__()
         self.App = App
         self.title = "RISC-V Simulator"
         
-        self.directoryPath = os.getcwd()
+        self.directoryPath = directoryPath
         self.countDisplay = 1
         self.countDisplay2 = 1
         self.knobsList = [0, 0, 0, 0 ,0, 0]
-        self.currFilePath = os.path.join(self.directoryPath, "test", "main.mc")
+        self.currFilePath = os.path.join(self.directoryPath, "test", "main.s")
         self.link = frontBackEndInteraction([self.directoryPath, [1024, 1024], [8, 8], [4, 4]])
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
@@ -143,7 +144,7 @@ class mainScreen(QMainWindow, UiComponents):
         cacheDetails = self.getCacheFromInput()
         self.link.reset(cacheDetails)
         self.updateknobsList()
-        self.link.runProgram(self.currFilePath, self.knobsList)
+        self.link.runProgram(self.currFilePath, self.knobsList, 0)
         self.callDataPaths()
         self.compile_button.setText("\U00002705")
         self.updateRegisterView()

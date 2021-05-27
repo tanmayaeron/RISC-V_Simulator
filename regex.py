@@ -99,18 +99,20 @@ class cleanFile:
                     
                     
         self.cleanFile.close()
+        # self.file.close()
         
 
 class parseInstruction:
-    def __init__(self):
-        self.df_control = pd.read_csv(os.path.join( 'repository', "instructions.csv"))
+    def __init__(self, currFolderPath, filePath):
+        self.currFolderPath = currFolderPath
+        self.df_control = pd.read_csv(os.path.join(self.currFolderPath,'repository', "instructions.csv"))
         self.df_neu = list(self.df_control['neumonic'].astype(str))
         self.df_format = list(self.df_control['format'])
         self.df      = list(self.df_control['parts'].astype(int))
         self.df_1    = list(self.df_control['part1'].astype(int))
         self.df_2    = list(self.df_control['part2'].astype(int))
         self.df_3    = list(self.df_control['part3'].astype(int))
-        self.cleaner = cleanFile(os.path.join("test", "bubble_sort.s"))
+        self.cleaner = cleanFile(os.path.join(self.currFolderPath, "test", filePath))
         self.cleaner.clear()
         self.textTable = self.cleaner.textTable
         self.dataTable = self.cleaner.dataTable
@@ -118,7 +120,7 @@ class parseInstruction:
         self.PC = 0
         self.dataPC = 0x10000000
         self.openFile = open(os.path.join("clean.s"), 'r')
-        self.finalmc = open(os.path.join("main.mc"), 'w')
+        self.finalmc = open(os.path.join(self.currFolderPath, "test", "main.mc"), 'w')
         self.dataSegment = []
 
     def printDetails(self):
@@ -178,6 +180,9 @@ class parseInstruction:
             self.finalmc.write("$\n")
         for element in self.dataSegment:
             self.finalmc.write(element[0] + element[1] + "\n")
+            
+        self.finalmc.close()
+        self.openFile.close()
     
     def BytebyByte(self, s, dirC):
         """

@@ -12,9 +12,9 @@ class frontBackEndInteraction:
         self.processor = Processor(startDetails)
         self.directoryPath = startDetails[0]
         
-    def runProgram(self, filePath, knobsL):
+    def runProgram(self, filePath, knobsL, isMC = 1):
         if(not knobsL[0]):
-            self.processor.load_mc(filePath)
+            self.processor.load(filePath,isMC)
             self.processor.nonPipelined(knobsL[2])
             
         else:

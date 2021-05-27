@@ -18,13 +18,14 @@ def format(color, style=''):
 
 
 STYLES = {
-    'dot': format('red', 'bolditalic'),
+    'dot': format("#ff99ff", 'bold'),
     'keyword': format('orange', 'bold'),
     'brace': format('yellow'),
     'imm': format('white'),
-    'comment': format('grey'),
-    'registers': format('green', 'italic'),
-    'label': format('purple', 'bold')
+    'comment': format('grey', 'italic'),
+    'registers': format('lightblue'),
+    'label': format('#66ff99'),
+    'string': format('white')
 }
 
 
@@ -37,13 +38,14 @@ class PythonHighlighter(QSyntaxHighlighter):
         rules = []
         rules += [(r'\b%s\b' % w, 0, STYLES['keyword']) for w in PythonHighlighter.keywords]
         rules += [(r'%s' % b, 0, STYLES['brace']) for b in PythonHighlighter.braces]
-        rules += [(r'#[^\n]*', 0, STYLES['comment'])]
         rules += [(r'\bx(([0-9])|([1-2][0-9])|(3[0-1]))\b', 0, STYLES['registers']),]
+        rules += [(r'\.[^\n]+', 0, STYLES['dot'])]
+        rules += [(r'[^\n]+:', 0, STYLES['label'])]
         rules += [(r'\b[0-9]+\b', 0, STYLES['imm'])]
         rules += [(r'\b0x[0-9A-Fa-f]+\b', 0, STYLES['imm'])]
         rules += [(r'\b0b[0-1]+\b', 0, STYLES['imm'])]
-        rules += [(r'[^\n]+:', 0, STYLES['label'])]
-        rules += [(r'\.[^\n]+', 0, STYLES['dot'])]
+        rules += [(r'\".*\"', 0, STYLES['string'])]
+        rules += [(r'#[^\n]*', 0, STYLES['comment'])]
         self.rules = [(QRegExp(pat), index, fmt) for (pat, index, fmt) in rules]
 
     def highlightBlock(self, text):

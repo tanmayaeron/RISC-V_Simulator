@@ -1,19 +1,60 @@
-0x0 0x00400513
-0x4 0x008000ef
-0x8 0x0440006f
-0xc 0xff810113
-0x10 0x00112223
-0x14 0x00a12023
-0x18 0x00100593
-0x1c 0x00a5c863
-0x20 0x00100513
-0x24 0x00810113
-0x28 0x00008067
-0x2c 0xfff50513
-0x30 0xfddff0ef
-0x34 0x00050313
-0x38 0x00012503
-0x3c 0x00412083
-0x40 0x02650533
-0x44 0x00810113
-0x48 0x00008067
+0x0 Unknown instruction as 0x0 is not recognized
+0x4 Unknown instruction as 0x4 is not recognized
+0x8 Unknown instruction as 0x8 is not recognized
+0xc Unknown instruction as 0xc is not recognized
+0x10 Unknown instruction as 0x10 is not recognized
+0x14 Unknown instruction as 0x14 is not recognized
+0x18 Unknown instruction as 0x18 is not recognized
+0x1c Unknown instruction as 0x1c is not recognized
+0x20 Unknown instruction as 0x20 is not recognized
+0x24 Unknown instruction as 0x24 is not recognized
+0x28 Unknown instruction as 0x28 is not recognized
+0x2c Unknown instruction as 0x2c is not recognized
+0x30 Unknown instruction as 0x30 is not recognized
+0x34 Unknown instruction as 0x34 is not recognized
+0x38 Unknown instruction as 0x38 is not recognized
+0x3c Unknown instruction as 0x3c is not recognized
+0x40 Unknown instruction as 0x40 is not recognized
+0x44 Unknown instruction as 0x44 is not recognized
+0x48 Unknown instruction as 0x48 is not recognized
+0x4c Unknown instruction as $ is not recognized
+0x50 Unknown instruction as 0x10000000 is not recognized
+0x54 Unknown instruction as 0x10000001 is not recognized
+0x58 Unknown instruction as 0x10000002 is not recognized
+0x5c Unknown instruction as 0x10000003 is not recognized
+0x60 Unknown instruction as 0x10000004 is not recognized
+0x64 Unknown instruction as 0x10000005 is not recognized
+0x68 Unknown instruction as 0x10000006 is not recognized
+0x6c Unknown instruction as 0x10000007 is not recognized
+0x70 Unknown instruction as 0x10000008 is not recognized
+0x74 Unknown instruction as 0x10000009 is not recognized
+0x78 Unknown instruction as 0x1000000a is not recognized
+0x7c Unknown instruction as 0x1000000b is not recognized
+0x80 Unknown instruction as 0x1000000c is not recognized
+0x84 Unknown instruction as 0x1000000d is not recognized
+0x88 Unknown instruction as 0x1000000e is not recognized
+0x8c Unknown instruction as 0x1000000f is not recognized
+0x90 Unknown instruction as 0x10000010 is not recognized
+0x94 Unknown instruction as 0x10000011 is not recognized
+0x98 Unknown instruction as 0x10000012 is not recognized
+0x9c Unknown instruction as 0x10000013 is not recognized
+0xa0 Unknown instruction as 0x10000014 is not recognized
+0xa4 Unknown instruction as 0x10000015 is not recognized
+0xa8 Unknown instruction as 0x10000016 is not recognized
+0xac Unknown instruction as 0x10000017 is not recognized
+0xb0 Unknown instruction as 0x10000018 is not recognized
+0xb4 Unknown instruction as 0x10000019 is not recognized
+0xb8 Unknown instruction as 0x1000001a is not recognized
+0xbc Unknown instruction as 0x1000001b is not recognized
+0xc0 Unknown instruction as 0x1000001c is not recognized
+0xc4 Unknown instruction as 0x1000001d is not recognized
+0xc8 Unknown instruction as 0x1000001e is not recognized
+0xcc Unknown instruction as 0x1000001f is not recognized
+0xd0 Unknown instruction as 0x10000020 is not recognized
+0xd4 Unknown instruction as 0x10000021 is not recognized
+0xd8 Unknown instruction as 0x10000022 is not recognized
+0xdc Unknown instruction as 0x10000023 is not recognized
+0xe0 Unknown instruction as 0x10000024 is not recognized
+0xe4 Unknown instruction as 0x10000025 is not recognized
+0xe8 Unknown instruction as 0x10000026 is not recognized
+0xec Unknown instruction as 0x10000027 is not recognized

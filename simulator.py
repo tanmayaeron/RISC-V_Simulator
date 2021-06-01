@@ -313,216 +313,225 @@ class Processor:
             self.buffer.memoryB(*self.bufferStore[3])
 
 
-
-    def pipelined(self, knob2 = False, knob3 = False, knob4 = False, knob5 = False, ins_num = 0):
-        #defaults to non-forwarding when knob is unset or False in our code
+    def pipelinedHelper(self):
         self.Pipeline_cycle = 0
         self.Stall_Count = 0
         self.Miss_Count = 0
-        isStall = 0
-        PrevIsStall = 0
-        executeControl = {}
-        memControl = {}
-        WBControl = {}
         self.outputF = {"EE1": "F","EE2": "F","ME1": "F","ME2": "F","MM": "F"}
-        while True:
-            self.printForwardingInfo()
-            self.outputF = {"EE1": "F","EE2": "F","ME1": "F","ME2": "F","MM": "F"}
-            self.Pipeline_cycle += 1
-            MemBufferSignal = ExecBufferSignal = DecodeBufferSignal = FetchBufferSignal = True
-            Miss = False
-            hazardlist = [[False, "NO", 0],[False, "NO", 0]]
-            hazardlistE = [[False, "NO", 0],[False, "NO", 0]]
-            self.outputD =  {0:{}, 1:{}, 2:{}, 3:{}, 4:{}}
-            
-            for i in range(5):
-                if i == 4:
-                    FetchBufferSignal = self.fetch()
-                if i == 3:
-                    DecodeBufferSignal, isStall, hazardlist = self.decode(knob2)
-                    self.outputD[1]["Stalling"] =  isStall
-                    if isStall:
-                        break
-                if i == 2:
-                    ExecBufferSignal, Miss, hazardlistE = self.execute(executeControl)
-                    if Miss:
-                        self.Miss_Count += 1
-                        if(self.S_select[self.buffer.get(2)[0]]):
-                            self.branch_Miss+=1
-                        break
-                if i == 1:
-                    MemBufferSignal = self.memoryAccess(memControl)
-                if i == 0:
-                    self.registerUpdate(WBControl,knob2)
-            
+        self.isStall = 0 
+        self.PrevIsStall = 0
+        self.executeControl = {}
+        self.memControl = {}
+        self.WBControl = {}
+        self.knob2 = False
+        self.knob3 = False
+        self.knob4 = False
+        self.knob5 = False
+        self.ins_num = 0
 
 
-            self.printCycleInfo()
-            if(knob3):
-                self.printRegisters(self.Pipeline_cycle)
-            
-
-            #In case of a miss
-            #send a signal from execute to clear buffers of decode and fetch
-            #PC is already updated to the required by IAG and will be fetched next
-
-            #In case of stall = 1, we know
-            #M->E, we realise it in decode, pass a signal
-            #The signal will tell us the stall
-            #Don't update decode buffer and fetch, don't delete the fetch buffer but decode is deleted
-            #as the decode buffer was deleted no execute occurs in the next cycle
-            #fetch buffer wasn't deleted or updated so decode occurs with same IR, PC
-            #this way we stalled the whole thing by one cycle
-
-            # updating PC for next cycle
-            if ExecBufferSignal and Miss:  # edits of execute
-
-                currOpID = self.buffer.get(2)[0]
-
-                if self.PC_select[currOpID]:          #jalr
-                    PC_select = 1
-                else:
-                    PC_select = 3
-
-                S_select = self.S_select[currOpID]
-                INC_select = self.INC_select[currOpID]
-
-                self._IAG.muxPC(PC_select,self.buffer)
-                self._IAG.updatePC(1)
-                self._IAG.muxINC(INC_select,S_select,self.buffer.get(2)[8],self._RZ)
-                self._IAG.adder()
-                self._IAG.muxPC(0,self.buffer)
-                self._IAG.updatePC(1)
-
-            if not Miss and not isStall and FetchBufferSignal:  # edits of fetch
-                predict = self._BTB.predict(self._IAG.getPC())
-
-                if predict[0]:
-                    PC_select1 = 4
-                    PC_select2 = 2
-                else:
-                    PC_select1 = 2
-                    PC_select2 = 0
-
-                self._IAG.muxPC(PC_select1, self.buffer, predict[1])
-                self._IAG.updatePC(1)
-                self._IAG.muxINC(0, 0, self.buffer.get(2)[8], self._RZ)
-                self._IAG.adder()
-                self._IAG.muxPC(PC_select2, self.buffer)
-                self._IAG.updatePC(1)
-
-            if  not knob2:
-                if PrevIsStall==0 and isStall:
-                    self.Data_Hazards += 1
-            
-            PrevIsStall = isStall
-
-
-            if MemBufferSignal:
-                self.bufferUpdate(3)
-            else:
-                self.buffer.clearStage(4)
-            
-            if ExecBufferSignal:
-                self.bufferUpdate(2)
-            else: #it's a miss or no fetch buffer before it
-                self.buffer.clearStage(3)
-
-            if DecodeBufferSignal and Miss == False and isStall == 0: #set buffer only here
-                self.bufferUpdate(1)
-            else: #delete pre existing buffer
-                self.buffer.clearStage(2)
-            
-            if isStall:
-                self.Stall_Count += 1
-                isStall -= 1
-            
-            else:
-                if FetchBufferSignal and Miss == False: #set buffer only here
-                    self.bufferUpdate(0)
-                else:
-                    self.buffer.clearStage(1)
-
-                # clear buffer store
-                self.bufferStore = [[],[],[],[]]
-
-                if MemBufferSignal == ExecBufferSignal == DecodeBufferSignal == FetchBufferSignal == False:
+    def pipelined(self):
+        #defaults to non-forwarding when knob is unset or False in our code
+         
+        self.printForwardingInfo()
+        self.outputF = {"EE1": "F","EE2": "F","ME1": "F","ME2": "F","MM": "F"}
+        self.Pipeline_cycle += 1
+        MemBufferSignal = ExecBufferSignal = DecodeBufferSignal = FetchBufferSignal = True
+        Miss = False
+        hazardlist = [[False, "NO", 0],[False, "NO", 0]]
+        hazardlistE = [[False, "NO", 0],[False, "NO", 0]]
+        self.outputD =  {0:{}, 1:{}, 2:{}, 3:{}, 4:{}}
+        
+        for i in range(5):
+            if i == 4:
+                FetchBufferSignal = self.fetch()
+            if i == 3:
+                DecodeBufferSignal, self.isStall, hazardlist = self.decode(self.knob2)
+                self.outputD[1]["Stalling"] =  self.isStall
+                if self.isStall:
                     break
+            if i == 2:
+                ExecBufferSignal, Miss, hazardlistE = self.execute(self.executeControl)
+                if Miss:
+                    self.Miss_Count += 1
+                    if(self.S_select[self.buffer.get(2)[0]]):
+                        self.branch_Miss+=1
+                    break
+            if i == 1:
+                MemBufferSignal = self.memoryAccess(self.memControl)
+            if i == 0:
+                self.registerUpdate(self.WBControl,self.knob2)
+        
 
-            # execute_control
-            executeControl.clear()
+
+        self.printCycleInfo()
+        if(self.knob3):
+            self.printRegisters(self.Pipeline_cycle)
+        
+
+        #In case of a miss
+        #send a signal from execute to clear buffers of decode and fetch
+        #PC is already updated to the required by IAG and will be fetched next
+
+        #In case of stall = 1, we know
+        #M->E, we realise it in decode, pass a signal
+        #The signal will tell us the stall
+        #Don't update decode buffer and fetch, don't delete the fetch buffer but decode is deleted
+        #as the decode buffer was deleted no execute occurs in the next cycle
+        #fetch buffer wasn't deleted or updated so decode occurs with same IR, PC
+        #this way we stalled the whole thing by one cycle
+
+        # updating PC for next cycle
+        if ExecBufferSignal and Miss:  # edits of execute
+
             currOpID = self.buffer.get(2)[0]
-            executeControl["currALU_select"] = self._ALU_select[currOpID]  # ALU
-            executeControl["currMuxB"] = self._muxB[currOpID]
-            executeControl["currMuxA"] = self._muxA[currOpID]
 
-            # mem_control
-            memControl.clear()
-            currOpID = self.buffer.get(3)[0]
-            memControl["currMemoryEnable"] = self._memoryEnable[currOpID]
-            memControl["currSizeEnable"] = self.SizeEnable[currOpID]
-            memControl["Y_select"] = self._muxY[currOpID]
-            memControl["M_select"] = 1
+            if self.PC_select[currOpID]:          #jalr
+                PC_select = 1
+            else:
+                PC_select = 3
 
-            # wb_control
-            WBControl.clear()
-            currOpID = self.buffer.get(4)[0]
-            WBControl["currWriteEnable"] = self._writeEnable[currOpID]
+            S_select = self.S_select[currOpID]
+            INC_select = self.INC_select[currOpID]
 
-            if knob2 and not PrevIsStall:  # forwarding occurs
-                if DecodeBufferSignal:
-                    if hazardlist[0][0]==True or hazardlist[1][0]==True:
-                        self.Data_Hazards += 1
+            self._IAG.muxPC(PC_select,self.buffer)
+            self._IAG.updatePC(1)
+            self._IAG.muxINC(INC_select,S_select,self.buffer.get(2)[8],self._RZ)
+            self._IAG.adder()
+            self._IAG.muxPC(0,self.buffer)
+            self._IAG.updatePC(1)
 
-                    if hazardlist[0][0] == True and executeControl["currMuxA"]==0:            #rs1
-                        if hazardlist[0][1] == "ME":
-                            self.outputF["ME1"] = "T"
-                            executeControl["currMuxA"] = 3               # RY value to RA
+        if not Miss and not self.isStall and FetchBufferSignal:  # edits of fetch
+            predict = self._BTB.predict(self._IAG.getPC())
 
-                        elif hazardlist[0][1] == "EE":
-                            self.outputF["EE1"] = "T"
-                            executeControl["currMuxA"] = 2               # RZ value to RA
+            if predict[0]:
+                PC_select1 = 4
+                PC_select2 = 2
+            else:
+                PC_select1 = 2
+                PC_select2 = 0
 
-                    if hazardlist[1][0] == True and executeControl["currMuxB"]==0:                                               # rs2
+            self._IAG.muxPC(PC_select1, self.buffer, predict[1])
+            self._IAG.updatePC(1)
+            self._IAG.muxINC(0, 0, self.buffer.get(2)[8], self._RZ)
+            self._IAG.adder()
+            self._IAG.muxPC(PC_select2, self.buffer)
+            self._IAG.updatePC(1)
 
-                        if hazardlist[1][1] == "ME":
-                            self.outputF["ME2"] = "T"
-                            executeControl["currMuxB"] = 3    # RY value to RB
+        if  not self.knob2:
+            if self.PrevIsStall==0 and self.isStall:
+                self.Data_Hazards += 1
+        
+        self.PrevIsStall = self.isStall
 
-                        elif hazardlist[1][1] == "EE":
-                            self.outputF["EE2"] = "T"
-                            executeControl["currMuxB"] = 2  # RZ value to RB
 
-                if hazardlistE[0][0] == True and hazardlistE[0][1] == "MM":
-                    memControl["M_select"] = 0
+        if MemBufferSignal:
+            self.bufferUpdate(3)
+        else:
+            self.buffer.clearStage(4)
+        
+        if ExecBufferSignal:
+            self.bufferUpdate(2)
+        else: #it's a miss or no fetch buffer before it
+            self.buffer.clearStage(3)
 
-                if hazardlistE[1][0] == True and hazardlistE[1][1] == "MM":
-                    self.outputF["MM"] = "T"
-                    memControl["M_select"] = 0
-                    
-                    
-            if(knob4):
-                self.printBuffer(self.Pipeline_cycle)
-                  
-            if(knob5):
-                PC_tocheck = self.checkPC(ins_num)
-                fPC = self.buffer.get(1)[0]
-                dPC = self.buffer.get(2)[1]
-                ePC = self.buffer.get(3)[7]
-                maPC = self.buffer.get(4)[3]
-                if str(fPC)==PC_tocheck:
-                    self.printBuffer2("Fetch", 1)
-                if str(dPC)==PC_tocheck:
-                    self.printBuffer2("Decode", 2)
-                if str(ePC)==PC_tocheck:
-                    self.printBuffer2("Execute", 3)
-                if str(maPC)==PC_tocheck:
-                    self.printBuffer2("MemoryAccess", 4)
+        if DecodeBufferSignal and Miss == False and self.isStall == 0: #set buffer only here
+            self.bufferUpdate(1)
+        else: #delete pre existing buffer
+            self.buffer.clearStage(2)
+        
+        if self.isStall:
+            self.Stall_Count += 1
+            self.isStall -= 1
+        
+        else:
+            if FetchBufferSignal and Miss == False: #set buffer only here
+                self.bufferUpdate(0)
+            else:
+                self.buffer.clearStage(1)
+
+            # clear buffer store
+            self.bufferStore = [[],[],[],[]]
+
+            if MemBufferSignal == ExecBufferSignal == DecodeBufferSignal == FetchBufferSignal == False:
+                return 0
+
+        # execute_control
+        self.executeControl.clear()
+        currOpID = self.buffer.get(2)[0]
+        self.executeControl["currALU_select"] = self._ALU_select[currOpID]  # ALU
+        self.executeControl["currMuxB"] = self._muxB[currOpID]
+        self.executeControl["currMuxA"] = self._muxA[currOpID]
+
+        # mem_control
+        self.memControl.clear()
+        currOpID = self.buffer.get(3)[0]
+        self.memControl["currMemoryEnable"] = self._memoryEnable[currOpID]
+        self.memControl["currSizeEnable"] = self.SizeEnable[currOpID]
+        self.memControl["Y_select"] = self._muxY[currOpID]
+        self.memControl["M_select"] = 1
+
+        # wb_control
+        self.WBControl.clear()
+        currOpID = self.buffer.get(4)[0]
+        self.WBControl["currWriteEnable"] = self._writeEnable[currOpID]
+
+        if self.knob2 and not self.PrevIsStall:  # forwarding occurs
+            if DecodeBufferSignal:
+                if hazardlist[0][0]==True or hazardlist[1][0]==True:
+                    self.Data_Hazards += 1
+
+                if hazardlist[0][0] == True and self.executeControl["currMuxA"]==0:            #rs1
+                    if hazardlist[0][1] == "ME":
+                        self.outputF["ME1"] = "T"
+                        self.executeControl["currMuxA"] = 3               # RY value to RA
+
+                    elif hazardlist[0][1] == "EE":
+                        self.outputF["EE1"] = "T"
+                        self.executeControl["currMuxA"] = 2               # RZ value to RA
+
+                if hazardlist[1][0] == True and self.executeControl["currMuxB"]==0:                                               # rs2
+
+                    if hazardlist[1][1] == "ME":
+                        self.outputF["ME2"] = "T"
+                        self.executeControl["currMuxB"] = 3    # RY value to RB
+
+                    elif hazardlist[1][1] == "EE":
+                        self.outputF["EE2"] = "T"
+                        self.executeControl["currMuxB"] = 2  # RZ value to RB
+
+            if hazardlistE[0][0] == True and hazardlistE[0][1] == "MM":
+                self.memControl["M_select"] = 0
+
+            if hazardlistE[1][0] == True and hazardlistE[1][1] == "MM":
+                self.outputF["MM"] = "T"
+                self.memControl["M_select"] = 0
                 
-        # self.printForwardingInfo()         
+                
+        if(self.knob4):
+            self.printBuffer(self.Pipeline_cycle)
+                
+        if(self.knob5):
+            PC_tocheck = self.checkPC(self.ins_num)
+            fPC = self.buffer.get(1)[0]
+            dPC = self.buffer.get(2)[1]
+            ePC = self.buffer.get(3)[7]
+            maPC = self.buffer.get(4)[3]
+            if str(fPC)==PC_tocheck:
+                self.printBuffer2("Fetch", 1)
+            if str(dPC)==PC_tocheck:
+                self.printBuffer2("Decode", 2)
+            if str(ePC)==PC_tocheck:
+                self.printBuffer2("Execute", 3)
+            if str(maPC)==PC_tocheck:
+                self.printBuffer2("MemoryAccess", 4)
+                
+        return 1
+        # se
+        # lf.printForwardingInfo()           
 
 
-    def nonPipelined(self, knob3):        
+    def nonPipelined(self):        
         self.outputD =  {0:{}, 1:{}, 2:{}, 3:{}, 4:{}}
         FetchBufferSignal = self.fetch()
         if not FetchBufferSignal:

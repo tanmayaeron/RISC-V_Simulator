@@ -144,7 +144,7 @@ class mainScreen(QMainWindow, UiComponents):
         cacheDetails = self.getCacheFromInput()
         self.link.reset(cacheDetails)
         self.updateknobsList()
-        self.link.runProgram(self.currFilePath, self.knobsList, 0)
+        self.link.runProgram(self.currFilePath, self.knobsList, self.k3.isChecked())
         self.callDataPaths()
         self.compile_button.setText("\U00002705")
         self.updateRegisterView()
@@ -176,9 +176,11 @@ class mainScreen(QMainWindow, UiComponents):
         self.l1[12].setText(temp["MM"])
         
     def load(self):
-        self.link.load(self.currFilePath, 0)
+        self.updateknobsList()
+        self.link.load(self.currFilePath, self.k3.isChecked())
+        
     def step(self):
-        self.link.step()
+        self.link.step(self.knobsList[1])
         self.updateRegisterView()
         self.updateIDCacheView()
         self.updateMemoryView("10000000")
@@ -227,6 +229,7 @@ class mainScreen(QMainWindow, UiComponents):
         self.registerDisplay()
         self.updateRegisterView()
         self.updateMemoryView()
+        self.info()
         self.datapath()
         self.controlBox()
         self.cacheDisplay()
@@ -234,7 +237,6 @@ class mainScreen(QMainWindow, UiComponents):
         # self.DCache()
         # self.ICache()
         self.IDCache()
-        self.info()
 
         self.tabbedView1()
         self.tabbedView2()

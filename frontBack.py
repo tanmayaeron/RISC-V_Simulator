@@ -12,30 +12,37 @@ class frontBackEndInteraction:
         self.processor = Processor(startDetails)
         self.directoryPath = startDetails[0]
         
-    def load(self, filePath, isMC = 0):
-        sys.stderr.write("loaded")
+    def load(self, filePath, isMC = 1):
         self.processor.load(filePath,isMC)
         
     def runProgram(self, filePath, knobsL, isMC = 1):
         
         if(not knobsL[0]):
             self.processor.load(filePath,isMC)
-            while(self.processor.nonPipelined(knobsL[2])):
+            while(self.step(0)):
                 continue
             
         else:
-            self.processor.load_mc(filePath)
-            self.processor.pipelined(knobsL[1], knobsL[2], knobsL[3], knobsL[4], knobsL[5])
+            self.processor.load(filePath, isMC)
+            self.processor.pipelinedHelper(knobsL[1], knobsL[2], knobsL[3], knobsL[4], knobsL[5])
+            while(self.step(1)):
+                continue
+            
             self.processor.printStat()
             
         self.processor.printRegisters()
         self.processor.printData()
         self.processor.getCaches()
         
-    def step(self):
-        a = self.processor.nonPipelined(0)
+    def step(self, isPipeline):
+        if(isPipeline):
+            a = self.processor.pipelined()
+        else:
+            a = self.processor.nonPipelined()
         if(a == 0):
-            return 
+            return 0
+        else:
+            return 1
                 
         
         

@@ -127,7 +127,7 @@ class UiComponents():
         self.displayWidget4 = QGroupBox()
         self.controlGrid = QGridLayout()
         self.controlTable = []
-        controlsD = ["Cache(I$)", "Cache(D$)", "Block(I$)", "Block(D$)", "Way(I$)", "Way(D$)", "Compile", "Save", "Pipelined", "Forwarding", "Load", "Step"]
+        controlsD = ["Cache(I$)", "Cache(D$)", "Block(I$)", "Block(D$)", "Way(I$)", "Way(D$)", "Pipelined", "Forwarding", "isMC"]
         for i in range(len(controlsD)):
             temp = self.labelTile(controlsD[i], 40, 130, 0)
             self.controlGrid.addWidget(temp, i+1, 0)
@@ -137,22 +137,11 @@ class UiComponents():
             temp = self.lineEditTile()
             self.controlGrid.addWidget(temp, i+1 , 1)
             self.controlTable.append(temp)
+
+        self.controlGrid.addWidget(self.k1, 7, 1)
+        self.controlGrid.addWidget(self.k2, 8, 1)
+        self.controlGrid.addWidget(self.k3, 9, 1)
         
-        self.save_button = self.buttonTile("\U0001F4BE", 50, 40)
-        self.compile_button = self.buttonTile("\U00002699", 50, 40)
-        self.load_button = self.buttonTile("Load", 50, 40)
-        self.step_button = self.buttonTile("Step", 50, 40)
-        self.currentTheme = "Dark Theme"
-        # self.theme_button = self.buttonTile("\U0001F4A1", 50, 40)
-        self.controlGrid.addWidget(self.compile_button, 7, 1)
-        self.controlGrid.addWidget(self.save_button, 8, 1)
-        # self.controlGrid.addWidget(self.theme_button, 9, 1)
-        
-        
-        self.controlGrid.addWidget(self.k1, 9, 1)
-        self.controlGrid.addWidget(self.k2, 10, 1)
-        self.controlGrid.addWidget(self.load_button, 11, 1)
-        self.controlGrid.addWidget(self.step_button, 12, 1)
         
             
         self.controlTable[0].setText("64")
@@ -166,14 +155,26 @@ class UiComponents():
         self.controlScroll.setWidget(self.displayWidget4)
         self.controlScroll.setWidgetResizable(True)
         
+        
     def mainLabel(self):        
         main_label_image = QLabel()
         main_label_image_pixmap = QPixmap("GUI/Images/logo.png")
         main_label_image_pixmap = main_label_image_pixmap.scaled(450, 140)
+        self.save_button = self.buttonTile("\U0001F4BE", 50, 40)
+        self.compile_button = self.buttonTile("\U00002699", 50, 40)
+        self.load_button = self.buttonTile("\U000021E9", 50, 40)
+        self.step_button = self.buttonTile("\U000000BB", 50, 40)
+        
         main_label_image.setPixmap(main_label_image_pixmap)
         main_label_hBox = QHBoxLayout()
         main_label_hBox.addWidget(main_label_image)
-        main_label_hBox.setAlignment(QtCore.Qt.AlignCenter)
+        
+        main_label_hBox.addWidget(self.compile_button)
+        main_label_hBox.addWidget(self.save_button)
+        main_label_hBox.addWidget(self.load_button)
+        main_label_hBox.addWidget(self.step_button)
+        main_label_hBox.addSpacing(40)
+        # main_label_hBox.setAlignment(QtCore.Qt.AlignCenter)
         return main_label_hBox
     
     def runMode(self):
@@ -330,7 +331,7 @@ class UiComponents():
         self.tab6 = self.table1
         self.tab7 = self.table2
         
-        # self.tabs1.addTab(self.tab4, QIcon("GUI/Images/controls.png"), "")
+        self.tabs1.addTab(self.tab4, QIcon("GUI/Images/controls.png"), "")
         self.tabs1.addTab(self.tab1, QIcon("GUI/Images/registers.png"), "")
         self.tabs1.addTab(self.tab2, QIcon("GUI/Images/memory.png"), "")
         self.tabs1.addTab(self.tab3, QIcon("GUI/Images/cache.png"), "")
@@ -342,14 +343,12 @@ class UiComponents():
 
     def tabbedView2(self):
         self.tabs2 = QTabWidget()
-
-        # self.tabs1.setIconSize(QtCore.QSize(0, 0))
         self.tabs2.setStyleSheet("border:none")
         
         self.tabMain2 = self.editorScroll
         self.tabMain3 = self.displayWidget2
         # self.tabMain4 = 
-        self.tabs2.addTab(self.tab4, "Controls")
+        # self.tabs2.addTab(self.tab4, "Controls")
         self.tabs2.addTab(self.tabMain2, "Code")
         self.tabs2.addTab(self.tabMain3, "Visualise")
 

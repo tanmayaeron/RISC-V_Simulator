@@ -14,7 +14,9 @@ class Cache:
     def __init__(self, cache_size, block_size, ways):
         self.initialise(cache_size, block_size, ways)
         
-    def initialise(self, cache_size, block_size, ways):
+    def initialise(self, cache_size, block_size, ways, BlockReplacementPolicyType):
+        self.choice = BlockReplacementPolicyType
+        #0->LRU 1->FIFO 2->Random 3->NRU
         self.cache_size = cache_size
         self.block_size = block_size
         self.ways = ways #number of ways
@@ -26,11 +28,16 @@ class Cache:
         self._missDetails = []
         self.index = int(math.log2(cache_size/block_size)) - int(math.log2(ways)) #index bits
         self.BO = int(math.log2(block_size)) #block offset bits
-        self.tag = 32 - self.index - self.BO #tage bits
+        self.tag = 32 - self.index - self.BO #tag bits
         self.miss = 0
         self.hit = 0
         self.cacheDetails = {"Index":-1, "Set":-1, "isMiss":-1, "Victim":-1}
         self.total_accesses = 0
+        self.BlockTracker = {}
+        self.coldMiss = 0
+        self.conflictMiss = 0
+        self.capacityMiss = 0
+        self.totalBlocks = cache_size/block_size
         self.createCache()
         self.initialiseLRU()
         self.initialiseFIFO()
@@ -79,9 +86,9 @@ class Cache:
     
     def initialiseRandom(self):
         for ind in range(2**self.index):
-            self._FIFO.append([])
+            self._Random.append([])
             for blocks in range(self.ways):
-                self._FIFO[ind].append([0,0,0]) 
+                self._Random[ind].append([0,0,0]) 
         """
         self._FIFO[i] contains [0,0,0]
         in [0,0,0] the first element represents if the element is present or not
@@ -178,7 +185,7 @@ class Cache:
         return (0, oldTag)  
     
 
-    def updateRandom(self,tag,index):
+    def updateRandom(self, tag, index):
         # first we find if the tag is present in the Random or not
 
         for i in range(self.ways):
@@ -212,7 +219,37 @@ class Cache:
         self._Random[index][victim]=[1,0,tag]#the randomly selected victim blocked is replaced by new tag
     
         self._missDetails.append((self.miss+1, self._cache[index][oldTag]))
-        return (0, oldTag)  
+        return (0, oldTag)
+
+    def updateNRU(self, tag, index):
+
+        for i in range(self.ways):
+            if self._NRU[index][i][0] == 1 and self._NRU[index][i][2] == tag:
+                self._NRU[index][i][1] += 1
+                return -1
+        
+        for i in range(self.ways):
+            if self._NRU[index][i][0] == 0:
+                self._NRU[index][i][0] = 1
+                self._LRU[index][i][1] = 1
+                self._LRU[index][i][2] = tag
+                return -1
+
+        minS = 1e9
+        victim = 0
+        for i in range(self.ways):
+            if(minS > self._NRU[index][i][1]):
+                minS = self._NRU[index][i][1]
+                victim = i
+                 
+        self._NRU[index][victim][0] = 1
+        self._NRU[index][victim][1] = 1
+        oldTag = self._NRU[index][victim][2]
+        self._NRU[index][victim][2] = tag
+            
+        self._missDetails.append((self.miss+1, self._cache[index][oldTag]))
+        return (0, oldTag)
+        
         
     def write(self, address, memory_obj, data, size, control):
         self.total_accesses += 1
@@ -220,7 +257,17 @@ class Cache:
         oldindex=index
         index = int(index, 2)
         BO = int(BO, 2)
-        isVictim = self.updateLRU(tag, index)
+
+        isVictim = -1
+        if(self.choice == 0):
+            isVictim = self.updateLRU(tag, index)
+        elif(self.choice == 1):
+            isVictim = self.updateFIFO(tag, index)
+        elif(self.choice == 2):
+            isVictim = self.updateRandom(tag, index)
+        else:
+            isVictim = self.updateNRU(tag, index)
+        
         self.cacheDetails["Index"] = index
         self.cacheDetails["Set"] = self._cache[index]
         
@@ -234,6 +281,14 @@ class Cache:
             self._cache[index][tag] = data2
             
         else:
+            if (tag, index) not in BlockTracker:
+                self.coldMiss += 1
+            else:
+                if(len(self._cache) == self.totalBlocks):
+                    self.capacityMiss += 1
+                else:
+                    self.conflictMiss += 1
+            
             self.cacheDetails["isMiss"] = "T"
             self.miss+=1
             if(isVictim == -1):
@@ -243,6 +298,7 @@ class Cache:
                     self.cacheDetails["Victim"] = {"tag": isVictim[1] , "data":self._cache[index][isVictim[1]]}
                 del self._cache[index][isVictim[1]]
                 self._cache[index][tag] = data2
+            BlockTracker[(tag, index)] = True
         
         
     def read(self, address, memory_obj, size, control):
@@ -251,9 +307,22 @@ class Cache:
         oldindex = index
         index = int(index, 2)
         BO = int(BO, 2)
-        isVictim = self.updateLRU(tag, index)
+
+        isVictim = -1
+        if(self.choice == 0):
+            isVictim = self.updateLRU(tag, index)
+        elif(self.choice == 1):
+            isVictim = self.updateFIFO(tag, index)
+        elif(self.choice == 2):
+            isVictim = self.updateRandom(tag, index)
+        else:
+            isVictim = self.updateNRU(tag, index)
+
+        # isVictim = self.updateLRU(tag, index)
+
         self.cacheDetails["Index"] = index
         self.cacheDetails["Set"] = self._cache[index]
+        
         # if(isVictim != -1):
         #     self.cacheDetails["Victim"] = {"tag": isVictim[1] , "data":self._cache[index][isVictim[1]]}
         
@@ -262,6 +331,14 @@ class Cache:
             self.hit += 1
             return self.slice(2*BO,2*BO+(2**(size+1)),index,tag)
         else:
+            if (tag, index) not in BlockTracker:
+                self.coldMiss += 1
+            else:
+                if(len(self._cache) == self.totalBlocks):
+                    self.capacityMiss += 1
+                else:
+                    self.conflictMiss += 1
+            
             self.miss += 1
             self.cacheDetails["isMiss"] = "T"
             address2 = tag+oldindex+"0"*self.BO
@@ -275,6 +352,7 @@ class Cache:
                     self.cacheDetails["Victim"] = {"tag": isVictim[1] , "data":self._cache[index][isVictim[1]]}
                 del self._cache[index][isVictim[1]]
                 self._cache[index][tag] = data
+            BlockTracker[(tag, index)] = True
             return self.slice(2*BO,2*BO+(2**(size+1)),index,tag)
             
     def slice(self,start,end,index,tag):
@@ -291,8 +369,3 @@ class Cache:
         temp = self.cacheDetails
         self.cacheDetails = {"Index":-1, "Set":-1, "isMiss":-1, "Victim":-1}
         return temp
-    
-
-        
-
-    

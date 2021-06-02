@@ -126,15 +126,15 @@ class Memory:
 
 
 class PMI:
-    def __init__(self, cache_size, block_size, ways):
+    def __init__(self, cache_size, block_size, ways, blockReplacementPolicyType):
         self.__MDR = ["0"*8, "0"*8]
         self.__MAR = ["0"*8, "0"*8]
         
-        self.instantiate(cache_size, block_size, ways)
-    def instantiate(self, cache_size, block_size, ways):
+        self.instantiate(cache_size, block_size, ways, blockReplacementPolicyType)
+    def instantiate(self, cache_size, block_size, ways, blockReplacementPolicyType):
         self.__memory = Memory()
-        self._instCache = Cache(cache_size[0], block_size[0], ways[0])
-        self._dataCache = Cache(cache_size[1], block_size[1], ways[1])
+        self._instCache = Cache(cache_size[0], block_size[0], ways[0], blockReplacementPolicyType[0])
+        self._dataCache = Cache(cache_size[1], block_size[1], ways[1], blockReplacementPolicyType[1])
 
     def getMDR(self, control = 1):
         return self.__MDR[control]

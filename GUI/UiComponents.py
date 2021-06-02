@@ -128,10 +128,12 @@ class UiComponents():
         self.displayWidget4 = QGroupBox()
         self.controlGrid = QGridLayout()
         self.controlTable = []
-        controlsD = ["Cache(I$)", "Cache(D$)", "Block(I$)", "Block(D$)", "Way(I$)", "Way(D$)", "Pipelined", "Forwarding", "isMC"]
+        controlsD = ["Cache(I$)", "Cache(D$)", "Block(I$)", "Block(D$)", "Way(I$)", "Way(D$)", "Pipelined", "Forwarding", "isMC", "Inst Rep.","Data Rep."]
         for i in range(len(controlsD)):
             temp = self.labelTile(controlsD[i], 40, 130, 0)
             self.controlGrid.addWidget(temp, i+1, 0)
+        
+        
         
             
         for i in range(6):
@@ -143,6 +145,14 @@ class UiComponents():
         self.controlGrid.addWidget(self.k2, 8, 1)
         self.controlGrid.addWidget(self.k3, 9, 1)
         
+        self.k7 = QComboBox()
+        self.k7.addItems(["LRU", "FIFO", "Random", "NRU"])
+        
+        self.k8 = QComboBox()
+        self.k8.addItems(["LRU", "FIFO", "Random", "NRU"])
+
+        self.controlGrid.addWidget(self.k7, 10, 1)
+        self.controlGrid.addWidget(self.k8, 11, 1)
         
             
         self.controlTable[0].setText("64")

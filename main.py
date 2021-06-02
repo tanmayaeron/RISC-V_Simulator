@@ -46,7 +46,7 @@ if __name__ == '__main__':
     knobsL = [knob1, knob2, knob3, knob4, knob5, ins_num]
 
     directoryPath = os.getcwd()
-    startDetails = [directoryPath, [64, 64], [4, 4], [2, 2]]
+    startDetails = [directoryPath, [64, 64], [4, 4], [2, 2], [0, 0]]
     if ICache is not None:
         startDetails[1][0] = ICache[0]
         startDetails[2][0] = ICache[1]

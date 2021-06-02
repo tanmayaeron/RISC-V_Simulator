@@ -98,9 +98,9 @@ class Cache:
     
     def initialiseNRU(self):
         for ind in range(2**self.index):
-            self._FIFO.append([])
+            self._NRU.append([])
             for blocks in range(self.ways):
-                self._FIFO[ind].append([0,0,0]) 
+                self._NRU[ind].append([0,0,0]) 
 
         """
         self._FIFO[i] contains [0,0,0]
@@ -231,8 +231,8 @@ class Cache:
         for i in range(self.ways):
             if self._NRU[index][i][0] == 0:
                 self._NRU[index][i][0] = 1
-                self._LRU[index][i][1] = 1
-                self._LRU[index][i][2] = tag
+                self._NRU[index][i][1] = 1
+                self._NRU[index][i][2] = tag
                 return -1
 
         minS = 1e9
@@ -281,7 +281,7 @@ class Cache:
             self._cache[index][tag] = data2
             
         else:
-            if (tag, index) not in BlockTracker:
+            if (tag, index) not in self.BlockTracker:
                 self.coldMiss += 1
             else:
                 if(len(self._cache) == self.totalBlocks):
@@ -298,7 +298,7 @@ class Cache:
                     self.cacheDetails["Victim"] = {"tag": isVictim[1] , "data":self._cache[index][isVictim[1]]}
                 del self._cache[index][isVictim[1]]
                 self._cache[index][tag] = data2
-            BlockTracker[(tag, index)] = True
+            self.BlockTracker[(tag, index)] = True
         
         
     def read(self, address, memory_obj, size, control):
@@ -331,7 +331,7 @@ class Cache:
             self.hit += 1
             return self.slice(2*BO,2*BO+(2**(size+1)),index,tag)
         else:
-            if (tag, index) not in BlockTracker:
+            if (tag, index) not in self.BlockTracker:
                 self.coldMiss += 1
             else:
                 if(len(self._cache) == self.totalBlocks):
@@ -352,7 +352,7 @@ class Cache:
                     self.cacheDetails["Victim"] = {"tag": isVictim[1] , "data":self._cache[index][isVictim[1]]}
                 del self._cache[index][isVictim[1]]
                 self._cache[index][tag] = data
-            BlockTracker[(tag, index)] = True
+            self.BlockTracker[(tag, index)] = True
             return self.slice(2*BO,2*BO+(2**(size+1)),index,tag)
             
     def slice(self,start,end,index,tag):

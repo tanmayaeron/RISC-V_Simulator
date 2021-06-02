@@ -25,6 +25,7 @@ class frontBackEndInteraction:
         else:
             self.processor.load(filePath, isMC)
             self.processor.pipelinedHelper(knobsL[1], knobsL[2], knobsL[3], knobsL[4], knobsL[5])
+            sys.stderr.write(str(knobsL))
             while(self.step(1)):
                 continue
             
@@ -66,6 +67,9 @@ class frontBackEndInteraction:
                 l[-1].append("0x"+address_in_hex)
             l[-1].append(mem[address_in_hex])
         return l
+    
+    
+    
 
     def reset(self, initialiseControls):
         self.clearData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))

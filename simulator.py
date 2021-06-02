@@ -313,7 +313,7 @@ class Processor:
             self.buffer.memoryB(*self.bufferStore[3])
 
 
-    def pipelinedHelper(self):
+    def pipelinedHelper(self, k1, k2, k3, k4, k5):
         self.Pipeline_cycle = 0
         self.Stall_Count = 0
         self.Miss_Count = 0
@@ -323,11 +323,11 @@ class Processor:
         self.executeControl = {}
         self.memControl = {}
         self.WBControl = {}
-        self.knob2 = False
-        self.knob3 = False
-        self.knob4 = False
-        self.knob5 = False
-        self.ins_num = 0
+        self.knob2 = k1
+        self.knob3 = k2
+        self.knob4 = k3
+        self.knob5 = k4
+        self.ins_num = k5
 
 
     def pipelined(self):
@@ -365,8 +365,8 @@ class Processor:
 
 
         self.printCycleInfo()
-        if(self.knob3):
-            self.printRegisters(self.Pipeline_cycle)
+        # if(self.knob3):
+        #     self.printRegisters(self.Pipeline_cycle)
         
 
         #In case of a miss
@@ -508,23 +508,23 @@ class Processor:
                 self.memControl["M_select"] = 0
                 
                 
-        if(self.knob4):
-            self.printBuffer(self.Pipeline_cycle)
+        # if(self.knob4):
+        #     self.printBuffer(self.Pipeline_cycle)
                 
-        if(self.knob5):
-            PC_tocheck = self.checkPC(self.ins_num)
-            fPC = self.buffer.get(1)[0]
-            dPC = self.buffer.get(2)[1]
-            ePC = self.buffer.get(3)[7]
-            maPC = self.buffer.get(4)[3]
-            if str(fPC)==PC_tocheck:
-                self.printBuffer2("Fetch", 1)
-            if str(dPC)==PC_tocheck:
-                self.printBuffer2("Decode", 2)
-            if str(ePC)==PC_tocheck:
-                self.printBuffer2("Execute", 3)
-            if str(maPC)==PC_tocheck:
-                self.printBuffer2("MemoryAccess", 4)
+        # if(self.knob5):
+        #     PC_tocheck = self.checkPC(self.ins_num)
+        #     fPC = self.buffer.get(1)[0]
+        #     dPC = self.buffer.get(2)[1]
+        #     ePC = self.buffer.get(3)[7]
+        #     maPC = self.buffer.get(4)[3]
+        #     if str(fPC)==PC_tocheck:
+        #         self.printBuffer2("Fetch", 1)
+        #     if str(dPC)==PC_tocheck:
+        #         self.printBuffer2("Decode", 2)
+        #     if str(ePC)==PC_tocheck:
+        #         self.printBuffer2("Execute", 3)
+        #     if str(maPC)==PC_tocheck:
+        #         self.printBuffer2("MemoryAccess", 4)
                 
         return 1
         # se

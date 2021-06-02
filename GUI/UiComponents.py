@@ -60,7 +60,7 @@ class UiComponents():
         temp.setAlignment(QtCore.Qt.AlignCenter)
         return temp
 
-    def buttonTile2(self, labelName, height, width, color):
+    def buttonTile2(self, labelName, height, width, color = "black"):
         temp = QPushButton()
         temp.setText(labelName)
         temp.setFont(self.fixedfont)
@@ -145,11 +145,11 @@ class UiComponents():
         self.controlGrid.addWidget(self.k2, 8, 1)
         self.controlGrid.addWidget(self.k3, 9, 1)
         
-        self.k7 = QComboBox()
-        self.k7.addItems(["LRU", "FIFO", "Random", "NRU"])
+        self.k7 = self.buttonTile2("LRU", 30, 100)
+        # self.k7.addItems(["LRU", "FIFO", "Random", "NRU"])
         
-        self.k8 = QComboBox()
-        self.k8.addItems(["LRU", "FIFO", "Random", "NRU"])
+        self.k8 = self.buttonTile2("LRU", 30, 100)
+        # self.k8.addItems()
 
         self.controlGrid.addWidget(self.k7, 10, 1)
         self.controlGrid.addWidget(self.k8, 11, 1)

@@ -4,8 +4,8 @@ array: .word 1 2 10 9 3 8 4 7 5 6
 .text
 auipc x11,0x10000 # x11=array.begin()
 addi x11 x11 0
-li x12,10 # x12=array.size()
-addi x31,x0,2
+addi x12 x0,10 # x12=array.size()
+addi x31,    x0,2
 bubble_sort: 
 addi x12,x12,-1  #n-=1
 beq x12,x0,exit # if (n-1==0){break;}
@@ -21,8 +21,8 @@ blt x15,x16,loop
 beq x15,x16,loop
 sw x16,0(x14) # arr[i]=arr[i+1]
 sw x15,4(x14) # arr[i+1]=arr[i] # thus swapped
-j loop
+jal x0 loop
 break:
 
-j bubble_sort
+jal x0 bubble_sort
 exit:

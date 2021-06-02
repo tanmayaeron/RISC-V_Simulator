@@ -116,9 +116,8 @@ class mainScreen(QMainWindow, UiComponents):
                     temp[-1].append(32)
                 else:
                     temp[-1].append(int(self.controlTable[(i*2) + j].text()))
-                    
-                    
         return temp
+
 
     def updateknobsList(self):
         self.knobsList[0] = self.k1.isChecked()
@@ -130,6 +129,7 @@ class mainScreen(QMainWindow, UiComponents):
             self.knobsList[5] = 0
         else:
             self.knobsList[5] = int(self.k6.text())
+
             
     def callDataPaths(self):
         self.datapathO = self.link.parseData(os.path.join(self.directoryPath, "generated", "outputLog.txt"))
@@ -243,8 +243,10 @@ class mainScreen(QMainWindow, UiComponents):
         
         self.help = self.tabs1
         self.feed = self.tabs2
+
     def initWindow(self):
         self.splash.close()
+        self.setWindowTitle(self.title)
         logo_label = self.mainLabel()
         
         self.window()

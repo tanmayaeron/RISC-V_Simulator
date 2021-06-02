@@ -59,6 +59,7 @@ class UiComponents():
         temp.setStyleSheet("background-color:" +color+";")
         temp.setAlignment(QtCore.Qt.AlignCenter)
         return temp
+
     def buttonTile2(self, labelName, height, width, color):
         temp = QPushButton()
         temp.setText(labelName)
@@ -186,6 +187,14 @@ class UiComponents():
         self.k6 = self.lineEditTile()
         self.k6.setValidator(QIntValidator())
 
+
+    def developerInfo(self):
+        self.about = QMessageBox()
+        self.about.setTitle("about RISC-V simulator")
+        self.about.setText("assembly to machine code\n conversion of RISC-V ISA\n\npython simulation of\nmachine level execution of\nRISC-V 32 bit instructions.\n"+
+                           "This project is developed by\nAneeket\nShikhar\nTanmay\nHet\nAditya\nSource code can be found at\nhttps://github.com/tanmayaeron/RISC-V_Simulator")
+        self.about.exec_()
+        
         
     def createMenuBar(self):
         self.menuBar =  QMenuBar(self)
@@ -270,7 +279,7 @@ class UiComponents():
         gridbox.addWidget(temp, 7, 3)
         self.l1.append(temp)
         self.displayWidget2.setLayout(gridbox)
-             
+
     def memoryDisplay(self):
         self.scroll = QScrollArea()
         self.displayWidget = QGroupBox()
@@ -281,8 +290,7 @@ class UiComponents():
         for i in range(4):
             tempB = self.labelTile("+"+str(i), 40, 40, 0)
             gridbox.addWidget(tempB, 0, i+1)
-        
-        
+
         for i in range(10):
             label = self.labelTile("0x", 40, 160, 0)
             self.memoryArray[i].append(label)
@@ -308,6 +316,14 @@ class UiComponents():
         gridbox.addWidget(self.memoryArray[-1][0], 11, 0, 1, 16)
         gridbox.addWidget(self.memoryArray[-1][1], 11,3, 1, 20)
 
+        self.text = self.labelTile("Display\nsettings",80,160,0)
+        self.selectMemoryFormat = QComboBox()
+        self.selectMemoryFormat.addItems(["Hex","Decimal","Unsigned","ASCII"])
+        self.selectMemoryFormat.setStyleSheet("border :1px solid white;")
+        self.selectMemoryFormat.setFont(self.fixedfont)
+        gridbox.addWidget(self.text,12,0)
+        gridbox.addWidget(self.selectMemoryFormat,12,2,1,3)
+
         gridbox.setVerticalSpacing(20)
         gridbox.setHorizontalSpacing(30)
         self.displayWidget.setLayout(gridbox)
@@ -317,6 +333,8 @@ class UiComponents():
         self.scroll.setWidgetResizable(True)
         self.scroll.setFrameStyle(QFrame.NoFrame)
         self.displayWidget.setStyleSheet("border:none")
+
+
         
     def tabbedView1(self):
         self.tabs1 = QTabWidget()
@@ -353,8 +371,6 @@ class UiComponents():
         self.tabs2.addTab(self.tabMain3, "Visualise")
 
 
-        
-
     def registerDisplay(self):
         self.scroll1 = QScrollArea()
         self.displayWidget = QGroupBox()
@@ -366,11 +382,19 @@ class UiComponents():
             label2 = self.labelTile("()", 40, 80, 0)
             temp = self.labelTile("", 40, 200, 1)
             self.registerArray[i] = [label1, label2, temp]
-            gridbox.addWidget(self.registerArray[i][0], i+1, 0)
-            gridbox.addWidget(self.registerArray[i][1], i+1, 1)
-            gridbox.addWidget(self.registerArray[i][2], i+1, 2)
+            gridbox.addWidget(self.registerArray[i][0], i, 0)
+            gridbox.addWidget(self.registerArray[i][1], i, 1)
+            gridbox.addWidget(self.registerArray[i][2], i, 2)
 
-        
+        self.text = self.labelTile("Display\nsettings", 80, 160, 0)
+        self.selectMemoryFormat = QComboBox()
+        self.selectMemoryFormat.addItems(["Hex", "Decimal", "Unsigned", "ASCII"])
+        self.selectMemoryFormat.setStyleSheet("border :1px solid white;")
+        self.selectMemoryFormat.setFont(self.fixedfont)
+        gridbox.addWidget(self.text, 32, 0)
+        gridbox.addWidget(self.selectMemoryFormat, 32, 2)
+
+
         # gridbox.setAlignment(QtCore.Qt.AlignCenter)
         self.displayWidget.setLayout(gridbox)
         self.scroll1.setWidget(self.displayWidget)

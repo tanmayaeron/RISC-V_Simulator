@@ -23,7 +23,7 @@ class mainScreen(QMainWindow, UiComponents):
         self.countDisplay2 = 1
         self.knobsList = [0, 0, 0, 0 ,0, 0]
         self.currFilePath = os.path.join(self.directoryPath, "test", "main.s")
-        self.link = frontBackEndInteraction([self.directoryPath, [1024, 1024], [8, 8], [4, 4]])
+        self.link = frontBackEndInteraction([self.directoryPath, [1024, 1024], [8, 8], [4, 4], [0, 0]])
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
         self.callDataPaths()
@@ -116,6 +116,11 @@ class mainScreen(QMainWindow, UiComponents):
                     temp[-1].append(32)
                 else:
                     temp[-1].append(int(self.controlTable[(i*2) + j].text()))
+                    
+                    
+        temp.append([0, 0])
+        temp[-1][0] = self.k7.currentIndex()
+        temp[-1][1] = self.k8.currentIndex()
                     
                     
         return temp

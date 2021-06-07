@@ -48,7 +48,7 @@ class BTB:
         self.muxS  = muxS
         self.initialState = defaultdict(lambda: initialState)
         self.initialStateOneBit= defaultdict(lambda: initialStateOneBit)
-        self.function=[addtoAllTaken,addtoAllNotTaken,addInstructionBTFNT,oneBitBranchPredictor,twoBitBranchPredictor]
+        self.function=[self.addtoAllTaken,self.addtoAllNotTaken,self.addInstructionBTFNT,self.oneBitBranchPredictor,self.twoBitBranchPredictor]
         # stores True if taken else False
         # initialized to -1 as it is matched to RZ which has value either 1 or 0
 
@@ -69,7 +69,7 @@ class BTB:
         elif functiontype==4:
             self.predicted[PC] = True if self.initialState[PC] in [2,3] else False
     
-    def isFlush(self, PC, RZ, currOpID,functiontype=3):
+    def isFlush(self, PC, RZ, currOpID,functiontype=2):
         # True means Flush
         # False means we do not flush
         if self.isBTB[currOpID] or self.muxPC[currOpID]:

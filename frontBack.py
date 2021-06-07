@@ -25,7 +25,7 @@ class frontBackEndInteraction:
         else:
             self.processor.load(filePath, isMC)
             self.processor.pipelinedHelper(knobsL[1], knobsL[2], knobsL[3], knobsL[4], knobsL[5])
-            sys.stderr.write(str(knobsL))
+
             while(self.step(1)):
                 continue
             

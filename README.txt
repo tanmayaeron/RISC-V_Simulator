@@ -1,5 +1,5 @@
 About The Project
-The aim of this project is to simulate the machine level execution of RISC V as well as the RISC-V 32-bit instructions using a high level language. The Project also aims to give updates to the user regarding each step of the execution of the program.
+The aim of this project is to simulate the machine level execution of RISC V as well as the execution of RISC-V 32-bit instructions using a high level language. The Project also aims to give updates to the user regarding each step of the execution of the program.
 The user can also choose the Inst and Data Replacement policy, Data and Inst Cache size. The project can also be executed using step functionality for debugging purposes.
 It also returns the final status of the memory and registers as output for the user to analyse the working of their programs thoroughly. The Project currently allows the user to use 29 different instructions and can be extended to allow the use of any number of instructions by editing the .csv files as long as the instructions are supported by 32-bit RISC V ISA.
 For each instruction the program gives various updates like IR, PC, decoded instruction, temporary registers like RA, RB, RZ, RY, etc. during each cycle and prints the number of cycles.

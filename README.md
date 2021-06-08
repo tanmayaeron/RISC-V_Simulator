@@ -170,10 +170,13 @@ Check the generated folder for details of compilation. It contains:
 ### ScreenShots
 
 <p align="center">
-  <img src="Documentation/Phase3/images/registers.png" alt="Logo" width="1080" height="500">
+    ![image](https://user-images.githubusercontent.com/62541263/121227565-5372e900-c8a9-11eb-8aff-c2b1ddbcb671.png)
 </p>
 <p align="center">
-  <img src="Documentation/Phase3/images/memory.png" alt="Logo" width="1080" height="500">
+  ![image](https://user-images.githubusercontent.com/62541263/121227643-6c7b9a00-c8a9-11eb-9ae1-2c3b2aa25837.png)
+</p>
+<p align="center">
+    ![image](https://user-images.githubusercontent.com/62541263/121227693-7d2c1000-c8a9-11eb-8507-99032b75cbee.png)
 </p>
 
 ### Contributors

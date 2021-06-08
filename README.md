@@ -105,7 +105,7 @@ To get a local copy up and running follow these simple example steps.
 2.  You may save the file using save button.
 3.  Set the required knobs according to the documentation
 4.  Set the details of cache in the control box.
-5.  Tick the isMC button if the file is in Machine level of RISC-V.
+5.  Tick the Machine Code button if the file is in Machine level of RISC-V.
 6.  You may change the Inst Replacement Policy as well as the Data Replacement Policy by clicking on them. The Default is LRU.
 7.  You may set branch predictor and initial state of predictor. The Default is static Always Taken predictor.
 8.  To run the file using step function first load the file by pressing on the top right third (down arrow key) button and then click on the step button.
@@ -170,16 +170,16 @@ Check the generated folder for details of compilation. It contains:
 ### ScreenShots
 
 <p align="center">
-  <img src="Documentation/Phase3/images/registers.png" alt="Logo" width="1080" height="500">
-</p>
-<p align="center">
-  <img src="Documentation/Phase3/images/memory.png" alt="Logo" width="1080" height="500">
-</p>
-<p align="center">
   <img src="Documentation/Phase4/images/FrontGUI.png" alt="Logo" width="1080" height="500">
 </p>
 <p align="center">
-  <img src="Documentation/Phase3/images/RegistersPhase4.png" alt="Logo" width="1080" height="500">
+  <img src="Documentation/Phase4/images/RegistersPhase4.png" alt="Logo" width="1080" height="500">
+</p>
+<p align="center">
+  <img src="Documentation/Phase4/images/MemoryPhase4.png" alt="Logo" width="1080" height="500">
+</p>
+<p align="center">
+  <img src="Documentation/Phase4/images/Stats.png" alt="Logo" width="1080" height="500">
 </p>
 ### Contributors
 

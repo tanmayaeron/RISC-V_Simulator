@@ -22,7 +22,7 @@ Libraries Used
 # Front-end - Python3
     * PyQT5: for the Graphic User Interface.
     * qdarkstyle: for dark theme
-    * QtAwesome: for beautifying the theme
+    * QtAwesome: for using icons in the GUI
 
 Installation
     1. Unzip the zip file and locate the folder directory using cmd
@@ -56,7 +56,7 @@ Instructions to use GUI:
 2. You may save the file using save button.
 3. Set the required knobs according to the documentation
 4. Set the details of cache in the control box.
-5. Tick the isMC button if the file is in Machine level of RISC-V.
+5.  Tick the Machine Code button if the file is in Machine level of RISC-V.
 6. You may change the Inst Replacement Policy as well as the Data Replacement Policy by clicking on them. The Default is LRU.
 7. You may set branch predictor and initial state of predictor. The Default is static Always Taken predictor.
 8. To run the file using step function first load the file by pressing on the top right third (down arrow key) button and then click on the step button.

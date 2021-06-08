@@ -7,7 +7,7 @@
   <p align="center">
     A python implementation of RISC-V Simulation.
     <br />
-    <a href="https://github.com/tanmayaeron/CS204_Project_RISC-V"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/tanmayaeron/RISC-V_Simulator/blob/phase4/Documentation/Phase4/Documentation.pdf"><strong>Explore the docs »</strong></a>
     
   </p>
 </p>

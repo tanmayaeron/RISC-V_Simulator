@@ -653,7 +653,7 @@ class Processor:
         
     def getStats(self):
         try:
-            self.CPI = self.Pipeline_cycle/self.instructions_executed
+            self.CPI = round(self.Pipeline_cycle/self.instructions_executed,3)
         except:
             self.CPI = 0
             

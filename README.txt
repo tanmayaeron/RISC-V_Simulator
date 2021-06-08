@@ -58,11 +58,12 @@ Instructions to use GUI:
 4. Set the details of cache in the control box.
 5. Tick the isMC button if the file is in Machine level of RISC-V.
 6. You may change the Inst Replacement Policy as well as the Data Replacement Policy by clicking on them. The Default is LRU.
-7. To run the file using step function first load the file by pressing on the top right third (down arrow key) button and then click on the step button.
-8. To run the file, press compile button. Once the code completes execution, a tick sign will be visible on the button.
-9. In case you run the pipelined version the datapath can visualised using the "datapath" and "info" tab
-10. You can get the info about data cache and instruction cache from respective tabs.
-11. Look for the generated files
+7. You may set branch predictor and initial state of predictor. The Default is static Always Taken predictor.
+8. To run the file using step function first load the file by pressing on the top right third (down arrow key) button and then click on the step button.
+9. To run the file, press compile button. Once the code completes execution, a tick sign will be visible on the button.
+10. In case you run the pipelined version the datapath can visualised using the "datapath" and "info" tab
+11. You can get the info about data cache and instruction cache from respective tabs.
+12. Look for the generated files
 
 Contributors:
 * Aditya Agarwal - 2019CSB1064

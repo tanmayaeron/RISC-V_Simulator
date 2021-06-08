@@ -149,7 +149,7 @@ class UiComponents():
         # self.k7.addItems(["LRU", "FIFO", "Random", "NRU"])
         
         self.k8 = self.buttonTile2("LRU", 30, 100)
-        self.k9 = self.buttonTile2("NAT", 30, 100)
+        self.k9 = self.buttonTile2("AT", 30, 100)
         
         self.k10 = self.buttonTile2("Taken", 30, 100)
 
@@ -293,6 +293,29 @@ class UiComponents():
         gridbox.addWidget(temp, 7, 3)
         self.l1.append(temp)
         self.displayWidget2.setLayout(gridbox)
+        
+    def statsDisplay(self):
+        self.statsScroll = QScrollArea()
+        self.statsWidget = QGroupBox()
+        gridbox = QGridLayout()
+        
+        d = ["Cycles", "Instructions", "CPI", "Data transfer instructions", "ALU instructions", "Control instructions", "Total Stall Count", "Data Hazard", "Control Hazard", "Mispredictions", "Stalls(data hazard)", "Stalls(control Hazard)"]
+        self.statsArray = []
+        for i in range(len(d)):
+            label = self.labelTile(d[i], 40, 260, 0)
+            gridbox.addWidget(label, i+1, 0)
+            label = self.labelTile("0", 40, 60, 0)
+            gridbox.addWidget(label, i+1, 1)
+            self.statsArray.append(label)
+      
+        gridbox.setVerticalSpacing(20)
+        gridbox.setHorizontalSpacing(30)
+        self.statsWidget.setLayout(gridbox)
+        self.statsScroll.setWidget(self.statsWidget)
+        self.statsScroll.setWidgetResizable(True)
+        self.statsScroll.setFrameStyle(QFrame.NoFrame)
+        self.statsWidget.setStyleSheet("border:none")
+        
 
     def memoryDisplay(self):
         self.scroll = QScrollArea()
@@ -330,13 +353,13 @@ class UiComponents():
         gridbox.addWidget(self.memoryArray[-1][0], 11, 0, 1, 16)
         gridbox.addWidget(self.memoryArray[-1][1], 11,3, 1, 20)
 
-        self.text = self.labelTile("Display\nsettings",80,160,0)
-        self.selectMemoryFormat = QComboBox()
-        self.selectMemoryFormat.addItems(["Hex","Decimal","Unsigned","ASCII"])
-        self.selectMemoryFormat.setStyleSheet("border :1px solid white;")
-        self.selectMemoryFormat.setFont(self.fixedfont)
-        gridbox.addWidget(self.text,12,0)
-        gridbox.addWidget(self.selectMemoryFormat,12,2,1,3)
+        # self.text = self.labelTile("Display\nsettings",80,160,0)
+        # self.selectMemoryFormat = QComboBox()
+        # self.selectMemoryFormat.addItems(["Hex","Decimal","Unsigned","ASCII"])
+        # self.selectMemoryFormat.setStyleSheet("border :1px solid white;")
+        # self.selectMemoryFormat.setFont(self.fixedfont)
+        # gridbox.addWidget(self.text,12,0)
+        # gridbox.addWidget(self.selectMemoryFormat,12,2,1,3)
 
         gridbox.setVerticalSpacing(20)
         gridbox.setHorizontalSpacing(30)
@@ -362,14 +385,16 @@ class UiComponents():
         self.tab5 = self.scroll5
         self.tab6 = self.table1
         self.tab7 = self.table2
+        self.tab8 = self.statsScroll
         
         self.tabs1.addTab(self.tab4, QIcon("GUI/Images/controls.png"), "")
         self.tabs1.addTab(self.tab1, QIcon("GUI/Images/registers.png"), "")
         self.tabs1.addTab(self.tab2, QIcon("GUI/Images/memory.png"), "")
+        self.tabs1.addTab(self.tab8, QIcon("GUI/Images/stats.png"), "")
         self.tabs1.addTab(self.tab3, QIcon("GUI/Images/cache.png"), "")
         
         # self.tabs1.addTab(self.tab5, "Cache Details")
-        self.tabs1.addTab(self.tab6, "D$ Cache")
+        # self.tabs1.addTab(self.tab6, "D$ Cache")
         # self.tabs1.addTab(self.tab7, "I$ Cache")
 
 
@@ -400,13 +425,13 @@ class UiComponents():
             gridbox.addWidget(self.registerArray[i][1], i, 1)
             gridbox.addWidget(self.registerArray[i][2], i, 2)
 
-        self.text = self.labelTile("Display\nsettings", 80, 160, 0)
-        self.selectMemoryFormat = QComboBox()
-        self.selectMemoryFormat.addItems(["Hex", "Decimal", "Unsigned", "ASCII"])
-        self.selectMemoryFormat.setStyleSheet("border :1px solid white;")
-        self.selectMemoryFormat.setFont(self.fixedfont)
-        gridbox.addWidget(self.text, 32, 0)
-        gridbox.addWidget(self.selectMemoryFormat, 32, 2)
+        # self.text = self.labelTile("Display\nsettings", 80, 160, 0)
+        # self.selectMemoryFormat = QComboBox()
+        # self.selectMemoryFormat.addItems(["Hex", "Decimal", "Unsigned", "ASCII"])
+        # self.selectMemoryFormat.setStyleSheet("border :1px solid white;")
+        # self.selectMemoryFormat.setFont(self.fixedfont)
+        # gridbox.addWidget(self.text, 32, 0)
+        # gridbox.addWidget(self.selectMemoryFormat, 32, 2)
 
 
         # gridbox.setAlignment(QtCore.Qt.AlignCenter)

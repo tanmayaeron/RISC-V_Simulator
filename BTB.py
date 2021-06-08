@@ -68,13 +68,15 @@ class BTB:
     def predict(self, PC):
         return [True, self.lookup[PC]] if PC in self.lookup else [False, "0"*8]
 
-    def updatepredict(self,PC):
+    def updatepredict(self,PC, target, PC_temp):
         if self.functiontype ==3:
             self.predicted[PC] = True if self.stateOneBit[PC] else False
+            self.lookup[PC] = target if self.stateOneBit[PC] else PC_temp
         elif self.functiontype==4:
             self.predicted[PC] = True if self.stateTwoBit[PC] in [2,3] else False
+            self.lookup[PC] = target if self.stateTwoBit[PC] in [2,3] else PC_temp
     
-    def isFlush(self, PC, RZ, currOpID):
+    def isFlush(self, PC, RZ, currOpID, target, PC_temp):
         # True means Flush
         # False means we do not flush
         if self.isBTB[currOpID] or self.muxPC[currOpID]:
@@ -96,14 +98,14 @@ class BTB:
 
                 if self.predicted[PC] == False and int(RZ[-1],16) == 1:
                     
-                    self.updatepredict(PC)
+                    self.updatepredict(PC, target, PC_temp)
                     return True
 
                 if self.predicted[PC] == True and int(RZ[-1],16) == 0:
-                    self.updatepredict(PC)
+                    self.updatepredict(PC, target, PC_temp)
                     return True
             
-                self.updatepredict(PC)
+                self.updatepredict(PC, target, PC_temp)
                 return False
             
             elif self.isBTB[currOpID] and not self.muxS[currOpID]: #jal

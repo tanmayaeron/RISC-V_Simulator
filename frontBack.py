@@ -12,7 +12,8 @@ class frontBackEndInteraction:
         self.processor = Processor(startDetails)
         self.directoryPath = startDetails[0]
         
-    def load(self, filePath, isMC = 1):
+    def load(self, filePath, knobsL, isMC = 1):
+        self.processor.pipelinedHelper(knobsL[1], knobsL[2], knobsL[3], knobsL[4], knobsL[5])
         self.processor.load(filePath,isMC)
         
     def runProgram(self, filePath, knobsL, isMC = 1):
@@ -51,7 +52,9 @@ class frontBackEndInteraction:
     def getRegisterSnapshot(self):
         l = self.processor.getRegisters()
         return l
-
+    def getStatsSnapshot(self):
+        l = self.processor.getStats()
+        return l
     def getMemorySnapshot(self, address):
         mem = self.processor.getData()
         l=[]

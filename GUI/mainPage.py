@@ -23,7 +23,7 @@ class mainScreen(QMainWindow, UiComponents):
         self.countDisplay2 = 1
         self.knobsList = [0, 0, 0, 0 ,0, 0,0,0, 0, 0]
         self.cacheReplacement = ["LRU", "FIFO", "Random", "NRU"]
-        self.branchPredictor = [["AT", ["-"]],["NAT",["-"]], ["BTFNT", ["-"]], ["1-bit", ["NT", "T"]],["2-bit", ["SNT", "WNT", "WT", "ST"]]]
+        self.branchPredictor = [["AT", ["-"]],["ANT",["-"]], ["BTFNT", ["-"]], ["1-bit", ["NT", "T"]],["2-bit", ["SNT", "WNT", "WT", "ST"]]]
         
         
         self.currFilePath = os.path.join(self.directoryPath, "test", "main.s")
@@ -47,6 +47,12 @@ class mainScreen(QMainWindow, UiComponents):
         for i in range(10):
             for j in range(5):
                 self.memoryArray[i][j].setText(l[i][j])
+                
+    def updateStatsView(self):
+        l = self.link.getStatsSnapshot()
+        for i in range(len(l)):
+            self.statsArray[i].setText(str(l[i]))
+        
                 
                 
     def updateCacheReplacement(self, ind):
@@ -182,6 +188,7 @@ class mainScreen(QMainWindow, UiComponents):
         self.callDataPaths()
         self.compile_button.setText("\U00002705")
         self.updateRegisterView()
+        self.updateStatsView()
         self.updateIDCacheView()
         self.updateMemoryView("10000000")
         loop = QEventLoop()
@@ -210,13 +217,16 @@ class mainScreen(QMainWindow, UiComponents):
         self.l1[12].setText(temp["MM"])
 
     def load(self):
+        cacheDetails = self.getCacheFromInput()
+        self.link.reset(cacheDetails)
         self.updateknobsList()
-        self.link.load(self.currFilePath, self.k3.isChecked())
+        self.link.load(self.currFilePath, self.knobsList[:6], self.k3.isChecked())
 
     def step(self):
         self.link.step(self.knobsList[1])
         self.updateRegisterView()
-        self.updateIDCacheView()
+        self.updateStatsView()
+        # self.updateIDCacheView()
         self.updateMemoryView("10000000")
 
 
@@ -276,6 +286,7 @@ class mainScreen(QMainWindow, UiComponents):
         self.controlBox()
         self.cacheDisplay()
         self.createMenuBar()
+        self.statsDisplay()
         # self.DCache()
         # self.ICache()
         self.IDCache()

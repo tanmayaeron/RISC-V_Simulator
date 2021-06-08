@@ -16,12 +16,10 @@ import json
 class Processor:
 
     def __init__(self, initialiseDetails):
-        
-        
+        self.stats = {"Cycles":0, "Instructions":0, "CPI":0, "Data transfer instructions":0, "ALU instructions":0, "Control instructions":0, "Total Stall Count":0, "Data Hazard":0, "Control Hazard":0, "Mispredictions":0, "Stalls(data hazard)":0, "Stalls(control Hazard)":0}
         self.initialise(initialiseDetails)
         self.initialiseTempRegisters()
         self.initialiseControls()
-        
         self.initializeStats()
         self._BTB = BTB(self._isBTB,self.PC_select,self.S_select, initialiseDetails[-1])
 
@@ -229,11 +227,11 @@ class Processor:
         self._RZ = self._ALU.operate(operand1, operand2, currALU_select)
         self.outputD[2]["RZ"] = self._RZ
 
-        Miss = self._BTB.isFlush(PC, self._RZ, currOpID) #order wise first
 
         #self._IAG.output_muxPC is PC+imm
         target = hexToDec(PC)+hexToDec(imm)
         target = decToHex(target)
+        Miss = self._BTB.isFlush(PC, self._RZ, currOpID, target, PC_temp) #order wise first
         self._BTB.addInstruction(PC, PC_temp, imm, target , currOpID)
         self.bufferStore[2] = [currOpID, self._RZ, rd, RM, rs1, rs2, PC_temp,PC]
         self.outputD[2]["buffer"] = self.bufferStore[2]
@@ -313,7 +311,7 @@ class Processor:
             self.buffer.memoryB(*self.bufferStore[3])
 
 
-    def pipelinedHelper(self, k1, k2, k3, k4, k5):
+    def pipelinedHelper(self, k1, k2, k3, k4 = 0, k5 = 0):
         self.Pipeline_cycle = 0
         self.Stall_Count = 0
         self.Miss_Count = 0
@@ -333,7 +331,7 @@ class Processor:
     def pipelined(self):
         #defaults to non-forwarding when knob is unset or False in our code
          
-        self.printForwardingInfo()
+        # self.printForwardingInfo()
         self.outputF = {"EE1": "F","EE2": "F","ME1": "F","ME2": "F","MM": "F"}
         self.Pipeline_cycle += 1
         MemBufferSignal = ExecBufferSignal = DecodeBufferSignal = FetchBufferSignal = True
@@ -653,7 +651,21 @@ class Processor:
     def getCaches(self):
         self._PMI.printCaches(self._currFolderPath)
         
+    def getStats(self):
+        try:
+            self.CPI = self.Pipeline_cycle/self.instructions_executed
+        except:
+            self.CPI = 0
+            
+        self.Total_Stall_Count= self.Stall_Count + self.Miss_Count*2
+        self.Flush = self.Miss_Count*2
+        self.stats = {"Cycles":self.Pipeline_cycle, "Instructions":self.instructions_executed, "CPI":self.CPI, "Data transfer instructions":self.Data_transfer_instructions, "ALU instructions":self.ALU_instructions, "Control instructions":self.control_instructions, "Total Stall Count":self.Total_Stall_Count, "Data Hazard":self.Data_Hazards, "Control Hazard":self.control_Hazards, "Mispredictions":self.branch_Miss, "Stalls(data hazard)":self.Stall_Count, "Stalls(control Hazard)":self.Flush}
+        statsArray = [self.Pipeline_cycle, self.instructions_executed, self.CPI, self.Data_transfer_instructions, self.ALU_instructions, self.control_instructions, self.Total_Stall_Count, self.Data_Hazards, self.control_Hazards, self.branch_Miss, self.Stall_Count, self.Flush]
+        
+            
+        return statsArray
     def printStat(self):
+        
         filename = os.path.join(self._currFolderPath, "generated", 'stats.txt')
         f = open(filename,'w')
         f.write("Total number of Cycles in the program :"+str(self.Pipeline_cycle)+"\n")

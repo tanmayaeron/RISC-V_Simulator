@@ -39,18 +39,23 @@ taken = 1
 """
 class BTB:
 
-    def __init__(self,isBTB,muxPC,muxS,initialState=0,initialStateOneBit=0):
+    def __init__(self,isBTB,muxPC,muxS,functiontype=2,initialState=[0,0]):
+        """
+        initialState[0] is 0 or 1 and is the initial state of one bit branch predictor
+        initialState[1] is 0(SNT) 1(WNT) 2(WT) or 3(ST) and is the initial state of two bit branch predictor
+        functiontype is 0 for all taken 1 (all not taken) 2 (btfnt) 3(one bit predictor) 4(two bit branch predictor)
+        """
         self.lookup = defaultdict(int)
         #  branch and jal instruction in self.lookup
-        self.predicted = defaultdict(lambda: 0)
+        self.predicted = defaultdict(int)
         self.isBTB = isBTB
         self.muxPC = muxPC
         self.muxS  = muxS
-        self.initialState = defaultdict(lambda: initialState)
-        self.initialStateOneBit= defaultdict(lambda: initialStateOneBit)
+        self.stateOneBit= defaultdict(lambda: initialState[0])
+        self.stateTwoBit = defaultdict(lambda: initialState[1])
         self.function=[self.addtoAllTaken,self.addtoAllNotTaken,self.addInstructionBTFNT,self.oneBitBranchPredictor,self.twoBitBranchPredictor]
-        # stores True if taken else False
-        # initialized to -1 as it is matched to RZ which has value either 1 or 0
+        self.functiontype=functiontype
+        
 
     # prediction - 1 -> Taken
     # prediction - 0 -> Not Taken
@@ -63,13 +68,13 @@ class BTB:
     def predict(self, PC):
         return [True, self.lookup[PC]] if PC in self.lookup else [False, "0"*8]
 
-    def updatepredict(self,PC,functiontype=3):
-        if functiontype ==3:
-            self.predicted[PC] = True if self.initialStateOneBit[PC] else False
-        elif functiontype==4:
-            self.predicted[PC] = True if self.initialState[PC] in [2,3] else False
+    def updatepredict(self,PC):
+        if self.functiontype ==3:
+            self.predicted[PC] = True if self.stateOneBit[PC] else False
+        elif self.functiontype==4:
+            self.predicted[PC] = True if self.stateTwoBit[PC] in [2,3] else False
     
-    def isFlush(self, PC, RZ, currOpID,functiontype=2):
+    def isFlush(self, PC, RZ, currOpID):
         # True means Flush
         # False means we do not flush
         if self.isBTB[currOpID] or self.muxPC[currOpID]:
@@ -83,22 +88,22 @@ class BTB:
                     return True
                 
                 if int(RZ[-1],16)==1:
-                    self.initialState[PC] = min(3, self.initialState[PC] + 1)
+                    self.stateTwoBit[PC] = min(3, self.stateTwoBit[PC] + 1)
                 elif int(RZ[-1],16) == 0:
-                    self.initialState[PC] = max( 0, self.initialState[PC] - 1)
+                    self.stateTwoBit[PC] = max( 0, self.stateTwoBit[PC] - 1)
 
-                self.initialStateOneBit[PC] = int(RZ[-1],16)
+                self.stateOneBit[PC] = int(RZ[-1],16)
 
                 if self.predicted[PC] == False and int(RZ[-1],16) == 1:
                     
-                    self.updatepredict( PC, functiontype)
+                    self.updatepredict(PC)
                     return True
 
                 if self.predicted[PC] == True and int(RZ[-1],16) == 0:
-                    self.updatepredict( PC, functiontype)
+                    self.updatepredict(PC)
                     return True
             
-                self.updatepredict( PC, functiontype)
+                self.updatepredict(PC)
                 return False
             
             elif self.isBTB[currOpID] and not self.muxS[currOpID]: #jal
@@ -113,7 +118,7 @@ class BTB:
         else:
             return False
 
-    def addInstruction(self, PC, PC_temp, imm, target, currOpID,functiontype=2):
+    def addInstruction(self, PC, PC_temp, imm, target, currOpID):
         """
         0 all taken
         1 all not taken
@@ -121,7 +126,7 @@ class BTB:
         3 one bit
         4 two bit
         """
-        self.function[functiontype]( PC, PC_temp, imm, target, currOpID)
+        self.function[self.functiontype]( PC, PC_temp, imm, target, currOpID)
 
         
 
@@ -146,8 +151,8 @@ class BTB:
         
         if PC not in self.lookup:
             if self.muxS[currOpID]:
-                self.lookup[PC] = target if self.initialState[PC] in [2,3] else PC_temp
-                self.predicted[PC] = True if self.initialState[PC] in [2,3] else False
+                self.lookup[PC] = target if self.stateTwoBit[PC] in [2,3] else PC_temp
+                self.predicted[PC] = True if self.stateTwoBit[PC] in [2,3] else False
                 # if it is in lookup and positive then we predict it as False and take the next instruction(pc_temp)
                 # else we predict it as true and and take the target
             elif self.isBTB[currOpID] and not self.muxS[currOpID]:
@@ -161,8 +166,8 @@ class BTB:
         
         if PC not in self.lookup:
             if self.muxS[currOpID]:
-                self.lookup[PC] = target if self.initialStateOneBit[PC] else PC_temp
-                self.predicted[PC] = True if self.initialStateOneBit[PC] else False
+                self.lookup[PC] = target if self.stateOneBit[PC] else PC_temp
+                self.predicted[PC] = True if self.stateOneBit[PC] else False
                 # if it is in lookup and positive then we predict it as False and take the next instruction(pc_temp)
                 # else we predict it as true and and take the target
             elif self.isBTB[currOpID] and not self.muxS[currOpID]:
@@ -207,8 +212,8 @@ class BTB:
     def clearBTB(self):
         self.lookup.clear()
         self.predicted.clear()
-        self.initialStateOneBit.clear()
-        self.initialState.clear()
+        self.stateOneBit.clear()
+        self.stateTwoBit.clear()
 
 if __name__ == "__main__":
     btb = BTB()

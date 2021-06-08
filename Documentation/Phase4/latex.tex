@@ -53,31 +53,33 @@
 \end{centering}
 \protect\vspace{2.0cm}
 \LARGE
-The aim of this project is to simulate the machine level execution of RISC V 32-bit instructions using a high level language.\\
+The aim of this project is to simulate the machine level execution of RISC V as well as the execution of RISC-V 32-bit instructions using a high level language.\\
 
 The Project also aims to give updates to the user regarding each step of the execution of the program. It also returns the final status of the memory and registers as output for the user to analyse the working of their programs thoroughly.\\
 
+The project can also be executed using step functionality for debugging purposes.\\
+
 The Project currently allows the user to use 29 different instructions and can be extended to allow the use of any number of instructions by editing the .csv files as long as the instructions are supported by 32-bit RISC V ISA. \\
 
-The program supports the use of `knobs' which will enable the user to select whether or not they want pipelining, data forwarding, and other details to be printed at the end of running the program.\\\\\\
-The program executes each instruction using five stages as described in the RISC V architecture.\\
+The Project also allows the user to choose which replacement policy to be used and which branch prediction to used while executing the instructions of the instructions.\\
+
+The program supports a configurable design that will allow the user to select whether or not they want pipelining, data forwarding, user defined cache sizes, etc. to analyse the working and performance of different codes and their behaviour under different hardware conditions.\\
+
+The program executes each instruction using five stages as described in the RISC V architecture and gives out all sort of stats and the opportunity to observe the behaviour and output of the program for each cycle as per the user's convenience.\\
 \newpage
-There are 5 separate knobs, all with a different purpose.\\
+The several options given to the user regarding the configuration of the virtual hardware that runs the machine codes are as follows.\\
 \begin{enumerate}
-  \item {\bf Knob1:} Used to enable/disable pipelining during runtime. 
-  \item {\bf Knob2:} Used to enable/disable data forwarding
-  \item {\bf Knob3:} Used to enable/disable printing values in the register file at the end of each cycle.
-  \item {\bf Knob4:} Used to enable/disable printing information in the pipeline registers at the end of each cycle, along with the cycle number.
-  \item {\bf Knob5:} This is like enabling knob4 for a specific instruction. We will be able to see pipeline register for that particular instruction only.
+  \item {\bf Pipeling:} If ticked allows pipelined execution of instructions.
+  \item {\bf Forwarding:} If ticked allows forwarding to resolve data hazards otherwise the program uses stalling to do the same.
+  \item {\bf Machine Code:} If ticked allows the user to directly provide machine code through the editor, expects assembly code otherwise.
+  \item {\bf I\$ and D\$:} I\$ refers to the instruction cache (from where the instructions are fetched during fetch stage) and D\$ refers to the data cache (where all sorts of data needed by the program is stored and read from).
+  \item{\bf Cache:} Allows the user to specify the total cache size for each of the two caches.
+  \item {\bf Block:} Allows the user to specify the total block size for each of the two caches.
+  \item{\bf Ways:} Allows the user to choose an N-way set associative cache for each of the cache. 'N' being the number entered in this column by the user.
+  \item{\bf Replacement:} Refers to the block replacement policy you want each of your caches to follow.
+  \item{\bf Branch Predictor:} Allows you to select the among different branch prediction methods such as Always Taken (AT), Always Not Taken (ANT), Backward Taken Forward Not Taken (BTFNT), One Bit dynamic branch predictor (1-Bit) and Two Bit dynamic branch predictor (2-Bit).
+  \item{\bf Initial State:} Allows the user to decide the initial state for all the dynamic branch predictors.
 \end{enumerate}\\
-The program also allows for the capability of a simple cache integrated with the previous phases of the project.\\
-The cache is implemented using the concept of LRU(Least Recently Used) in which the data that was used least recently is deemed the victim block, and evicted from the cache.\\\\
-There are two different caches:
-\begin{enumerate}
-    \item Instruction Cache (I\$)
-    \item Data Cache (D\$)
-\end{enumerate}\\
-\vspace{1cm}All data during the Fetch stage is handled by the I\$ and all data during Memory Stage is handled by the D\$.\\
 
 \newpage
 \begin{centering}
@@ -99,6 +101,9 @@ Back-end - Python3
   \item {\bf sys} for reading and editing files with ease.
   \item {\bf json} for crunching data
   \item {\bf glob} for file management
+  \item {\bf regex} for making the cleaned file
+  \item {\bf random} for generating random number in Random Replacement Policy
+  \item {\bf argparse} for taking arguments from the user
 \end{enumerate}\\
 \textbf{}
 
@@ -106,6 +111,7 @@ Front-end - Python3
 \begin{enumerate}
   \item {\bf PyQt5} for the Graphic User Interface.
   \item {\bf qdarkstyle} for dark theme in the GUI.
+  \item {\bf QtAwesome} for using icons
 \end{enumerate}
 \newpage
 \textsl{\textbf{How to run the code:}}\\\\
@@ -158,7 +164,7 @@ Arguments: [-h] [-g] [-f F] [-k1] [-k2] [-k3] [-k4] [-k5 INS] [-ICache cacheSize
 \protect\vspace{1.0cm}
 We have implemented the project using the following method:\\
 
-First it takes the input from a \textsl{\textbf{.mc}} file that contains the input in the required format, the content of this file can be modified using the GUI editor or by changing the main.mc file.\\
+The simulator takes the input from a \textsl{\textbf{.mc}} file that contains the machine code in the required format, the content of this file can be modified using the GUI editor by supplying an assembly code that is converted to the machine code or by directly supplying the machine code directly in the required format or by changing the main.mc file.\\
 Then, it stores the \textsl{\textbf{.data}} part into the data memory and the \textsl{\textbf{.text}} part in the text part of the memory.
 Once that is completed, we run the program using the following method:
 \begin{enumerate}
@@ -166,21 +172,22 @@ Once that is completed, we run the program using the following method:
 \item Instruction Decode: We are identifying the instruction using the .csv file and {\bf pandas} library and returning all the required fields. The registers RA and RB are also set during this stage.
 \item Execute: The ALU executes the instruction by computing the desired output using values stored in registers in RA, RB, imm, etc. The required type of ALU instruction is determined by another .csv file. We are updating the output in the RZ register.
 \item Memory Access: Memory is read and written in this stage. This stage is used only for load and store instructions. For the remaining instructions, this stage is redundant. The value of the RY register is also consequently updated.
-\item Register Write-back: Here we are storing the value of the temporary register RY in the destination register, resulting in the register files being updated. The register update is extremely fast compared to memory read and update.
-\end{enumerate}
 \newpage
-We have implemented data forwarding by passing the required values from the source buffer to the destination buffer without the need of stalling in most cases. This helps to reduce the number of stalls required. The types of data forwarding are:
+\item Register Write-back: Here we are storing the value of the temporary register RY in the destination register, resulting in the register files being updated. The register update is extremely fast compared to memory read and update.\\
+\end{enumerate}
+We have implemented data forwarding by passing the required values from the source buffer to the destination buffer without the need of stalling in most cases. This helps to reduce the number of stalls required. The types of data forwarding are:\\
 \begin{enumerate}
     \item Execute to Execute
     \item Memory to Execute
     \item Memory to Memory
 \end{enumerate}
-\\
 \vspace{1cm}
 
 \vspace{1cm}\\
-The program detects hazards present which can cause an incorrect value to be register due to one instruction's stage being executed before another. This is fixed by either transferring data values directly with the help of data forwarding, or with the help of stalling which delays the next instruction so that the previous one is updated in time.\\\\
-While data forwarding is enabled, there is no use of stalling\\ except for one particular case where we use it along with \\Memory-to-Execute data forwarding.
+The program detects hazards present which can cause an incorrect value to be register due to one instruction's stage being executed before another. This is fixed by either transferring data values directly with the help of data forwarding, or with the help of stalling which delays the next instruction so that the previous one is updated in time.\\
+
+While data forwarding is enabled, there is no use of stalling\\ except for one particular case where we use it along with \\Memory-to-Execute data forwarding.\\
+
 
 \newpage
 \begin{centering}
@@ -191,13 +198,42 @@ While data forwarding is enabled, there is no use of stalling\\ except for one p
 \end{centering}
 \noindent
 \LARGE
-{\bf Input Format:}\\\\
+{\bf Input Format:}\\
+{\bf The input format of the RISC-V code is}\\
+.data\\
+array: .word 1 2 10 9 3 8 4 7 5 6\\
+.text\\
+auipc x11,0x10000\\
+addi x11 x11 0\\
+addi x12 x0,10\\
+addi x31,    x0,2\\
+bubblesort: \\
+addi x12,x12,-1 \\
+beq x12,x0,exit \\
+addi x13, x0,0 \\
+loop:\\
+beq x13,x12,break \\
+sll x14,x13,x31 \\
+add x14,x14,x11 \\
+lw x15,0(x14) \\
+lw x16,4(x14) \\
+addi x13,x13,1 \\
+blt x15,x16,loop\\
+beq x15,x16,loop\\
+sw x16,0(x14) \\
+sw x15,4(x14\\
+jal x0 loop\\
+break:\\
+jal x0 bubblesort\\
+exit:
+\newpage
+{\bf The input format of the Machine code is}\\
 0x0 0x00500513\\
 0x4 0x008000EF\\
 0x8 0x0440006F\\
 \$\\
 0x10000000 0x64\\\\
-The input is given through GUI if the GUI is run else it is taken from the input file.\\\\
+The input is given through GUI if the GUI is run else it is taken from the main.mc file.\\\\
 The section given before the `\$' sign is the text segment of the code and all the lines after it signify the data segment of the code.\\\\
 Output is generated in the `generated' folder. It contains the following things:  \\
 \begin{enumerate}
@@ -276,7 +312,7 @@ Input parameters that can be set by the user include:
 \textsf{CPI is :3.5}\\
 \textsf{Data Transfer Instructions Executed :0}\\
 \textsf{ALU instructions are :4}\\
-\textsf{Contol instructions :0}\\
+\textsf{Control instructions :0}\\
 \textsf{Total Stall Count are :6}\\
 \textsf{Number of Data Hazards are :3}\\
 \textsf{Total Control Hazards are :0}\\
@@ -299,7 +335,7 @@ Input parameters that can be set by the user include:
 \end{Huge}
 \vspace{2cm}
 \begin{centering}
-\includegraphics[width=1.0\textwidth]{controls.png}\vspace{2cm}
+\includegraphics[width=1.0\textwidth]{FrontGUI.png}\vspace{2cm}
 \end{centering}
 Above is the GUI image, the tab on the right is the `controls tab' and the user can change the knobs and cache configurations accordingly (cache size must be greater than the block size and the cache size should be a power of 2  along with the block size being a multiple of 4 to ensure word alignment).\\
 \unindent
@@ -311,53 +347,24 @@ We can also change the theme by clicking the `bulb button' to change from light 
 When we press the compile button the code in the editor gets saved in main.mc and the code will be executed.
 \newpage
 \begin{centering}
-\includegraphics[width=1.0\textwidth]{registers.png}\vspace{2cm}
+\includegraphics[width=1.0\textwidth]{RegistersPhase4.png}\vspace{2cm}
 \end{centering}
 We can see the values stored in all the Registers here. Values are stored in Hexadecimal format.\\
 User can scroll down to observe the registers that are not immediately visible on the screen.
 
 
-\newpage
-\begin{centering}
-\includegraphics[width=1.0\textwidth]{info.png}\vspace{2cm}
-\end{centering}
-The `info tab' contains all the necessary information about the pipelined execution of each stage. It should only be used when the code is run in pipelined mode.\\
-We can see the info about each cycle and each stage.
-The cycle for which info is seen is seen in the box. In the image, we are checking details for the 5th cycle.\\
-One can increase or decrease the total cycles by clicking '+' or '-' respectively. One can't change cycles beyond the total number of cycles of the program or less than 0 either.\\
-We can see the info about the stage by clicking the `$F$' `$D$' `$E$' `$MA$' or `$WB$' boxes accordingly.\\
-EE rs1 `T' implies that there is Execute to Execute forwarding going on because of a data hazard in rs1.
 
-\newpage
-\begin{centering}
-\includegraphics[width=1.0\textwidth]{cache_details.png}\vspace{2cm}
-\end{centering}
-We can see the Cache Details corresponding to the selected cycle.\\
-One can increase or decrease the total cycles by clicking '+' or '-' respectively. One can't change cycles beyond the total number of cycles of the program or less than 0 either.\\
-We can see the details about Fetch, Load, and Store accordingly by clicking on that block.\\
-`isMiss' is T(meaning True) when Miss occurs else it is F(meaning False).
-Here we can see the Total number of Accesses, Hits, Misses for Instruction and Data respectively, they are independent of the cycle number and are the net stats after the execution of the whole program.\\
-The tag and data of the Victim is shown in the Victim block. If no data is present then it will be -1.\\
-For example if you want to see the Load Cache Details for the 11th cycle first go to the 11th cycle and then click on the Load button.\\
+
+
 \newpage
 
 \vspace{2cm}
 \begin{centering}
-\includegraphics[width=1.0\textwidth]{data_cache.png}\vspace{2cm}
+\includegraphics[width=1.0\textwidth]{Stats.png}\vspace{2cm}
 \end{centering}
-The information about the Data Cache is seen here\\
-We can see the whole info by double clicking on the corresponding box.
-We can then scroll thorugh the info using the right or left arrow key.\\
-One set is represented by the line number and the total blocks in it are given in a line. One block is of the format \{tag:``data"\}.\\
+We can see the statistical details here\\
 
-\newpage
-\begin{centering}
-\includegraphics[width=1.0\textwidth]{ins_cache.png}\vspace{2cm}
-\end{centering}
-The information about the Data Cache is seen here\\
-We can see the whole info by double clicking on the corresponding box.
-We can then scroll thorugh the info using the right or left arrow key.\\
-One set is represented by the line number and the total blocks in it are given in a line. One block is of the format \{tag:``data"\}.\\
+
 
 \newpage
 
@@ -366,7 +373,7 @@ One set is represented by the line number and the total blocks in it are given i
 \newpage
 
 \begin{centering}
-\includegraphics[width=1.0\textwidth]{memory.png}\vspace{2cm}
+\includegraphics[width=1.0\textwidth]{MemoryPhase4.png}\vspace{2cm}
 \end{centering}
 \\
 \LARGE
@@ -380,15 +387,15 @@ For example to jump on the location 0x10000500 write `10000500' in the Jump to b
 \newpage
 \def\checkmark{\tikz\fill[scale=0.4](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;}
 \LARGE
-\\\\
-We have shown memory, registers and info on the right section of the GUI while on the left part there is Code Editor.\\
+\\
+\unindent
+We have shown memory, registers and statistical details of the program on the left tabs of the GUI while on the right part there is Code Editor.\\
+The code in the non Machine Version supports highlighting.\\
 In the Code Editor you can edit your code or copy paste your code and also save it.\\
-The info contains the details of the instruction being executed in each stage during a cycle.\\
 First of all we will paste the code in the Editor on the left side and then save and compile the code by clicking the respective `save' button which is the first button on the top right and `compile' button. The code will get updated in \textsl{\textbf{main.mc}} file and then the code will be executed and a \checkmark\hspace{0.7mm} will appear. The memory and registers will be updated simultaneously.\\\\
 \unindent
 Other details are present in their respective tabs as described earlier.\\\\
-\unindent
-Refer to the next page for a more detailed explanation of each tab and it's purpose.\\
+
 
 \newpage
 \begin{centering}
@@ -402,16 +409,11 @@ Refer to the next page for a more detailed explanation of each tab and it's purp
 \begin{itemize}
     \item We can jump to the memory using the `Jump to' box on the bottom right corner in the memory section.
     \item All the registers can be seen in the register file by scrolling in the register file section.
-    \item Executing \textsl{\textbf{main.py}} always generates a GUI window where you can code in the Editor.
-    \item We can also execute non GUI code by writing\textrightarrow   python main.py
-    \item The DataPath explains how the data is flowing through each stage.
-    \item Here the 5 stages can be seen in the DataPath tab.
-    \item The number below it is the cycle number for which the DataPath is shown.
-    \item You can see the DataPath in the respective cycle by going to that cycle.
-    \item Click on + to go to the next cycle and on - to go to the previous cycle.
-    \item We can observe all the required data in the cache by clicking on the required tabs
-    \item One tab is meant to observe the Victim block in each cycle, where you can adjust the cycle number similar to the `datapath tab' along with the details of individual sets during that cycle.
-    \item Two more tabs are there for observing the final state of the instruction cache (I\$) or data cache (D\$) respectively after the program has run.
+    \item We can execute non GUI code by writing \textrightarrow   python main.py
+    \item We can set knob k1 k2 etc by using -k1 -k2 in the non GUI version.
+    \item Executing \textsl{\textbf{python main.py -g}} always generates a GUI window where you can code in the Editor.
+    \item In GUI we can tick the Pipelined, forwarding etc to execute the code in pipelined and forwarding manner respectively.
+    \item We can observe all the register values in the register tab, Memory data in the memory tab and the statistical details in the Statistical tab.
 \end{itemize}
 
 \end{document}

@@ -21,11 +21,13 @@ class mainScreen(QMainWindow, UiComponents):
         self.directoryPath = directoryPath
         self.countDisplay = 1
         self.countDisplay2 = 1
-        self.knobsList = [0, 0, 0, 0 ,0, 0,0,0]
+        self.knobsList = [0, 0, 0, 0 ,0, 0,0,0, 0, 0]
         self.cacheReplacement = ["LRU", "FIFO", "Random", "NRU"]
+        self.branchPredictor = [["AT", ["-"]],["NAT",["-"]], ["BTFNT", ["-"]], ["1-bit", ["NT", "T"]],["2-bit", ["SNT", "WNT", "WT", "ST"]]]
+        
         
         self.currFilePath = os.path.join(self.directoryPath, "test", "main.s")
-        self.link = frontBackEndInteraction([self.directoryPath, [1024, 1024], [8, 8], [4, 4], [0, 0]])
+        self.link = frontBackEndInteraction([self.directoryPath, [1024, 1024], [8, 8], [4, 4], [0, 0], [0,0]])
         self.iconName = os.path.join(self.directoryPath, "GUI", "Images", "logo.png")
         self.splash = QSplashScreen(QPixmap(self.iconName), Qt.WindowStaysOnTopHint)
         self.callDataPaths()
@@ -50,13 +52,24 @@ class mainScreen(QMainWindow, UiComponents):
     def updateCacheReplacement(self, ind):
         if(ind == 0):
             self.knobsList[6] +=1
-            self.knobsList[6]%=4
+            self.knobsList[6]%=len(self.cacheReplacement)
             self.k7.setText(self.cacheReplacement[self.knobsList[6]])
         else:
             self.knobsList[7] +=1
-            self.knobsList[7]%=4
+            self.knobsList[7]%=len(self.cacheReplacement)
             self.k8.setText(self.cacheReplacement[self.knobsList[7]])
 
+    def updateBranchPredictor(self):
+        self.knobsList[8]+=1
+        self.knobsList[8]%=len(self.branchPredictor)
+        self.k9.setText(self.branchPredictor[self.knobsList[8]][0])
+        self.knobsList[9] = -1
+        self.updateBranchPredictorHelper()
+    def updateBranchPredictorHelper(self):
+        self.knobsList[9]+=1
+        self.knobsList[9]%=len(self.branchPredictor[self.knobsList[8]][1])
+        self.k10.setText(self.branchPredictor[self.knobsList[8]][1][self.knobsList[9]])
+        
 
     def updateCacheView(self, stage):
         dictionary = self.datapathC[self.countDisplay2-1][str(stage)]
@@ -134,8 +147,9 @@ class mainScreen(QMainWindow, UiComponents):
         temp.append([0, 0])
         temp[-1][0] = self.knobsList[6]
         temp[-1][1] = self.knobsList[7]
-
-
+        temp.append([0, 0])
+        temp[-1][0] = self.knobsList[8]
+        temp[-1][1] = self.knobsList[9]
         return temp
 
 
@@ -163,6 +177,7 @@ class mainScreen(QMainWindow, UiComponents):
         self.fileSave()
         cacheDetails = self.getCacheFromInput()
         self.link.reset(cacheDetails)
+        sys.stderr.write(str(cacheDetails))
         self.updateknobsList()
         self.link.runProgram(self.currFilePath, self.knobsList[:6], self.k3.isChecked())
         self.callDataPaths()
@@ -243,7 +258,10 @@ class mainScreen(QMainWindow, UiComponents):
         self.cacheArray2[5].clicked.connect(lambda: self.cacheViewHelp(1))
         self.k7.clicked.connect(lambda: self.updateCacheReplacement(0))
         self.k8.clicked.connect(lambda: self.updateCacheReplacement(1))
-
+        self.k9.clicked.connect(lambda: self.updateBranchPredictor())
+        self.k10.clicked.connect(lambda: self.updateBranchPredictorHelper())
+        self.knobsList[9] = -1
+        self.updateBranchPredictorHelper()
 
 
 

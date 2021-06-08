@@ -35,11 +35,11 @@ taken = min(3,prev+1)
 1 taken;
 
 not taken = 0
-taken = 1
+taken = 1[functiontype, st]
 """
 class BTB:
 
-    def __init__(self,isBTB,muxPC,muxS,functiontype=2,initialState=[0,0]):
+    def __init__(self,isBTB,muxPC,muxS, initialState=[2,0]):
         """
         initialState[0] is 0 or 1 and is the initial state of one bit branch predictor
         initialState[1] is 0(SNT) 1(WNT) 2(WT) or 3(ST) and is the initial state of two bit branch predictor
@@ -51,10 +51,10 @@ class BTB:
         self.isBTB = isBTB
         self.muxPC = muxPC
         self.muxS  = muxS
-        self.stateOneBit= defaultdict(lambda: initialState[0])
+        self.stateOneBit= defaultdict(lambda: initialState[1])
         self.stateTwoBit = defaultdict(lambda: initialState[1])
         self.function=[self.addtoAllTaken,self.addtoAllNotTaken,self.addInstructionBTFNT,self.oneBitBranchPredictor,self.twoBitBranchPredictor]
-        self.functiontype=functiontype
+        self.functiontype=initialState[0]
         
 
     # prediction - 1 -> Taken

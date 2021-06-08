@@ -46,7 +46,7 @@ class UiComponents():
         temp.setFixedWidth(width)
         if (isBorder):
             temp.setStyleSheet("border :1px solid white;")
-        temp.setAlignment(QtCore.Qt.AlignCenter)
+        # temp.setAlignment(QtCore.Qt.AlignCenter)
         return temp
     
     def labelTile2(self, labelName, height, width, color):
@@ -128,9 +128,9 @@ class UiComponents():
         self.displayWidget4 = QGroupBox()
         self.controlGrid = QGridLayout()
         self.controlTable = []
-        controlsD = ["Cache(I$)", "Cache(D$)", "Block(I$)", "Block(D$)", "Way(I$)", "Way(D$)", "Pipelined", "Forwarding", "isMC", "Inst Rep.","Data Rep."]
+        controlsD = ["Cache(I$)", "Cache(D$)", "Block(I$)", "Block(D$)", "Way(I$)", "Way(D$)", "Pipelined", "Forwarding", "Machine Code", "Replacement(I$)","Replacement(D$)", "Branch Pre.", "Initial State"]
         for i in range(len(controlsD)):
-            temp = self.labelTile(controlsD[i], 40, 130, 0)
+            temp = self.labelTile(controlsD[i], 40, 200, 0)
             self.controlGrid.addWidget(temp, i+1, 0)
         
         
@@ -149,10 +149,14 @@ class UiComponents():
         # self.k7.addItems(["LRU", "FIFO", "Random", "NRU"])
         
         self.k8 = self.buttonTile2("LRU", 30, 100)
-        # self.k8.addItems()
+        self.k9 = self.buttonTile2("NAT", 30, 100)
+        
+        self.k10 = self.buttonTile2("Taken", 30, 100)
 
         self.controlGrid.addWidget(self.k7, 10, 1)
         self.controlGrid.addWidget(self.k8, 11, 1)
+        self.controlGrid.addWidget(self.k9, 12, 1)
+        self.controlGrid.addWidget(self.k10, 13, 1)
         
             
         self.controlTable[0].setText("64")

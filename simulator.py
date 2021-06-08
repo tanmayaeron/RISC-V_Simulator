@@ -23,10 +23,10 @@ class Processor:
         self.initialiseControls()
         
         self.initializeStats()
-        self._BTB = BTB(self._isBTB,self.PC_select,self.S_select)
+        self._BTB = BTB(self._isBTB,self.PC_select,self.S_select, initialiseDetails[-1])
 
     def initialise(self, initialiseDetails):
-        self._PMI = memory.PMI(*initialiseDetails[1:])
+        self._PMI = memory.PMI(*initialiseDetails[1:-1])
         self.initialiseDetails = initialiseDetails
         self._ALU = ALU.ALU()
         self._IAG = IAG.IAG()
@@ -364,7 +364,7 @@ class Processor:
         
 
 
-        self.printCycleInfo()
+        # self.printCycleInfo()
         # if(self.knob3):
         #     self.printRegisters(self.Pipeline_cycle)
         
@@ -697,7 +697,9 @@ class Processor:
         self._registerFile.initialise_registers()
         self._PMI.clearMemory()
         del self._PMI
-        self._PMI = memory.PMI(*initialiseDetails2)
+        del self._BTB
+        self._BTB = BTB(self._isBTB,self.PC_select,self.S_select, initialiseDetails2[-1])
+        self._PMI = memory.PMI(*initialiseDetails2[:-1])
         self._IAG.initialiseIAG()
         self.initialiseTempRegisters()
         self.initialiseControls()

@@ -85,20 +85,23 @@ To get a local copy up and running follow these simple example steps.
    ```sh
    python main.py
    ```
-   Following flags are present to configure simulator:\
-    1.<b>-h, --help<b> show this help message and exit\
-    2.<b>-g, -gui</b> enable GUI\
-    3.<b>-f F, -filename F</b> specify file which is to be run for non-GUI version\
-    4.<b>-k1, -knob1</b> enable Pipelining\
-    5.<b>-k2, -knob2</b> enable Data Forwarding\
-    6.<b>-k3, -knob3</b> show value in registerFile at end of each cycle\
-    7.<b>-k4, -knob4</b> show value in Pipeline Registers at end of each cycle\
-    8.<b>-k5 K5, -knob5 K5</b> show value in Pipeline Registers at end of each cycle for particular instruction\
-    9.<b>-ICache cacheSize blockSize noOfWays</b> configure input cache in format cache size block size number of ways\
-    10.-DCache cacheSize blockSize noOfWays</b> configure data cache in format cache size block size number of ways
+   
+### Instructions to run using CLI
+
+Following flags are present to configure simulator:\
+     1.<b> -h, --help </b> show this help message and exit\
+     2.<b>-g, -gui </b> enable GUI\
+     3.<b>-f F, -filename F</b> specify file which is to be run for non-GUI version\
+     4.<b>-k1, -knob1 </b> enable Pipelining\
+     5.<b>-k2, -knob2 </b> enable Data Forwarding\
+     6.<b>-k3, -knob3 </b> show value in registerFile at end of each cycle\
+     7.<b>-k4, -knob4 </b> show value in Pipeline Registers at end of each cycle\
+     8.<b>-k5 K5, -knob5 K5 </b> show value in Pipeline Registers at end of each cycle for particular instruction\
+     9.<b>-ICache cacheSize blockSize noOfWays </b> configure input cache in format cache size block size number of ways\
+     10.-DCache cacheSize blockSize noOfWays </b> configure data cache in format cache size block size number of ways
 
 <b>Note:- </b> file should be present in the test directory\
- <b>Note:- </b> support for changing block replacement policy and branch predictor is not present for Non-GUI version currently.
+<b>Note:- </b> support for changing block replacement policy and branch predictor is not present for Non-GUI version currently.
 
 ### Instructions to use GUI
 
@@ -191,6 +194,7 @@ Check the generated folder for details of compilation. It contains:
 <p align="center">
   <img src="Documentation/Phase4/images/Stats.png" alt="Logo" width="1080" height="500">
 </p>
+
 ### Contributors
 
 - Aditya Agarwal - 2019CSB1064

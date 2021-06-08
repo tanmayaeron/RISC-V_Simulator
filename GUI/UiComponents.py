@@ -15,10 +15,14 @@ import syntax
 class UiComponents():
     def __init__(self):
         font1 = QFontDatabase.applicationFontFamilies(0)[0]
-        self.fixedfont = QFont(font1, 14)
+        font2 = QFontDatabase.applicationFontFamilies(1)[0]
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.fixedfont = QFont(font1, 16)
+        else:
+            self.fixedfont = QFont(font1, 12)
         # self.fixedfont.setPointSize(16)
-        self.fixedfont2 = QFontDatabase.systemFont(QFontDatabase.FixedFont)
-        self.fixedfont2.setPointSize(16)
+        self.fixedfont2 = QFont(font2, 16)
+        # self.fixedfont2.setPointSize(16)
         
 
     def operationTile(self, name):
@@ -68,7 +72,7 @@ class UiComponents():
         temp.setFont(self.fixedfont)
         temp.setFixedHeight(height)
         temp.setFixedWidth(width)
-        temp.setStyleSheet("background-color:" +color+";")
+        temp.setStyleSheet("border :1px solid white;"+"background-color:" +color+";")
         return temp
 
     def info(self):
@@ -108,7 +112,7 @@ class UiComponents():
         temp = QLineEdit("")
         temp.setValidator(QIntValidator())
         temp.setFixedHeight(40)
-        temp.setFixedWidth(80)
+        temp.setFixedWidth(100)
         temp.setStyleSheet("border :1px solid white;")
         temp.setAlignment(QtCore.Qt.AlignCenter)
         return temp
@@ -118,7 +122,7 @@ class UiComponents():
         
         temp.setStyleSheet("QCheckBox::indicator"
                                "{"
-                               "width :40px;"
+                               "width :100px;"
                                "height : 40px;"
                                "}")
         
@@ -130,7 +134,7 @@ class UiComponents():
         self.displayWidget4 = QGroupBox()
         self.controlGrid = QGridLayout()
         self.controlTable = []
-        controlsD = ["Cache(I$)", "Cache(D$)", "Block(I$)", "Block(D$)", "Way(I$)", "Way(D$)", "Pipelined", "Forwarding", "Machine Code", "Replacement(I$)","Replacement(D$)", "Branch Pre.", "Initial State"]
+        controlsD = ["Pipelined", "Forwarding", "Machine Code", "Cache(I$)", "Cache(D$)", "Block(I$)", "Block(D$)", "Way(I$)", "Way(D$)", "Replacement(I$)","Replacement(D$)", "Branch Pre.", "Initial State"]
         for i in range(len(controlsD)):
             temp = self.labelTile(controlsD[i], 40, 200, 0, 0)
             self.controlGrid.addWidget(temp, i+1, 0)
@@ -140,20 +144,20 @@ class UiComponents():
             
         for i in range(6):
             temp = self.lineEditTile()
-            self.controlGrid.addWidget(temp, i+1 , 1)
+            self.controlGrid.addWidget(temp, i+4, 1)
             self.controlTable.append(temp)
 
-        self.controlGrid.addWidget(self.k1, 7, 1)
-        self.controlGrid.addWidget(self.k2, 8, 1)
-        self.controlGrid.addWidget(self.k3, 9, 1)
+        self.controlGrid.addWidget(self.k1, 1, 1)
+        self.controlGrid.addWidget(self.k2, 2, 1)
+        self.controlGrid.addWidget(self.k3, 3, 1)
         
-        self.k7 = self.buttonTile2("LRU", 30, 100)
+        self.k7 = self.buttonTile2("LRU", 40, 100, "grey")
         # self.k7.addItems(["LRU", "FIFO", "Random", "NRU"])
         
-        self.k8 = self.buttonTile2("LRU", 30, 100)
-        self.k9 = self.buttonTile2("AT", 30, 100)
+        self.k8 = self.buttonTile2("LRU", 40, 100, "grey")
+        self.k9 = self.buttonTile2("AT", 40, 100, "grey")
         
-        self.k10 = self.buttonTile2("Taken", 30, 100)
+        self.k10 = self.buttonTile2("Taken", 40, 100, "grey")
 
         self.controlGrid.addWidget(self.k7, 10, 1)
         self.controlGrid.addWidget(self.k8, 11, 1)

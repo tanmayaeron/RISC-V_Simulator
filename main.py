@@ -60,6 +60,7 @@ if __name__ == '__main__':
         App = QApplication(sys.argv)
         App.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         QtGui.QFontDatabase.addApplicationFont(os.path.join(directoryPath, "GUI", "Fonts", "FiraCodeL.ttf"))
+        QtGui.QFontDatabase.addApplicationFont(os.path.join(directoryPath, "GUI", "Fonts", "monoL.ttf"))
         window = mainScreen(App, directoryPath)
         highlight = PythonHighlighter(window.editorScreen.document())
         sys.exit(App.exec_())

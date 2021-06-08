@@ -61,6 +61,7 @@ To get a local copy up and running follow these simple example steps.
 - <b>glob: </b> for file management
 - <b>regex: </b>for making the cleaned file by splitting the RISC-V instructions and removing comments
 - <b>random: </b>for generating random number in Random Replacement Policy
+- <b>argparse: </b>for taking arguments from the user
 
 #### Front-end - Python3
 
@@ -108,13 +109,15 @@ To get a local copy up and running follow these simple example steps.
 5.  Tick the Machine Code button if the file is in Machine level of RISC-V.
 6.  You may change the Inst Replacement Policy as well as the Data Replacement Policy by clicking on them. The Default is LRU.
 7.  You may set branch predictor and initial state of predictor. The Default is static Always Taken predictor.
-8.  To run the file using step function first load the file by pressing on the top right third (down arrow key) button and then click on the step button.
+8.  To run the file using step function first load the file by pressing on the top right third (down arrow key) button and then click on the step button(last button).
 9.  To run the file, press compile button. Once the code completes execution, a tick sign will be visible on the button.
 10. In case you run the pipelined version the datapath can visualised using the "datapath" and "info" tab
 11. You can get the info about data cache and instruction cache from respective tabs.
 12. Look for the generated files
 
 ### Input Format
+
+Input format of the Machine Code file instructions
 
 - In text segment, data is word by word while in data segment it is byte by byte.
 - Text segment followed by data segment demarcated by '$', each line is of format: "address data".
@@ -127,6 +130,11 @@ To get a local copy up and running follow these simple example steps.
     $
     0x10000000 0x64
   ```
+
+Input format of the RISC-V instructions
+
+- The instructions are RISC-V 32 bit instructions.
+- For these instructions keep the isMC unchecked
 
   ```
     .data
@@ -166,6 +174,8 @@ Check the generated folder for details of compilation. It contains:
 - <b>memory.txt: </b> details of memory
 - <b>register.txt: </b> details of registers
 - <b>outputLog.txt: </b> details of changes in temporary registers for each cycle
+- <b>forwarding.txt: </b> details of data forwarding paths taken in each cycle
+- <b>stats.txt : </b> contains general stats about the code compilation.
 
 ### ScreenShots
 
@@ -188,7 +198,3 @@ Check the generated folder for details of compilation. It contains:
 - Fadia Het Rakeshkumar - 2019CSB1084
 - Shikhar Soni - 2019CSB1119
 - Tanmay Aeron - 2019CSB1124
-
-```
-
-```

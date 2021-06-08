@@ -19,6 +19,7 @@ Libraries Used
     * glob: for file management
     * regex: for making the cleaned file by splitting the RISC-V instructions and removing comments
     * random: for generating random number in Random Replacement Policy
+    * argparse: for taking arguments from the user
 # Front-end - Python3
     * PyQT5: for the Graphic User Interface.
     * qdarkstyle: for dark theme
@@ -52,15 +53,15 @@ Installation
 
 
 Instructions to use GUI:
-1. Write the code you wish to run in the editor window. You may copy it from any other location as well.
-2. You may save the file using save button.
-3. Set the required knobs according to the documentation
-4. Set the details of cache in the control box.
+1.  Write the code you wish to run in the editor window. You may copy it from any other location as well.
+2.  You may save the file using save button.
+3.  Set the required knobs according to the documentation
+4.  Set the details of cache in the control box.
 5.  Tick the Machine Code button if the file is in Machine level of RISC-V.
-6. You may change the Inst Replacement Policy as well as the Data Replacement Policy by clicking on them. The Default is LRU.
-7. You may set branch predictor and initial state of predictor. The Default is static Always Taken predictor.
-8. To run the file using step function first load the file by pressing on the top right third (down arrow key) button and then click on the step button.
-9. To run the file, press compile button. Once the code completes execution, a tick sign will be visible on the button.
+6.  You may change the Inst Replacement Policy as well as the Data Replacement Policy by clicking on them. The Default is LRU.
+7.  You may set branch predictor and initial state of predictor. The Default is static Always Taken predictor.
+8.  To run the file using step function first load the file by pressing on the top right third (down arrow key) button and then click on the step button(last button).
+9.  To run the file, press compile button. Once the code completes execution, a tick sign will be visible on the button.
 10. In case you run the pipelined version the datapath can visualised using the "datapath" and "info" tab
 11. You can get the info about data cache and instruction cache from respective tabs.
 12. Look for the generated files

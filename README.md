@@ -202,8 +202,12 @@ Check the generated folder for details of compilation. It contains:
 
 ### Contributors
 
-- Aditya Agarwal - 2019CSB1064
-- Aneeket Mangal - 2019CSB1071
-- Fadia Het Rakeshkumar - 2019CSB1084
-- Shikhar Soni - 2019CSB1119
-- Tanmay Aeron - 2019CSB1124
+<div align="center">
+  <strong>
+    <a href="https://github.com/soggycake0312">Aditya Agarwal</a> &emsp;
+    <a href="https://github.com/aneeketMangal">Aneeket Mangal</a> &emsp;
+    <a href="https://github.com/HETFADIA">Het Fadia</a> &emsp;
+    <a href="https://github.com/Shikhar-Soni">Shikhar Soni</a> &emsp;
+    <a href="https://github.com/tanmayaeron">Tanmay Aeron</a> &emsp;
+  </strong>
+</div>

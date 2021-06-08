@@ -14,8 +14,9 @@ import qtawesome as qta
 import syntax
 class UiComponents():
     def __init__(self):
-        self.fixedfont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
-        self.fixedfont.setPointSize(16)
+        font1 = QFontDatabase.applicationFontFamilies(0)[0]
+        self.fixedfont = QFont(font1, 16)
+        # self.fixedfont.setPointSize(16)
         self.fixedfont2 = QFontDatabase.systemFont(QFontDatabase.FixedFont)
         self.fixedfont2.setPointSize(16)
         
@@ -38,7 +39,7 @@ class UiComponents():
         return button
     # def labelTile2(self, name, height, width)
 
-    def labelTile(self, labelName, height, width, isBorder):
+    def labelTile(self, labelName, height, width, isBorder, isCenter = 1):
         temp = QLabel()
         temp.setText(labelName)
         temp.setFont(self.fixedfont)
@@ -46,7 +47,8 @@ class UiComponents():
         temp.setFixedWidth(width)
         if (isBorder):
             temp.setStyleSheet("border :1px solid white;")
-        # temp.setAlignment(QtCore.Qt.AlignCenter)
+        if(isCenter):
+            temp.setAlignment(QtCore.Qt.AlignCenter)
         return temp
     
     def labelTile2(self, labelName, height, width, color):
@@ -130,7 +132,7 @@ class UiComponents():
         self.controlTable = []
         controlsD = ["Cache(I$)", "Cache(D$)", "Block(I$)", "Block(D$)", "Way(I$)", "Way(D$)", "Pipelined", "Forwarding", "Machine Code", "Replacement(I$)","Replacement(D$)", "Branch Pre.", "Initial State"]
         for i in range(len(controlsD)):
-            temp = self.labelTile(controlsD[i], 40, 200, 0)
+            temp = self.labelTile(controlsD[i], 40, 200, 0, 0)
             self.controlGrid.addWidget(temp, i+1, 0)
         
         
@@ -302,7 +304,7 @@ class UiComponents():
         d = ["Cycles", "Instructions", "CPI", "Data transfer instructions", "ALU instructions", "Control instructions", "Total Stall Count", "Data Hazard", "Control Hazard", "Mispredictions", "Stalls(data hazard)", "Stalls(control Hazard)"]
         self.statsArray = []
         for i in range(len(d)):
-            label = self.labelTile(d[i], 40, 260, 0)
+            label = self.labelTile(d[i], 40, 260, 0, 0)
             gridbox.addWidget(label, i+1, 0)
             label = self.labelTile("0", 40, 60, 0)
             gridbox.addWidget(label, i+1, 1)

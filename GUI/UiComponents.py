@@ -15,7 +15,7 @@ import syntax
 class UiComponents():
     def __init__(self):
         font1 = QFontDatabase.applicationFontFamilies(0)[0]
-        self.fixedfont = QFont(font1, 16)
+        self.fixedfont = QFont(font1, 14)
         # self.fixedfont.setPointSize(16)
         self.fixedfont2 = QFontDatabase.systemFont(QFontDatabase.FixedFont)
         self.fixedfont2.setPointSize(16)
@@ -301,11 +301,12 @@ class UiComponents():
         self.statsWidget = QGroupBox()
         gridbox = QGridLayout()
         
-        d = ["Cycles", "Instructions", "CPI", "Data transfer instructions", "ALU instructions", "Control instructions", "Total Stall Count", "Data Hazard", "Control Hazard", "Mispredictions", "Stalls(data hazard)", "Stalls(control Hazard)"]
+        d = ["Cycles", "Instructions", "CPI", "Data instructions", "ALU instructions", "Control instructions", "Stall Count", "Data Hazard", "Control Hazard", "Mispredictions", "data stalls", "control stalls"]
         self.statsArray = []
         for i in range(len(d)):
             label = self.labelTile(d[i], 40, 260, 0, 0)
             gridbox.addWidget(label, i+1, 0)
+            
             label = self.labelTile("0", 40, 60, 0)
             gridbox.addWidget(label, i+1, 1)
             self.statsArray.append(label)

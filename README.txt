@@ -88,7 +88,7 @@ Input format of the MC file instructions
 
 Input format of the RISC-V instructions
 * The instructions are RISC-V 32 bit instructions.
-* For these instructions keep the isMC unchecked
+* For these instructions keep the Machine Code unchecked
 .data
 array: .word 1 2 10 9 3 8 4 7 5 6
 

@@ -46,29 +46,28 @@ To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-- ```pip``` (>21.0.3)
-- ```python``` (>3.7)
-
+- `pip` (>21.0.3)
+- `python` (>3.7)
 
 ### Libraries Used
 
 #### Back-end - Python3
 
-- ```os: ``` for getting and adding path to certain file locations.
-- ```sys: ``` for reading and editing files with ease.
-- ```json: ``` for crunching generated data.
-- ```glob: ``` for file management
-- ```regex: ```for making the cleaned file by splitting the RISC-V instructions and removing comments
-- ```pandas:``` for reading .csv files.
-- ```random: ```for generating random number in Random Replacement Policy
-- ```argparse: ```for taking arguments from the user
-- ```defaultdict: ``` to make a hash map for memory.
+- `os: ` for getting and adding path to certain file locations.
+- `sys: ` for reading and editing files with ease.
+- `json: ` for crunching generated data.
+- `glob: ` for file management
+- `regex: `for making the cleaned file by splitting the RISC-V instructions and removing comments
+- `pandas:` for reading .csv files.
+- `random: `for generating random number in Random Replacement Policy
+- `argparse: `for taking arguments from the user
+- `defaultdict: ` to make a hash map for memory.
 
 #### Front-end - Python3
 
-- ```PyQT5: ``` for the Graphic User Interface.
-- ```QtAwesome:``` for using icons
-- ```qdarkstyle: ``` for dark theme
+- `PyQT5: ` for the Graphic User Interface.
+- `QtAwesome:` for using icons
+- `qdarkstyle: ` for dark theme
 
 ### Installation
 
@@ -86,30 +85,31 @@ To get a local copy up and running follow these simple example steps.
    ```sh
    python main.py
    ```
-   
+
 ### Instructions to run using CLI
 
 Following flags are present to configure simulator:
--    ``` -g, -gui ``` enable GUI
-- ``` -h, --help``` show this help message and exit
 
-- ```-k1, -knob1 ``` enable Pipelining
-- ```-k2, -knob2 ``` enable Data Forwarding
-- ```-k3, -knob3 ``` show value in registerFile at end of each cycle
-- ```-k4, -knob4 ``` show value in 
-- ```-k5 K5, -knob5 K5 ``` show value in Pipeline Registers at end of each cycle for particular instruction
-- ```-f F, -filename F``` specify file which is to be run for non-GUI version
-Pipeline Registers at end of each cycle
+- `-g, -gui` enable GUI
+- ` -h, --help` show this help message and exit
 
-- ``` -ICache cacheSize blockSize noOfWays ``` configure input cache in format cache size block size number of ways
-- ``` -DCache cacheSize blockSize noOfWays ``` configure data cache in format cache size block size number of ways
+- `-k1, -knob1 ` enable Pipelining
+- `-k2, -knob2 ` enable Data Forwarding
+- `-k3, -knob3 ` show value in registerFile at end of each cycle
+- `-k4, -knob4 ` show value in
+- `-k5 K5, -knob5 K5 ` show value in Pipeline Registers at end of each cycle for particular instruction
+- `-f F, -filename F` specify file which is to be run for non-GUI version
+  Pipeline Registers at end of each cycle
+
+- `-ICache cacheSize blockSize noOfWays` configure input cache in format cache size block size number of ways
+- `-DCache cacheSize blockSize noOfWays` configure data cache in format cache size block size number of ways
 
 > File should be present in the test directory.\
 > Support for changing block replacement policy and branch predictor is not present for Non-GUI version currently.
 
 ### Instructions to use GUI
 
-1.  Write the code you wish to run in the editor window. 
+1.  Write the code you wish to run in the editor window.
 2.  You may save the file using save button.
 3.  Set the required knobs according to the documentation
 4.  Set the details of cache in the control box.
@@ -138,10 +138,10 @@ Input format of the Machine Code file instructions
     0x10000000 0x64
   ```
 
- Input format of the RISC-V instructions
+Input format of the RISC-V instructions
 
 - The instructions are RISC-V 32 bit instructions.
-- For these instructions keep the isMC unchecked
+- For these instructions keep the Machine Code unchecked
 - Example
 
   ```javascript
@@ -179,12 +179,11 @@ Input format of the Machine Code file instructions
 
 Check the generated folder for details of compilation. It contains:
 
-- ``` stats.txt : ``` contains general stats about the code compilation.
-- ``` memory.txt: ``` details of memory
-- ``` register.txt: ``` details of registers
-- ``` outputLog.txt: ``` details of changes in temporary registers for each cycle
-- ``` forwarding.txt: ``` details of data forwarding paths taken in each cycle
-
+- `stats.txt :` contains general stats about the code compilation.
+- `memory.txt:` details of memory
+- `register.txt:` details of registers
+- `outputLog.txt:` details of changes in temporary registers for each cycle
+- `forwarding.txt:` details of data forwarding paths taken in each cycle
 
 ### ScreenShots
 

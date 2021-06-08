@@ -175,7 +175,12 @@ Check the generated folder for details of compilation. It contains:
 <p align="center">
   <img src="Documentation/Phase3/images/memory.png" alt="Logo" width="1080" height="500">
 </p>
-
+<p align="center">
+  <img src="Documentation/Phase4/images/FrontGUI.png" alt="Logo" width="1080" height="500">
+</p>
+<p align="center">
+  <img src="Documentation/Phase3/images/RegistersPhase4.png" alt="Logo" width="1080" height="500">
+</p>
 ### Contributors
 
 - Aditya Agarwal - 2019CSB1064

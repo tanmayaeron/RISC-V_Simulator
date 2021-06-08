@@ -177,7 +177,6 @@ class mainScreen(QMainWindow, UiComponents):
         self.fileSave()
         cacheDetails = self.getCacheFromInput()
         self.link.reset(cacheDetails)
-        sys.stderr.write(str(cacheDetails))
         self.updateknobsList()
         self.link.runProgram(self.currFilePath, self.knobsList[:6], self.k3.isChecked())
         self.callDataPaths()

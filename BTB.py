@@ -14,8 +14,7 @@ from collections import defaultdict
 # # RZ =1
 # # self.predicted[PC] = 1
 # # our prediction = True and Flush = False
-
-
+import sys
 # backward:
 # beq x11,x12, backward
 # # RZ = 0
@@ -46,6 +45,7 @@ class BTB:
         functiontype is 0 for all taken 1 (all not taken) 2 (btfnt) 3(one bit predictor) 4(two bit branch predictor)
         """
         self.lookup = defaultdict(int)
+        # sys.stderr.write(str(initialState)+"\n")
         #  branch and jal instruction in self.lookup
         self.predicted = defaultdict(int)
         self.isBTB = isBTB
